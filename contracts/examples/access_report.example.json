@@ -1,12 +1,13 @@
 {
   "mock": true,
-  "modes": ["truck", "jeep", "foot"],
+  "modes": ["fire_truck", "ambulance", "jeep", "foot"],
   "places": [
     {"place_id": "place_MOCK_A", "name": "MOCK village A", "population": null, "population_source": "PLACEHOLDER",
-     "reachable": {"truck": null, "jeep": null, "foot": null}, "facility": null}
+     "reachable": {"fire_truck": null, "ambulance": null, "jeep": null, "foot": null}, "facility": null}
   ],
   "reopen_plan": [
-    {"rank": 1, "segment_id": "seg_MOCK_0002", "reconnects_people": null, "reconnects_places": null, "debris_volume_m3": null}
+    {"rank": 1, "segment_id": "seg_MOCK_0002", "mode": "ambulance", "reconnects_people": null, "reconnects_places": null,
+     "debris_volume_m3": null, "reasons": ["MOCK: only link between place_MOCK_A and the main road for this vehicle"]}
   ],
   "computed_with": "networkx-fallback"
 }

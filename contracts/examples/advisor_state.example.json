@@ -2,7 +2,21 @@
   "mock": true,
   "updated_at": null,
   "segments": [
-    {"segment_id": "seg_MOCK_0001", "status_by_mode": {"truck": "unknown", "jeep": "unknown", "foot": "unknown"}, "source": "geometry"},
-    {"segment_id": "seg_MOCK_0002", "status_by_mode": {"truck": "blocked", "jeep": "blocked", "foot": "open"}, "source": "field_report"}
+    {
+      "segment_id": "seg_MOCK_0001",
+      "status_by_mode": {"fire_truck": "unknown", "ambulance": "unknown", "jeep": "unknown", "foot": "unknown"},
+      "reasons_by_mode": {"fire_truck": ["MOCK: coverage below threshold"], "ambulance": ["MOCK: coverage below threshold"],
+                          "jeep": ["MOCK: coverage below threshold"], "foot": ["MOCK: coverage below threshold"]},
+      "needs_verification": true,
+      "source": "geometry"
+    },
+    {
+      "segment_id": "seg_MOCK_0002",
+      "status_by_mode": {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "partial", "foot": "open"},
+      "reasons_by_mode": {"fire_truck": ["MOCK: clear width below vehicle width + clearance"], "ambulance": ["MOCK: clear width below vehicle width + clearance"],
+                          "jeep": ["MOCK: clear width within tolerance of threshold"], "foot": ["MOCK: field report says passable on foot"]},
+      "needs_verification": false,
+      "source": "field_report"
+    }
   ]
 }

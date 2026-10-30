@@ -19,7 +19,7 @@
         "min_clear_width_m": null,
         "debris_volume_m3": null,
         "debris_volume_tolerance_m3": null,
-        "status_by_mode": {"truck": "unknown", "jeep": "unknown", "foot": "unknown"},
+        "status_by_mode": {"fire_truck": "unknown", "ambulance": "unknown", "jeep": "unknown", "foot": "unknown"},
         "ml": {"p_blocked": null, "model": null},
         "decision": "geometry",
         "measured": false
@@ -42,9 +42,7 @@
         "min_clear_width_m": null,
         "debris_volume_m3": null,
         "debris_volume_tolerance_m3": null,
-        "status_by_mode": {"truck": "blocked", "jeep": "partial", "foot": "open"},
         "ml": {"p_blocked": null, "model": null},
-        "decision": "geometry",
         "measured": false
       }
     }

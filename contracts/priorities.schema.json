@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "priorities.json: teammate's priority engine. Decision support with hand-set weights, not AI and not dispatch.",
+  "type": "object",
+  "required": ["mock", "decision_support", "weights", "weights_source", "generated_at", "items"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "decision_support": {"const": true},
+    "weights": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}},
+    "weights_source": {"type": "string", "description": "config/priority.yaml; PLACEHOLDER until reviewed"},
+    "generated_at": {"type": ["string", "null"]},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rank", "target_id", "target_kind", "score", "level", "factors", "unknown_factors", "reasons", "recommended_action", "needs_verification"],
+        "properties": {
+          "rank": {"type": "integer", "minimum": 1},
+          "target_id": {"type": "string", "description": "place_id or segment_id"},
+          "target_kind": {"enum": ["place", "segment"]},
+          "score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+          "level": {"enum": ["critical", "high", "moderate", "low", "unknown"]},
+          "factors": {
+            "description": "Normalised 0-100 score per factor; null when unknown (never 0 for missing data)",
+            "type": "object",
+            "additionalProperties": {"type": ["number", "null"]}
+          },
+          "unknown_factors": {"type": "array", "items": {"type": "string"}},
+          "reasons": {"type": "array", "items": {"type": "string"}},
+          "recommended_action": {"type": "string"},
+          "needs_verification": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

@@ -10,6 +10,19 @@
     "model": {"type": ["string", "null"], "description": "Model name for ml_model; null for standard_check"},
     "version": {"type": ["string", "null"]},
     "source": {"type": "string", "description": "Folder of images or path of the MP4 that was scored"},
+    "coverage": {
+      "description": "Optional dataset-level check (teammate's quality/ module)",
+      "type": ["object", "null"],
+      "required": ["target_area_m2", "covered_area_m2", "coverage_fraction", "low_overlap_pairs", "method"],
+      "properties": {
+        "target_area_m2": {"type": ["number", "null"]},
+        "covered_area_m2": {"type": ["number", "null"]},
+        "coverage_fraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "low_overlap_pairs": {"type": "array", "items": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}},
+        "uncovered_geojson": {"type": ["string", "null"], "description": "Path to a GeoJSON of uncovered areas"},
+        "method": {"type": "string"}
+      }
+    },
     "items": {
       "type": "array",
       "items": {

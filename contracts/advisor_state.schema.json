@@ -1,8 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "GET /advisor/state: current road status per vehicle type. web/ colours roads only from this.",
+  "title": "GET /advisor/state: road status per vehicle with reasons, from the teammate's assessment engine. web/ colours roads only from this.",
   "type": "object",
   "required": ["mock", "segments", "updated_at"],
+  "$defs": {
+    "modes": {"enum": ["fire_truck", "ambulance", "jeep", "foot"]},
+    "status": {"enum": ["open", "partial", "blocked", "unknown"]}
+  },
   "properties": {
     "mock": {"type": "boolean"},
     "updated_at": {"type": ["string", "null"]},
@@ -10,14 +14,23 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["segment_id", "status_by_mode", "source"],
+        "required": ["segment_id", "status_by_mode", "reasons_by_mode", "needs_verification", "source"],
         "properties": {
           "segment_id": {"type": "string"},
           "status_by_mode": {
             "type": "object",
-            "required": ["truck", "jeep", "foot"],
-            "additionalProperties": {"enum": ["open", "partial", "blocked", "unknown"]}
+            "required": ["fire_truck", "ambulance", "jeep", "foot"],
+            "propertyNames": {"$ref": "#/$defs/modes"},
+            "additionalProperties": {"$ref": "#/$defs/status"}
           },
+          "reasons_by_mode": {
+            "description": "Rule that decided the status, with the numbers it used, per vehicle",
+            "type": "object",
+            "required": ["fire_truck", "ambulance", "jeep", "foot"],
+            "propertyNames": {"$ref": "#/$defs/modes"},
+            "additionalProperties": {"type": "array", "items": {"type": "string"}}
+          },
+          "needs_verification": {"type": "boolean"},
           "source": {"enum": ["geometry", "field_report", "scenario"]}
         }
       }

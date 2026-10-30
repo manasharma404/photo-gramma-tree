@@ -6,7 +6,7 @@
   "$defs": {"bool_or_null": {"type": ["boolean", "null"]}},
   "properties": {
     "mock": {"type": "boolean"},
-    "modes": {"type": "array", "items": {"enum": ["truck", "jeep", "foot"]}},
+    "modes": {"type": "array", "items": {"enum": ["fire_truck", "ambulance", "jeep", "foot"]}},
     "places": {
       "type": "array",
       "items": {
@@ -19,7 +19,7 @@
           "population_source": {"type": "string"},
           "reachable": {
             "type": "object",
-            "required": ["truck", "jeep", "foot"],
+            "required": ["fire_truck", "ambulance", "jeep", "foot"],
             "additionalProperties": {"$ref": "#/$defs/bool_or_null"}
           },
           "facility": {"type": ["string", "null"]}
@@ -30,10 +30,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["rank", "segment_id", "reconnects_people", "reconnects_places", "debris_volume_m3"],
+        "required": ["rank", "segment_id", "mode", "reconnects_people", "reconnects_places", "debris_volume_m3", "reasons"],
         "properties": {
           "rank": {"type": "integer", "minimum": 1},
           "segment_id": {"type": ["string", "null"]},
+          "mode": {"enum": ["fire_truck", "ambulance", "jeep", "foot"]},
+          "reasons": {"type": "array", "items": {"type": "string"}},
           "reconnects_people": {"type": ["integer", "null"]},
           "reconnects_places": {"type": ["integer", "null"]},
           "debris_volume_m3": {"type": ["number", "null"]}

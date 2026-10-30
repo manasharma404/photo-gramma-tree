@@ -1,0 +1,21 @@
+{
+  "mock": true,
+  "decision_support": true,
+  "weights": {"damage_severity": 0.0, "access_difficulty": 0.0, "population_exposure": 0.0, "critical_facilities": 0.0, "alternative_routes": 0.0},
+  "weights_source": "config/priority.yaml (PLACEHOLDER)",
+  "generated_at": null,
+  "items": [
+    {
+      "rank": 1,
+      "target_id": "place_MOCK_A",
+      "target_kind": "place",
+      "score": null,
+      "level": "unknown",
+      "factors": {"damage_severity": null, "access_difficulty": null, "population_exposure": null, "critical_facilities": null, "alternative_routes": null},
+      "unknown_factors": ["population_exposure"],
+      "reasons": ["MOCK: no confirmed vehicle route"],
+      "recommended_action": "MOCK: verify access on the ground",
+      "needs_verification": true
+    }
+  ]
+}

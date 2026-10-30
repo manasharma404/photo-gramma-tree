@@ -54,6 +54,21 @@ def test_accuracy_rejects_gcp_use():
 
 def test_segments_rejects_unknown_status():
     bad = copy.deepcopy(load(EXAMPLES / "segments.example.geojson"))
-    bad["features"][0]["properties"]["status_by_mode"]["truck"] = "maybe"
+    bad["features"][0]["properties"]["status_by_mode"]["ambulance"] = "maybe"
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(bad, load(CONTRACTS / "segments.schema.json"))
+
+
+def test_advisor_state_rejects_old_mode_names():
+    # Modes are fire_truck / ambulance / jeep / foot since 31 Oct 02:00 (PLAN.md)
+    bad = copy.deepcopy(load(EXAMPLES / "advisor_state.example.json"))
+    bad["segments"][0]["status_by_mode"]["truck"] = "open"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(bad, load(CONTRACTS / "advisor_state.schema.json"))
+
+
+def test_priorities_must_be_decision_support():
+    bad = copy.deepcopy(load(EXAMPLES / "priorities.example.json"))
+    bad["decision_support"] = False
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(bad, load(CONTRACTS / "priorities.schema.json"))

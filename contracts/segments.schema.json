@@ -29,7 +29,7 @@
             "type": "object",
             "required": ["mock", "segment_id", "osm_way_id", "highway", "length_m", "corridor_width_m", "corridor_width_source",
                          "coverage_fraction", "max_obstruction_m", "obstructed_length_m", "min_clear_width_m",
-                         "debris_volume_m3", "debris_volume_tolerance_m3", "status_by_mode", "ml", "decision", "measured"],
+                         "debris_volume_m3", "debris_volume_tolerance_m3", "ml", "measured"],
             "properties": {
               "mock": {"type": "boolean"},
               "segment_id": {"type": "string"},
@@ -45,8 +45,9 @@
               "debris_volume_m3": {"$ref": "#/$defs/num"},
               "debris_volume_tolerance_m3": {"$ref": "#/$defs/num"},
               "status_by_mode": {
+                "description": "Optional. The authoritative status per vehicle comes from GET /advisor/state (assessment engine).",
                 "type": "object",
-                "required": ["truck", "jeep", "foot"],
+                "required": ["fire_truck", "ambulance", "jeep", "foot"],
                 "additionalProperties": {"$ref": "#/$defs/status"}
               },
               "ml": {
