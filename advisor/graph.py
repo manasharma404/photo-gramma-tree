@@ -134,15 +134,25 @@ def build_topology(
 
     junctions: dict[str, Junction] = {}
     junction_list: list[Junction] = []
+    grid_index: dict[tuple[int, int], list[Junction]] = {}
+    # ~11 m grid cell size in degrees (~0.0001 deg), safe for snap_m <= 10 m
+    cell_deg = max(snap_m / 50000.0, 0.0001)
+
+    def _cell_key(lon: float, lat: float) -> tuple[int, int]:
+        return (int(lon // cell_deg), int(lat // cell_deg))
 
     def snap_or_create(lon: float, lat: float) -> str:
-        for j in junction_list:
-            if _dist_m(lon, lat, j.lon, j.lat) <= snap_m:
-                return j.junction_id
+        gx, gy = _cell_key(lon, lat)
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for j in grid_index.get((gx + dx, gy + dy), ()):
+                    if _dist_m(lon, lat, j.lon, j.lat) <= snap_m:
+                        return j.junction_id
         jid = f"junc_{len(junction_list) + 1:04d}"
         j_obj = Junction(junction_id=jid, lon=lon, lat=lat)
         junctions[jid] = j_obj
         junction_list.append(j_obj)
+        grid_index.setdefault((gx, gy), []).append(j_obj)
         return jid
 
     raw_features = sorted(
@@ -343,6 +353,10 @@ def assemble_access_report(
         reached_before = passable_by_mode[mode]
         for seg in sorted(topology.segments.values(), key=lambda s: s.segment_id):
             if seg.status_by_mode[mode] != "blocked":
+                continue
+            # Frontier filter: clearing a single blocked edge (u, v) can newly reach
+            # isolated junctions iff exactly one endpoint is already reachable from base.
+            if (seg.u in reached_before) == (seg.v in reached_before):
                 continue
             reached_after = reachability_fn(mode, {"open", "partial"}, seg.segment_id)
             newly_reached_places = [
