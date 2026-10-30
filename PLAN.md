@@ -15,7 +15,7 @@
 | exiftool | **Not installed** | `Get-Command` |
 | Neo 2 clip 0148 | 4K HEVC, 59.94 fps, 56.1 s, 56.6 Mb/s, 379 MB, created 20 Aug 17:39 UTC (23:09 IST) | `ffprobe` |
 | Neo 2 clip 0149 | 4K HEVC, 59.94 fps, 177.1 s, 56.5 Mb/s, 1.25 GB, created 20 Aug 17:40 UTC (23:10 IST) | `ffprobe` |
-| Telemetry | Both files carry a DJI `dvtm_NEO2.proto` data stream ("CAM meta"); **may** hold GPS, not decoded yet | first bytes of stream 1 |
+| Telemetry | Both files carry a DJI `dvtm_NEO2.proto` data stream ("CAM meta"). **GPS in every frame** (decoded by `pipeline/dji_telemetry.py`; exiftool 13.59 cannot read it). See step 4 in the decisions log | `pipeline.video_check` |
 | Stabilisation | `EIS:RS` (electronic stabilisation, rolling shutter) | MP4 comment tag |
 | Content | Night, floodlit grass football ground, players moving, mostly oblique view, buildings behind | 5 sampled frames, viewed |
 
@@ -73,6 +73,9 @@
 | 31 Oct 01:00 | Step 1 done. ODM pinned: `opendronemap/odm:gpu@sha256:c6ecdec7764094732248517c51d6430fbc9dad61b586daafded04745026d9ed8` (9.38 GB, built ~2 months ago). `nvidia-smi` inside it sees the RTX 4050 (6 GB). CPU image not pulled. Docker sees 12 GB RAM, 10 CPUs. C: free after the pull: 31.3 GB | Claude measured |
 | 31 Oct 01:20 | Step 2: git on `main`; Python env via `uv` (Python 3.12.15, since uv could not install 3.11; brief says 3.11+); `uv.lock` + `requirements.lock`. Lead offered to move data to an external drive if disk-saving gets in the way | Claude |
 | 31 Oct 01:25 | Step 3: 10 contracts in `contracts/` (schema + mock example each), `tests/test_contracts.py` 24/24 pass. **Changes from the brief's section 6:** `run.tier` adds `video`, optional `inputs.quality_filter`; `accuracy.used_gcps` is fixed to `false`, `found_by` adds `template` (USGS tarps), optional `datum_note`; `ml_scores.json` is wrapped as `{mock, scores: [...]}` so it can carry `mock`; `measurement.tolerance.unit` adds `m2`, `deg`; `image_quality.json` puts `method` (`ml_model` / `standard_check`), `model`, `version` at the top instead of per item; new `places.geojson` (adds `kind`, `source`, `nearest_segment_id`) and `advisor_state` schemas | Claude; lead to confirm |
+| 31 Oct 02:00 | Lead: teammate prompt waits until she finalises her scope; focus on the lead's work | Lead |
+| 31 Oct 02:00 | Step 4 done → `data/raw/neo2/video_report.json` (+ `<clip>_track.csv`). Videos moved from Downloads. **GPS:** 3363/3363 frames (clip 0148) and 10615/10615 (clip 0149); flight extent 29.5 × 37.1 m and 50.9 × 74.0 m; paths 87.6 m and 390.3 m. Altitude field reads 299.8–325.8 m, reference unknown (not used for anything yet). **Brightness:** median luma 98.7 / 101.2 of 255, 0 of 20 frames dark. **Sharpness:** Laplacian variance median 27.1 / 34.5; 18 of 20 frames per clip under the PLACEHOLDER blur threshold of 100. ISO (inferred field) reached 4250 / 6400, so night noise reduction likely softens detail. Threshold is uncalibrated, so this is a warning, not a verdict: the video tier run decides | Claude measured |
+| 31 Oct 02:00 | Step 9 approach changed: since the GPS exists, extract frames ourselves, drop bad ones (standard check now, teammate's `image_quality.json` later), write GPS into each frame's EXIF, then run ODM on images. This replaces ODM's MP4+SRT path and gives the video map a real position and scale (consumer-GPS accuracy, to be stated) | Claude; lead to confirm |
 
 ## Bug table
 | # | Bug | Owner | Status |

@@ -1,0 +1,5 @@
+# Thresholds for the standard brightness + sharpness check (pipeline/frame_quality.py).
+# PLACEHOLDER: common rules of thumb, not calibrated on our data. Tune after the
+# first ODM run shows which frames actually matched.
+dark_mean_luma_below: 40        # PLACEHOLDER, 0-255 scale
+blurry_laplacian_var_below: 100 # PLACEHOLDER, full-resolution grayscale
