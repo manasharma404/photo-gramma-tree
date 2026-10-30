@@ -1,8 +1,8 @@
 # Vortex
 
-hackFront India 2026, PS T8.2 "The First Map After The Landslide": consumer drone footage to a georeferenced map, a change report and field measurements, offline on a laptop.
+hackFront IIITD, team Vortex (repo: photo-gramma-tree). hackFront India 2026, PS T8.2 "The First Map After The Landslide": consumer drone footage to a georeferenced map, a change report and field measurements, offline on a laptop.
 
-**Status:** work in progress. Plan, owners and decisions: [PLAN.md](PLAN.md).
+**Status:** work in progress. Plan, owners and decisions: [PLAN.md](PLAN.md). Teammate scope: [TEAMMATE.md](TEAMMATE.md).
 
 ## What's real, what's public, what's estimated
 Filled in as results arrive. Every number in this project comes from a run we can show, or is labelled `ESTIMATE` or `PLACEHOLDER`.
