@@ -1,0 +1,36 @@
+[project]
+name = "vortex"
+version = "0.1.0"
+description = "Offline rapid mapping from consumer drone footage (hackFront T8.2)"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "rasterio",
+    "numpy",
+    "scipy",
+    "shapely",
+    "geopandas",
+    "pyproj",
+    "osmnx",
+    "networkx",
+    "neo4j",
+    "opencv-contrib-python",
+    "simplekml",
+    "matplotlib",
+    "psutil",
+    "pyyaml",
+    "laspy",
+    "qrcode",
+    "jsonschema",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

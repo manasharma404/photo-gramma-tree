@@ -1,0 +1,23 @@
+# Data stays out of git (raw footage, public datasets, ODM outputs are huge).
+# Anchored with a leading slash so folders like web/src/data are NOT ignored.
+/data/*
+!/data/LICENSES.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Web
+node_modules/
+web/dist/
+
+# Neo4j (teammate) runtime folders
+neo4j/data/
+neo4j/plugins/
+neo4j/logs/
+
+# Secrets
+.env
