@@ -24,8 +24,8 @@
 ## Owners
 | Area | Folders | Owner |
 |---|---|---|
-| Map, measurements, 3D, styling | `pipeline/ accuracy/ measure/ export/`, `web/` (map, 3D view, design system) | Lead + Claude |
-| Decisions and field delivery | `roads/ advisor/ quality/ ml/ api/ neo4j/`, `web/src/panels/`, `scripts/qr.py`, `config/vehicles.yaml`, `config/priority.yaml` | Teammate (see `TEAMMATE.md` v3) |
+| Map, measurements, everything on screen | `pipeline/ accuracy/ measure/ roads/ export/`, all of `web/` (map, 3D, panels, styling) | Lead + Claude |
+| Decisions and field delivery | `advisor/ quality/ ml/ api/ neo4j/`, `scripts/qr.py`, `config/vehicles.yaml`, `config/priority.yaml` | Teammate (see `TEAMMATE.md` v3, prompt `docs/teammate_prompt.md`) |
 | Shared, frozen once approved | `contracts/`, this file | Lead decides |
 
 ## Work plan (lead + Claude), one feature at a time
@@ -40,8 +40,8 @@
 | 7 | Accuracy: find tarps in orthophoto (template match, else manual click), datum conversion, errors → `accuracy.json` with N | Numbers from a run, N stated | 09:00 |
 | 8 | Full tier → DSM/DTM; heights vs RTK topography (absolute + relative) → `docs/validation.md` | Table filled from runs | 12:00 |
 | 9 | Neo 2 video tier (frame selection uses our sharpness check now, teammate's ML scores later); report result or failure with numbers | Result or failure written up | 13:00 |
-| 10 | Measure: volume over a deposit, landing zones, span (if a channel exists), working space, as `measure.router`; `accuracy.router` for `/spec`. Hand the teammate the orthophoto (~06:00), DSM/DTM (~12:00) and landing zones (~15:00); **she** builds `segments.geojson` + `places.geojson` | Endpoints return `measurement.json` | 15:00 |
-| 11 | Web: design tokens/components for her panels (~12:00); MapLibre 2D map, three.js terrain from DSM + orthophoto, road colours from `GET /advisor/state`, spec card; styling. **Her** `api/` app serves it and mounts our routers | Runs offline, screenshot | 18:00 |
+| 10 | Measure: volume over a deposit, landing zones, span (if a channel exists), working space, as `measure.router`; `accuracy.router` for `/spec`. **`roads/`**: OSM ways clipped to the map, ≤ 50 m segments, DSM cross-sections → `segments.geojson` + `places.geojson` (incl. landing zones); write it during ODM waits, test on a synthetic DSM, hand to the teammate ~15:00 | Endpoints return `measurement.json`; both GeoJSONs validate | 15:00 |
+| 11 | Web: MapLibre 2D map, three.js terrain from DSM + orthophoto, **data panels** (road status per vehicle from `GET /advisor/state`, priorities, measurements, accuracy, field reports), spec card; styling. Built against contract mocks first. **Her** `api/` app serves it and mounts our routers | Runs offline, screenshot | 18:00 |
 | 12 | Exports: COG, KMZ, GPKG, GeoJSON, PDF; each opened in its target app | Opened in QGIS / Google Earth | 19:00 |
 | 13 | Offline test (Wi-Fi off, phone on hotspot); README disclosure; runbook | Phone opens the map | 20:30 |
 | — | **Code freeze 21:30**, two rehearsals, submit by 23:00 | | |
@@ -76,6 +76,7 @@
 | 31 Oct 02:00 | Step 5 blocked: ScienceBase (and its S3 / CMGDS mirrors) refuse scripts behind a Cloudflare bot check; the lead downloads the RTK CSV and smallest image zip by hand | Lead |
 | 31 Oct 02:10 | **Work division (TEAMMATE.md v3):** her six docs are hers except R1 (accuracy validator, lead). Moved to her: `roads/` (segment measurements), `api/` app shell + offline serving + QR + hotspot, `web/src/panels/`, status per vehicle with reasons, quality checks. Lead keeps ODM pipeline, accuracy, `measure/` (span, volume, landing zones, working space), exports, map + 3D + all styling | Lead (rule), Claude (details) |
 | 31 Oct 02:10 | **Contract changes:** modes are `fire_truck, ambulance, jeep, foot` (was truck/jeep/foot; N1 picked by Claude under the lead's "decide this") in `segments`, `advisor_state`, `access_report`; `segments.status_by_mode` and `decision` optional (status comes from `/advisor/state`); `advisor_state` adds `reasons_by_mode`, `needs_verification`; `access_report.reopen_plan` adds `mode`, `reasons`; new `priorities.json` (`decision_support: true` enforced); `image_quality.json` optional `coverage` block. 32 tests pass | Claude |
+| 31 Oct 02:20 | Rebalance: `roads/` (T9) and the data panels (T10) move back to the lead. Reason: T9 needs our DSM and `measure/` code and fits our ODM waits; panels keep all of `web/` with one owner who also does styling. Her 8 Must items can all start on mock data now | Lead |
 | 31 Oct 02:00 | Step 4 done → `data/raw/neo2/video_report.json` (+ `<clip>_track.csv`). Videos moved from Downloads. **GPS:** 3363/3363 frames (clip 0148) and 10615/10615 (clip 0149); flight extent 29.5 × 37.1 m and 50.9 × 74.0 m; paths 87.6 m and 390.3 m. Altitude field reads 299.8–325.8 m, reference unknown (not used for anything yet). **Brightness:** median luma 98.7 / 101.2 of 255, 0 of 20 frames dark. **Sharpness:** Laplacian variance median 27.1 / 34.5; 18 of 20 frames per clip under the PLACEHOLDER blur threshold of 100. ISO (inferred field) reached 4250 / 6400, so night noise reduction likely softens detail. Threshold is uncalibrated, so this is a warning, not a verdict: the video tier run decides | Claude measured |
 | 31 Oct 02:00 | Step 9 approach changed: since the GPS exists, extract frames ourselves, drop bad ones (standard check now, teammate's `image_quality.json` later), write GPS into each frame's EXIF, then run ODM on images. This replaces ODM's MP4+SRT path and gives the video map a real position and scale (consumer-GPS accuracy, to be stated) | Claude; lead to confirm |
 

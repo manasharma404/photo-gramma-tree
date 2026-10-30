@@ -1,21 +1,20 @@
 # TEAMMATE.md v3: the teammate's scope and plan
 
-**Status: work division DECIDED by the lead, 31 Oct 02:00 IST.** Rule: everything from her six documents is hers, except where it's clearly more efficient for the lead; the lead keeps at most R1 (accuracy). v1 and v2 are in git history. Next: Claude turns this into one self-contained prompt for her agent.
+**Status: work division DECIDED by the lead, 31 Oct 02:00 IST; revised 02:20.** Rule: everything from her six documents is hers, except where it's clearly more efficient for the lead. The lead keeps R1 (accuracy) and, since 02:20, **T9 road measurements and T10 data panels** (they depend on the lead's DSM and styling, and fit the lead's ODM waiting time). v1 and v2 are in git history. Her agent's prompt: `docs/teammate_prompt.md`.
 
 **Her scope (her six documents):** multi-vehicle accessibility · explainable road blockage assessment · rescue priority engine · offline field usability · automatic flight and image quality assessment · positional accuracy and uncertainty reporting (except the checkpoint validator).
 
-**The split in one line:** the lead's side produces the **map and its measurements** (ODM products, accuracy at checkpoints, span / volume / landing zones / working space, exports, the map + 3D view and all styling). She turns them into **decisions people use in the field**: road measurements and status per vehicle with reasons, who is cut off, what to clear first, quality checks before mapping, and the offline delivery (server, phone access, data panels).
+**The split in one line:** the lead's side produces the **map, its measurements and everything on screen** (ODM products, accuracy at checkpoints, road segment measurements, span / volume / landing zones / working space, exports, all of `web/`). She turns the measurements into **decisions people use in the field**: status per vehicle with reasons, who is cut off, what to clear first, quality checks before mapping, and the offline delivery (server, phone field page, QR, hotspot).
 
 ## Folders
 | Folder | Owner | Notes |
 |---|---|---|
-| `roads/` | **Her** (moved from lead) | Reads our `dsm.tif` / `dtm.tif` + prefetched OSM roads → `segments.geojson` (measurements). May import `measure/` helpers (e.g. volume) |
+| `roads/` | Lead (back from her, 02:20) | DSM + OSM roads → `segments.geojson` and `places.geojson` for South Fork |
 | `advisor/` | Her | Assessment engine, graph, routing, priorities, field reports, `/field` page |
 | `quality/` (new) | Her | Image, metadata, coverage and overlap checks; builds on `pipeline/frame_quality.py` |
 | `ml/` | Her | Image-quality model; optional road-status model |
 | `api/` | **Her** (moved from lead) | The FastAPI app shell: offline serving, `/health`, tiles, mounts routers. The lead supplies `measure.router` and `accuracy.router` (`/spec`) |
-| `web/src/panels/` | Her | Data panels: road status per vehicle, priorities, measurements, accuracy report, field reports, freshness. **Uses the lead's styles and components; visual decisions are the lead's** |
-| `web/` (rest) | Lead | Map (MapLibre), 3D view (three.js), design system and styling |
+| `web/` (all, incl. panels) | Lead (panels back from her, 02:20) | Map, 3D view, data panels, design system and styling. Panels read her `/advisor/*` JSON |
 | `scripts/qr.py`, hotspot runbook | Her | |
 | `neo4j/`, `config/vehicles.yaml`, `config/priority.yaml` | Her | Every number cited or `PLACEHOLDER` |
 | `pipeline/ accuracy/ measure/ export/ config/quality.yaml` | Lead | She may import, not edit |
@@ -40,8 +39,8 @@
 | T6 | **Wayanad scenario**: OSM roads prefetched, road states from cited reports, labelled "scenario reconstructed from reports, not drone-measured" | Runs end to end through T3–T5; sources listed | 12:00 |
 | T7 | **API app shell** `api/`: FastAPI on `0.0.0.0:8000`, serves built `web/`, tiles and all routers; `GET /health` says truthfully whether internet is reachable; advisor routes `GET /advisor/state`, `GET /advisor/priorities`, `POST /advisor/reports` | Starts with Wi-Fi off; lead's routers mount with one line each | 13:00 |
 | T8 | **Field page** `/field` + field reports in SQLite (dead end, cleared, new debris), shown as `source: field_report`; **freshness line**; `scripts/qr.py`; hotspot runbook | A phone on the laptop hotspot opens it with Wi-Fi off; a report changes `/advisor/state` | 14:30 |
-| T9 | **Road measurements** `roads/` on South Fork: OSM ways clipped to the map, ≤ 50 m segments, corridor, stations every 1 m on the DSM → `segments.geojson` (contract); `places.geojson` incl. our landing zones | Runs on the lead's DSM once the full tier exists (~12:00); tested on a synthetic DSM before that | 15:30 |
-| T10 | **Data panels** `web/src/panels/`: road status with vehicle switch, priorities, measurements, accuracy report, field reports | Built against `contracts/examples/` mocks first, then live; lead approves the look | 16:00 |
+| ~~T9~~ | Road measurements → **moved to the lead** (02:20). She receives `segments.geojson` + `places.geojson` for South Fork ~15:00 | | |
+| ~~T10~~ | Data panels → **moved to the lead** (02:20). The lead's panels read her `/advisor/state`, `/advisor/priorities`, `access_report.json` | | |
 
 ### Should
 | # | Deliverable | Done when | Target |
@@ -57,7 +56,7 @@ T14 spatial confidence layer, labelled "estimated quality indicator" (never "acc
 Automatic flight planning and adaptive re-flight (the Neo 2 cannot fly automated grids) · terrain-aware altitude · Bayesian/AHP priorities · training road/debris segmentation · before/after survey consistency (needs two of our own flights) · PWA service worker.
 
 ### If she falls behind, cut in this order
-T17 → T16 → T14 → T15 → T13 → T12 → T11 → T6 (use South Fork only). T1–T5 and T7–T10 are the demo; they don't get cut.
+T17 → T16 → T14 → T15 → T13 → T12 → T11 → T6 (use South Fork only). T1–T5, T7 and T8 are the demo; they don't get cut.
 
 ---
 
@@ -65,8 +64,8 @@ T17 → T16 → T14 → T15 → T13 → T12 → T11 → T6 (use South Fork only)
 | # | Topic | Decision |
 |---|---|---|
 | R1 | Accuracy validator (checkpoints, RMSE, relative distances) | **Lead.** She does only T14 |
-| R2 | Offline delivery: server, phone access, QR, hotspot, data sections | **Her** (T7, T8, T10). One dashboard; the lead owns the map, 3D and all styling |
-| R3 | Road width, obstruction, debris per segment | **Her** (T9). Span, volume, landing zones and working space stay with the lead (`measure/`, not in her docs) |
+| R2 | Offline delivery: server, phone access, QR, hotspot, data sections | **Her** for server, field page, QR, hotspot (T7, T8). Data sections (panels) moved to the lead at 02:20: one `web/`, one owner |
+| R3 | Road width, obstruction, debris per segment | **Lead** (moved back at 02:20: needs the lead's DSM, reuses `measure/` code, fits ODM waits) |
 | R4 | Blur / exposure / GPS checks | **Her** (T12), extending `pipeline/frame_quality.py` |
 | R5 | "Impact of road restoration" vs reopen plan | Merged (T5), hers |
 | R6 | Status per vehicle + reasons | **Her** (T3), published via `/advisor/state` |
@@ -79,6 +78,6 @@ T17 → T16 → T14 → T15 → T13 → T12 → T11 → T6 (use South Fork only)
 ## What she gets from us, and when
 - Contract mocks: **now** (`contracts/examples/`)
 - `pipeline/frame_quality.py`, `pipeline/video_check.py`: **now**
-- South Fork orthophoto: ~06:00 · DSM/DTM: ~12:00 · landing zones: ~15:00
+- South Fork `segments.geojson` + `places.geojson` (incl. landing zones): ~15:00
 - `measure.router` and `accuracy.router` to mount: ~15:00
-- Design tokens / components for panels: the lead, by ~12:00
+- Built `web/` to serve: ~18:00
