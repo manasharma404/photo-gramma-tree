@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "mock": true,
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [0.0, 0.0]},
+      "properties": {
+        "mock": true, "place_id": "place_MOCK_A", "name": "MOCK village A", "kind": "settlement", "source": "osm",
+        "population": null, "population_source": "PLACEHOLDER", "nearest_segment_id": "seg_MOCK_0001"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [0.0002, 0.0]},
+      "properties": {
+        "mock": true, "place_id": "lz_MOCK_1", "name": "MOCK landing zone 1", "kind": "landing_zone", "source": "landing_zones",
+        "population": null, "population_source": "PLACEHOLDER", "nearest_segment_id": "seg_MOCK_0002"
+      }
+    }
+  ]
+}

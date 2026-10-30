@@ -1,0 +1,6 @@
+{
+  "mock": true,
+  "scores": [
+    {"segment_id": "seg_MOCK_0001", "p_blocked": null, "p_partial": null, "p_clear": null, "model": "MOCK_model", "version": "MOCK"}
+  ]
+}

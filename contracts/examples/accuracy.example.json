@@ -1,0 +1,14 @@
+{
+  "mock": true,
+  "run_id": null,
+  "used_gcps": false,
+  "n_checkpoints": null,
+  "checkpoint_method": "rtk",
+  "checkpoint_stated_accuracy_m": null,
+  "datum_note": null,
+  "horizontal": {"rmse_x_m": null, "rmse_y_m": null, "rmse_h_m": null, "max_error_m": null},
+  "vertical": {"rmse_v_m": null, "max_error_m": null},
+  "relative": [{"from": "MOCK_T1", "to": "MOCK_T2", "taped_m": null, "map_m": null, "diff_m": null}],
+  "per_point": [{"id": "MOCK_T1", "dx_m": null, "dy_m": null, "dz_m": null, "found_by": "template"}],
+  "standard_note": "ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full compliance; this assessment uses n_checkpoints."
+}

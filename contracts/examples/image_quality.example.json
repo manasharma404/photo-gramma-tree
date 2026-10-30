@@ -1,0 +1,11 @@
+{
+  "mock": true,
+  "method": "ml_model",
+  "model": "MOCK_quality_model",
+  "version": "MOCK",
+  "source": "data/raw/MOCK/clip.mp4",
+  "items": [
+    {"image": "video:0", "score": null, "usable": true, "reasons": []},
+    {"image": "video:30", "score": null, "usable": false, "reasons": ["blur"]}
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "access_report.json: teammate's reachability and reopen plan (Neo4j, NetworkX fallback gives the same JSON)",
+  "type": "object",
+  "required": ["mock", "modes", "places", "reopen_plan", "computed_with"],
+  "$defs": {"bool_or_null": {"type": ["boolean", "null"]}},
+  "properties": {
+    "mock": {"type": "boolean"},
+    "modes": {"type": "array", "items": {"enum": ["truck", "jeep", "foot"]}},
+    "places": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["place_id", "name", "population", "population_source", "reachable", "facility"],
+        "properties": {
+          "place_id": {"type": ["string", "null"]},
+          "name": {"type": ["string", "null"]},
+          "population": {"type": ["integer", "null"]},
+          "population_source": {"type": "string"},
+          "reachable": {
+            "type": "object",
+            "required": ["truck", "jeep", "foot"],
+            "additionalProperties": {"$ref": "#/$defs/bool_or_null"}
+          },
+          "facility": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "reopen_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rank", "segment_id", "reconnects_people", "reconnects_places", "debris_volume_m3"],
+        "properties": {
+          "rank": {"type": "integer", "minimum": 1},
+          "segment_id": {"type": ["string", "null"]},
+          "reconnects_people": {"type": ["integer", "null"]},
+          "reconnects_places": {"type": ["integer", "null"]},
+          "debris_volume_m3": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "computed_with": {"enum": ["neo4j-gds", "networkx-fallback"]}
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "mock": true,
+  "run_id": "MOCK_siteA_quick",
+  "project": "MOCK_siteA",
+  "inputs": {"kind": "images", "count": null, "source_folder": "data/raw/MOCK", "quality_filter": null},
+  "tier": "quick",
+  "odm_image": "opendronemap/odm:gpu@sha256:c6ecdec7764094732248517c51d6430fbc9dad61b586daafded04745026d9ed8",
+  "odm_options": ["--fast-orthophoto", "--skip-3dmodel"],
+  "machine_file": "data/machine.json",
+  "status": "queued",
+  "started_at": null,
+  "ended_at": null,
+  "stages": [{"name": "MOCK_stage", "started_at": null, "seconds": null}],
+  "total_seconds": null,
+  "peak_memory_gb": null,
+  "area_ha": null,
+  "gsd_cm": null,
+  "products": {"orthophoto": null, "dsm": null, "dtm": null, "point_cloud": null, "glb": null, "kmz": null}
+}

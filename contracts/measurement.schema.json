@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "measurement.json: returned by every /measure endpoint",
+  "type": "object",
+  "required": ["mock", "type", "run_id", "input_geometry", "result", "tolerance", "rule_source", "placeholders_used", "measured"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "type": {"enum": ["span", "volume", "landing_zones", "working_space"]},
+    "run_id": {"type": ["string", "null"]},
+    "input_geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {"type": {"enum": ["LineString", "Polygon", "Point"]}, "coordinates": {"type": "array"}}
+    },
+    "result": {"type": "object"},
+    "tolerance": {
+      "type": "object",
+      "required": ["value", "unit", "method"],
+      "properties": {
+        "value": {"type": ["number", "null"]},
+        "unit": {"enum": ["m", "m2", "m3", "deg"]},
+        "method": {"type": "string"}
+      }
+    },
+    "rule_source": {"type": ["string", "null"]},
+    "placeholders_used": {"type": "array", "items": {"type": "string"}},
+    "measured": {"type": "boolean"}
+  }
+}

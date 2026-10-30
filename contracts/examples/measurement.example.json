@@ -1,0 +1,14 @@
+{
+  "mock": true,
+  "type": "span",
+  "run_id": null,
+  "input_geometry": {"type": "LineString", "coordinates": [[0.0, 0.0], [0.0001, 0.0]]},
+  "result": {
+    "span_m": null, "bank_a_height_m": null, "bank_b_height_m": null, "bed_elevation_m": null, "profile_png": null,
+    "panel_estimate": {"count": null, "rule": "config/bridging.yaml"}
+  },
+  "tolerance": {"value": null, "unit": "m", "method": "MOCK: +/- sqrt(2) * RMSE_H, conservative bound"},
+  "rule_source": "config/bridging.yaml",
+  "placeholders_used": ["bridging.panel_rule", "bank_drop_min_m"],
+  "measured": false
+}

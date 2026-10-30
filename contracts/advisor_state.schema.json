@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GET /advisor/state: current road status per vehicle type. web/ colours roads only from this.",
+  "type": "object",
+  "required": ["mock", "segments", "updated_at"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "updated_at": {"type": ["string", "null"]},
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["segment_id", "status_by_mode", "source"],
+        "properties": {
+          "segment_id": {"type": "string"},
+          "status_by_mode": {
+            "type": "object",
+            "required": ["truck", "jeep", "foot"],
+            "additionalProperties": {"enum": ["open", "partial", "blocked", "unknown"]}
+          },
+          "source": {"enum": ["geometry", "field_report", "scenario"]}
+        }
+      }
+    }
+  }
+}

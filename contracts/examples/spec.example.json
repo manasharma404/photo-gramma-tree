@@ -1,0 +1,9 @@
+{
+  "mock": true,
+  "accuracy": null,
+  "timing": {"area_ha": null, "total_minutes": null, "minutes_per_ha": null, "tier": null},
+  "laptop": null,
+  "validation": [{"what": "MOCK span", "tool_value": null, "taped_value": null, "diff": null, "unit": "m"}],
+  "data_sources": ["MOCK"],
+  "generated_at": null
+}

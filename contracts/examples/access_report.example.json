@@ -1,0 +1,12 @@
+{
+  "mock": true,
+  "modes": ["truck", "jeep", "foot"],
+  "places": [
+    {"place_id": "place_MOCK_A", "name": "MOCK village A", "population": null, "population_source": "PLACEHOLDER",
+     "reachable": {"truck": null, "jeep": null, "foot": null}, "facility": null}
+  ],
+  "reopen_plan": [
+    {"rank": 1, "segment_id": "seg_MOCK_0002", "reconnects_people": null, "reconnects_places": null, "debris_volume_m3": null}
+  ],
+  "computed_with": "networkx-fallback"
+}

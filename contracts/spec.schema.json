@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "spec.json: assembled by GET /spec from accuracy.json, run.json, machine.json and docs/validation.md. Missing values stay null and show as 'not measured yet'.",
+  "type": "object",
+  "required": ["mock", "accuracy", "timing", "laptop", "validation", "data_sources", "generated_at"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "accuracy": {"type": ["object", "null"], "description": "Copy of accuracy.json"},
+    "timing": {
+      "type": "object",
+      "required": ["area_ha", "total_minutes", "minutes_per_ha", "tier"],
+      "properties": {
+        "area_ha": {"type": ["number", "null"]},
+        "total_minutes": {"type": ["number", "null"]},
+        "minutes_per_ha": {"type": ["number", "null"]},
+        "tier": {"type": ["string", "null"]}
+      }
+    },
+    "laptop": {"type": ["object", "null"], "description": "Copy of data/machine.json"},
+    "validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["what", "tool_value", "taped_value", "diff", "unit"],
+        "properties": {
+          "what": {"type": "string"},
+          "tool_value": {"type": ["number", "null"]},
+          "taped_value": {"type": ["number", "null"]},
+          "diff": {"type": ["number", "null"]},
+          "unit": {"type": "string"}
+        }
+      }
+    },
+    "data_sources": {"type": "array", "items": {"type": "string"}},
+    "generated_at": {"type": ["string", "null"]}
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "run.json: one processing run",
+  "type": "object",
+  "required": ["mock", "run_id", "project", "inputs", "tier", "odm_image", "odm_options", "machine_file", "status",
+               "started_at", "ended_at", "stages", "total_seconds", "peak_memory_gb", "area_ha", "gsd_cm", "products"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "run_id": {"type": "string"},
+    "project": {"type": "string"},
+    "inputs": {
+      "type": "object",
+      "required": ["kind", "count", "source_folder"],
+      "properties": {
+        "kind": {"enum": ["images", "video"]},
+        "count": {"type": ["integer", "null"]},
+        "source_folder": {"type": "string"},
+        "quality_filter": {"type": ["string", "null"], "description": "standard_check | image_quality.json path | null"}
+      }
+    },
+    "tier": {"enum": ["quick", "full", "video"]},
+    "odm_image": {"type": "string"},
+    "odm_options": {"type": "array", "items": {"type": "string"}},
+    "machine_file": {"type": "string"},
+    "status": {"enum": ["queued", "running", "done", "failed"]},
+    "started_at": {"type": ["string", "null"]},
+    "ended_at": {"type": ["string", "null"]},
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "started_at", "seconds"],
+        "properties": {
+          "name": {"type": "string"},
+          "started_at": {"type": ["string", "null"]},
+          "seconds": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "total_seconds": {"type": ["number", "null"]},
+    "peak_memory_gb": {"type": ["number", "null"]},
+    "area_ha": {"type": ["number", "null"]},
+    "gsd_cm": {"type": ["number", "null"]},
+    "products": {
+      "type": "object",
+      "required": ["orthophoto", "dsm", "dtm", "point_cloud", "glb", "kmz"],
+      "additionalProperties": {"type": ["string", "null"]}
+    }
+  }
+}

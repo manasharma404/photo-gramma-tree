@@ -1,0 +1,8 @@
+{
+  "mock": true,
+  "updated_at": null,
+  "segments": [
+    {"segment_id": "seg_MOCK_0001", "status_by_mode": {"truck": "unknown", "jeep": "unknown", "foot": "unknown"}, "source": "geometry"},
+    {"segment_id": "seg_MOCK_0002", "status_by_mode": {"truck": "blocked", "jeep": "blocked", "foot": "open"}, "source": "field_report"}
+  ]
+}

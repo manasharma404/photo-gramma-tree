@@ -1,0 +1,52 @@
+{
+  "type": "FeatureCollection",
+  "mock": true,
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {"type": "LineString", "coordinates": [[0.0, 0.0], [0.0001, 0.0]]},
+      "properties": {
+        "mock": true,
+        "segment_id": "seg_MOCK_0001",
+        "osm_way_id": null,
+        "highway": "track",
+        "length_m": null,
+        "corridor_width_m": null,
+        "corridor_width_source": "default_by_class(PLACEHOLDER)",
+        "coverage_fraction": null,
+        "max_obstruction_m": null,
+        "obstructed_length_m": null,
+        "min_clear_width_m": null,
+        "debris_volume_m3": null,
+        "debris_volume_tolerance_m3": null,
+        "status_by_mode": {"truck": "unknown", "jeep": "unknown", "foot": "unknown"},
+        "ml": {"p_blocked": null, "model": null},
+        "decision": "geometry",
+        "measured": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {"type": "LineString", "coordinates": [[0.0001, 0.0], [0.0002, 0.0]]},
+      "properties": {
+        "mock": true,
+        "segment_id": "seg_MOCK_0002",
+        "osm_way_id": null,
+        "highway": "track",
+        "length_m": null,
+        "corridor_width_m": null,
+        "corridor_width_source": "default_by_class(PLACEHOLDER)",
+        "coverage_fraction": null,
+        "max_obstruction_m": null,
+        "obstructed_length_m": null,
+        "min_clear_width_m": null,
+        "debris_volume_m3": null,
+        "debris_volume_tolerance_m3": null,
+        "status_by_mode": {"truck": "blocked", "jeep": "partial", "foot": "open"},
+        "ml": {"p_blocked": null, "model": null},
+        "decision": "geometry",
+        "measured": false
+      }
+    }
+  ]
+}

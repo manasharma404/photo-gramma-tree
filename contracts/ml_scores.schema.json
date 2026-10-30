@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ml_scores.json: teammate's road-status scores per segment (optional, M2)",
+  "type": "object",
+  "required": ["mock", "scores"],
+  "$defs": {"p": {"type": ["number", "null"], "minimum": 0, "maximum": 1}},
+  "properties": {
+    "mock": {"type": "boolean"},
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["segment_id", "p_blocked", "p_partial", "p_clear", "model", "version"],
+        "properties": {
+          "segment_id": {"type": "string"},
+          "p_blocked": {"$ref": "#/$defs/p"},
+          "p_partial": {"$ref": "#/$defs/p"},
+          "p_clear": {"$ref": "#/$defs/p"},
+          "model": {"type": "string"},
+          "version": {"type": "string"}
+        }
+      }
+    }
+  }
+}

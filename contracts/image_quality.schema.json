@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "image_quality.json: per-photo or per-frame quality, read by pipeline/ to drop bad frames before ODM",
+  "description": "Produced by the teammate's ML model (M1), or by pipeline/'s standard brightness + sharpness check until M1 lands. 'method' says which; the UI must name it accurately.",
+  "type": "object",
+  "required": ["mock", "method", "model", "version", "source", "items"],
+  "properties": {
+    "mock": {"type": "boolean"},
+    "method": {"enum": ["ml_model", "standard_check"]},
+    "model": {"type": ["string", "null"], "description": "Model name for ml_model; null for standard_check"},
+    "version": {"type": ["string", "null"]},
+    "source": {"type": "string", "description": "Folder of images or path of the MP4 that was scored"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["image", "score", "usable", "reasons"],
+        "properties": {
+          "image": {"type": "string", "description": "File name, or 'video:<frame_index>' for a video frame"},
+          "score": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "usable": {"type": "boolean"},
+          "reasons": {"type": "array", "items": {"enum": ["blur", "dark", "overexposed", "motion", "no_texture", "obstructed", "other"]}}
+        }
+      }
+    }
+  }
+}

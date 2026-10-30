@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "accuracy.json: positional error at checkpoints (never used to correct the map)",
+  "type": "object",
+  "required": ["mock", "run_id", "used_gcps", "n_checkpoints", "checkpoint_method", "checkpoint_stated_accuracy_m",
+               "horizontal", "vertical", "relative", "per_point", "standard_note"],
+  "$defs": {"num": {"type": ["number", "null"]}},
+  "properties": {
+    "mock": {"type": "boolean"},
+    "run_id": {"type": ["string", "null"]},
+    "used_gcps": {"const": false},
+    "n_checkpoints": {"type": ["integer", "null"]},
+    "checkpoint_method": {"enum": ["rtk", "dgps", "phone"]},
+    "checkpoint_stated_accuracy_m": {"$ref": "#/$defs/num"},
+    "datum_note": {"type": ["string", "null"], "description": "How checkpoint and map datums were reconciled"},
+    "horizontal": {
+      "type": "object",
+      "required": ["rmse_x_m", "rmse_y_m", "rmse_h_m", "max_error_m"],
+      "additionalProperties": {"$ref": "#/$defs/num"}
+    },
+    "vertical": {
+      "type": "object",
+      "required": ["rmse_v_m", "max_error_m"],
+      "additionalProperties": {"$ref": "#/$defs/num"}
+    },
+    "relative": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "taped_m", "map_m", "diff_m"],
+        "properties": {
+          "from": {"type": "string"}, "to": {"type": "string"},
+          "taped_m": {"$ref": "#/$defs/num"}, "map_m": {"$ref": "#/$defs/num"}, "diff_m": {"$ref": "#/$defs/num"}
+        }
+      }
+    },
+    "per_point": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "dx_m", "dy_m", "dz_m", "found_by"],
+        "properties": {
+          "id": {"type": "string"},
+          "dx_m": {"$ref": "#/$defs/num"}, "dy_m": {"$ref": "#/$defs/num"}, "dz_m": {"$ref": "#/$defs/num"},
+          "found_by": {"enum": ["aruco", "template", "manual"]}
+        }
+      }
+    },
+    "standard_note": {"type": "string"}
+  }
+}
