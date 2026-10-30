@@ -149,3 +149,21 @@ def test_non_geotagged_folder_reports_null_footprint_metrics_never_zero(tmp_path
     assert res["coverage"]["covered_area_m2"] is None
     assert res["coverage"]["coverage_fraction"] is None
     assert res["coverage"]["low_overlap_pairs"] == []
+
+
+def test_t13_ml_comparison_gate_requires_ml_to_beat_standard_check():
+    from ml.benchmark_iqa import compare_predictions
+
+    labels = {"f1.jpg": True, "f2.jpg": True, "f3.jpg": False, "f4.jpg": False}
+    std_preds = {"f1.jpg": True, "f2.jpg": True, "f3.jpg": False, "f4.jpg": True}  # 3/4
+    ml_worse = {"f1.jpg": True, "f2.jpg": False, "f3.jpg": False, "f4.jpg": True}  # 2/4
+    ml_better = {"f1.jpg": True, "f2.jpg": True, "f3.jpg": False, "f4.jpg": False}  # 4/4
+
+    rep_keep = compare_predictions(labels, std_preds, ml_worse)
+    assert rep_keep["ml_beats_standard_check"] is False
+    assert rep_keep["selected_method"] == "standard_check"
+    assert rep_keep["model_metadata"]["model"] == "opencv-QualityBRISQUE-svr-live-r2"
+
+    rep_win = compare_predictions(labels, std_preds, ml_better)
+    assert rep_win["ml_beats_standard_check"] is True
+    assert rep_win["selected_method"] == "ml_model"
