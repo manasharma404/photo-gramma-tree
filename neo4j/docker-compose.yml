@@ -1,0 +1,30 @@
+services:
+  neo4j:
+    # Pinned Neo4j 5.26.32 Community LTS image (GDS 2.13.14).
+    image: neo4j:5.26-community@sha256:249a1ec6e3c52d82101a5ed33d6ed2b5ed5b0017b21a28c0bfebc335e87fb177
+    container_name: t82-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    env_file:
+      - ../.env
+    environment:
+      NEO4J_PLUGINS: '["graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: "gds.*"
+      NEO4J_dbms_usage__report_enabled: "false"
+    # First run (online): /plugins/graph-data-science.jar is absent, so NEO4J_PLUGINS
+    # downloads it into ./plugins/. Every subsequent start (including Wi-Fi off):
+    # the cached JAR is already in /plugins/, so unset NEO4J_PLUGINS to prevent
+    # Neo4j's entrypoint from calling wget against graphdatascience.ninja.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ -f /plugins/graph-data-science.jar ]; then
+          echo "Using cached offline /plugins/graph-data-science.jar (skipping online fetch)"
+          unset NEO4J_PLUGINS
+        fi
+        exec /startup/docker-entrypoint.sh neo4j
+    volumes:
+      - ./data:/data
+      - ./plugins:/plugins
