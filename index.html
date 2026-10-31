@@ -7,11 +7,10 @@
   <meta name="typhon-root" content="./" />
   <title>Project Typhon</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <script type="module" crossorigin src="./assets/landing-DB0BMAHb.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/format-zSNVdzBx.js">
-  <link rel="modulepreload" crossorigin href="./assets/icons-Dme8FlrP.js">
-  <link rel="stylesheet" crossorigin href="./assets/icons-B7mFigCz.css">
-  <link rel="stylesheet" crossorigin href="./assets/landing-J-ieV19E.css">
+  <script type="module" crossorigin src="./assets/landing-Ceoyywhw.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icons-L0ImoM0C.js">
+  <link rel="stylesheet" crossorigin href="./assets/icons-DBsx-xbe.css">
+  <link rel="stylesheet" crossorigin href="./assets/landing-CcdKtFlm.css">
 </head>
 <!-- Hero = the lead's illustration (heading included). Overlays follow the lead's reference.
      Honesty: callouts name what Typhon measures (no numbers on an illustration); thumbnails are our own
@@ -24,8 +23,8 @@
       <div class="lnav__links">
         <a href="./" aria-current="page">Home</a>
         <a href="app/">Map</a>
-        <a href="about/">About</a>
-        <a href="neo2/">Drone data</a>
+        <a href="#about">About</a>
+        <a href="#drone-data">Drone data</a>
       </div>
       <a class="pill-cta" href="app/">Get started <span data-icon="arrow"></span></a>
     </nav>
@@ -76,10 +75,292 @@
     <span class="cross" style="left: 67%; top: 23%" aria-hidden="true"></span>
 
     <div class="corner corner--left caps">From<br />data<br />to<br />impact</div>
-    <a class="explore caps" href="about/">Explore<span data-icon="chevron"></span></a>
+    <a class="explore caps" href="#about">Explore<span data-icon="chevron"></span></a>
     <div class="corner corner--right caps">Safer<br />communities<br />stronger<br />tomorrows</div>
     <p class="credit caps">Illustration</p>
   </section>
-
+
+  <!-- About and Drone data live below the hero (lead, 31 Oct): ticket style in the shared Typhon v2 palette.
+       Copy and numbers are ours (numbers load from spec.json); pictures are halftones of our own data. -->
+  <div class="zine zband">
+    <header class="chapter" id="about">
+      <div><p class="zcaps lime">About</p><h2 class="zdisplay">The first map<br />after the landslide</h2></div>
+    </header>
+    <main class="zpage">
+
+    <!-- 02 problem -->
+    <section class="ticket" aria-labelledby="t2">
+      <div class="ticket__in">
+        <span class="cross" style="right: 70px; top: 26px"></span><span class="cross" style="right: 40px; top: 26px"></span>
+        <div class="split">
+          <div>
+            <div class="thead"><span class="tnum">01 / 05</span><span id="t2">The problem</span></div>
+            <p class="zlead" style="margin-top: 36px">After a landslide, responders need a current map within hours. The next satellite pass can be days away.</p>
+            <div class="rule"></div>
+            <p class="zsmall" style="max-width: 46ch">Roads, bridges and slopes have moved. The maps on hand show where things <em>were</em>.
+              Teams need to know which road a fire truck can still take, how wide a gap is, and where a helicopter can land, and they need it before the internet comes back.</p>
+          </div>
+          <div style="position: relative; min-height: 340px">
+            <figure class="photo torn" style="position: absolute; left: 0; top: 10px; width: 62%; height: 72%; margin: 0; transform: rotate(-1.5deg)">
+              <img class="halftone" src="./art/sf_debris.webp" alt="Halftone close-up of the debris channel" />
+            </figure>
+            <span class="tape" style="left: -18px; top: 26%; transform: rotate(-78deg)"></span>
+            <div style="position: absolute; right: 0; top: 0; width: 46%; height: 64%; border: 1px solid var(--z-line); overflow: hidden; background: var(--z-navy-2)">
+              <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden="true" fill="none" stroke="rgba(235,226,204,.55)" stroke-width=".6">
+                <path d="M0 40h200M0 80h200M0 120h200M0 160h200M40 0v200M80 0v200M120 0v200M160 0v200" stroke="rgba(235,226,204,.14)" />
+                <path d="M100 30c40 2 66 30 66 68s-30 70-68 68-64-30-64-70 26-68 66-66z" />
+                <path d="M102 50c28 2 46 22 46 48s-20 50-48 48-46-22-46-50 20-48 48-46z" />
+                <path d="M100 68c18 0 30 14 30 30s-14 32-30 32-30-14-30-32 14-30 30-30z" />
+                <path d="M100 84c8 0 14 6 14 14s-6 16-14 16-14-8-14-16 6-14 14-14z" />
+                <circle cx="100" cy="98" r="5" stroke="#B5D334" stroke-width="2.5" />
+              </svg>
+            </div>
+            <figure class="photo" style="position: absolute; right: 4%; bottom: 0; width: 56%; height: 44%; margin: 0; transform: rotate(1.2deg)">
+              <img class="halftone" src="./art/terrain_relief.webp" alt="Halftone shaded relief from our height model" />
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 what it does -->
+    <section class="ticket" aria-labelledby="t3">
+      <div class="ticket__in fade-l" style="min-height: 460px">
+        <div class="bleed"><img class="halftone" src="./art/terrain_relief.webp" alt="" style="object-position: 70% 40%" /></div>
+        <span class="cross" style="left: 46%; top: 30%"></span><span class="cross" style="left: 6%; bottom: 40px"></span>
+        <div class="split over">
+          <div>
+            <div class="thead"><span class="tnum">02 / 05</span><span id="t3">What Typhon does</span></div>
+            <p class="zlead" style="margin-top: 36px; max-width: 26ch">Photos from a consumer drone become a map, on one laptop, with no internet, and the map says how far off it is.</p>
+          </div>
+          <div class="opts" style="align-self: center; max-width: 430px; justify-self: end; width: 100%">
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M4 8l8-3 8 3 8-3v19l-8 3-8-3-8 3z M12 5v19 M20 8v19" /></svg>
+              <div><b>Map</b><span>Orthophoto and 3D terrain from the drone's own photos and GPS</span></div></div>
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M4 24L24 4l4 4L8 28z M9 19l2 2 M13 15l2 2 M17 11l2 2" /></svg>
+              <div><b>Measure</b><span>Gap spans, debris volume, landing zones, working space</span></div></div>
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M16 4v6 M16 22v6 M4 16h6 M22 16h6" /><circle cx="16" cy="16" r="7" /><circle cx="16" cy="16" r="1.5" /></svg>
+              <div><b>Decide</b><span>Road status for a fire truck, ambulance, jeep or a team on foot</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 how it works -->
+    <section class="ticket" aria-labelledby="t4">
+      <div class="ticket__in">
+        <div class="contours"></div>
+        <div class="thead over"><span class="tnum">03 / 05</span><span id="t4">How it works</span></div>
+        <div class="steps over" style="margin-top: 26px">
+          <div class="step">
+            <div class="step__frame"><img src="./art/neo2_frame_round.webp" alt="Halftone of a frame from our Neo 2 video" /></div>
+            <h3><span>01</span><span>Fly</span></h3>
+            <p>Photos or a video from a consumer drone. Its GPS places every frame; no ground control is laid.</p>
+          </div>
+          <div class="step__arrow" aria-hidden="true">→</div>
+          <div class="step">
+            <div class="step__frame"><img src="./art/sf_ortho_round.webp" alt="Halftone of our South Fork orthophoto" /></div>
+            <h3><span>02</span><span>Process</span></h3>
+            <p>OpenDroneMap runs on the laptop's own GPU and builds the map and terrain. Nothing goes online.</p>
+          </div>
+          <div class="step__arrow" aria-hidden="true">→</div>
+          <div class="step">
+            <div class="step__frame"><img src="./art/terrain_relief.webp" alt="Halftone shaded relief from our height model" /></div>
+            <h3><span>03</span><span>Deliver</span></h3>
+            <p>Road status per vehicle, measurements with their error, and files for print and GIS: PDF, KMZ, GeoPackage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 numbers -->
+    <section class="ticket" aria-labelledby="t5">
+      <div class="ticket__in" style="padding: 0">
+        <div class="split" style="gap: 0">
+          <div style="position: relative; min-height: 420px">
+            <img class="halftone" src="./art/sf_debris.webp" alt="Halftone of the South Fork debris channel" style="position: absolute; inset: 0" />
+            <div class="thead over chip" style="margin: 28px 0 0 28px"><span class="tnum">04 / 05</span><span id="t5">The numbers</span></div>
+            <span class="tape" style="left: 8%; bottom: 18px; transform: rotate(-6deg)"></span>
+          </div>
+          <div style="background: var(--z-paper); color: var(--z-ink); padding: 26px clamp(20px, 3vw, 40px)">
+            <div class="stats">
+              <div class="stat"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" /><path d="M16 2v8 M16 22v8 M2 16h8 M22 16h8" /></svg>
+                <div><b data-fact="rmse_h">not measured</b><span>Horizontal error at <span data-fact="n_checkpoints">—</span> surveyed checkpoints, with no ground control</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" /><path d="M16 17V10 M16 17l5 3 M13 3h6" /></svg>
+                <div><b><span data-fact="min_per_ha">not measured</span> min / ha</b><span>On this laptop: <span data-fact="area_ha">—</span> ha in <span data-fact="total_min">—</span> min</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><path d="M2 26l8-10 6 6 6-12 8 16z" /></svg>
+                <div><b data-fact="rel_v">not measured</b><span>Heights relative to nearby ground (absolute heights are off; we say so)</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><path d="M6 12a14 14 0 0120 0 M10 16a8 8 0 0112 0" /><circle cx="16" cy="21" r="1.5" /><path d="M4 4l24 24" /></svg>
+                <div><b>0</b><span>Internet connections needed while it runs</span></div></div>
+            </div>
+            <p class="zsmall" style="margin-top: 10px">Measured on USGS public survey photos (South Fork, California, 30 Apr 2024), not our footage.
+              The standard asks for at least 30 checkpoints; this site gave us 3, so treat the error as a first estimate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 next -->
+    <section class="ticket" aria-labelledby="t6">
+      <div class="ticket__in" style="min-height: 460px">
+        <div class="contours"></div>
+        <div class="reticle" style="width: 380px; height: 380px; right: -110px; bottom: -150px; border-color: rgba(181,211,52,.5)"></div>
+        <img src="./art/sf_ortho_round.webp" alt="" style="position: absolute; right: -110px; bottom: -150px; width: 380px; height: 380px; object-fit: cover; border-radius: 50%; opacity: .9" />
+        <div class="thead over"><span class="tnum">05 / 05</span><span id="t6">What's next</span></div>
+        <div class="road over">
+          <svg class="path" viewBox="0 0 1000 330" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M70 290 C 220 270, 250 230, 330 220 S 520 160, 590 150 S 760 110, 860 100" fill="none" stroke="#EBE2CC" stroke-width="2.5" stroke-dasharray="9 9" />
+          </svg>
+          <span class="pin" style="left: 7%; top: 88%"></span>
+          <span class="pin" style="left: 33%; top: 66.6%"></span>
+          <span class="pin" style="left: 59%; top: 45.5%"></span>
+          <span class="pin" style="left: 86%; top: 30.3%"></span>
+          <div class="tag" style="left: 9%; top: 88%"><b>Now</b>Working prototype on public survey data</div>
+          <div class="tag" style="left: 33%; top: 66.6%"><b>Before 21 Nov</b>Our own survey flight, our own checkpoints</div>
+          <div class="tag" style="left: 59%; top: 45.5%"><b>Then</b>Tool vs tape on a real gap and debris pile</div>
+          <div class="tag" style="left: 82%; top: 30.3%"><b>Goal</b>30 checkpoints, so the error figure meets the standard</div>
+        </div>
+        <p class="credit-strip over" style="margin-top: 8px">Our planned survey flights on 29–30 Oct were cancelled by rain.</p>
+      </div>
+    </section>
+  </main>
+
+    <header class="chapter" id="drone-data">
+      <div><p class="zcaps lime">Drone data</p><h2 class="zdisplay">What our drone<br />taught us</h2></div>
+    </header>
+    <div class="zpage">
+
+    <!-- 01 cover -->
+    <section class="ticket" aria-labelledby="n1">
+      <div class="ticket__in fade-l" style="min-height: 500px">
+        <div class="bleed"><img class="halftone" src="./art/neo2_frame.webp" alt="Halftone of a frame from our Neo 2 video: a floodlit football ground at night" style="object-position: 60% 50%" /></div>
+        <div class="reticle" style="width: 260px; height: 260px; left: 64%; top: 24%"></div>
+        <span class="cross" style="left: 55%; top: 14%"></span>
+        <div class="thead over"><span class="tnum">01 / 06</span><span class="tright">Drone data</span></div>
+        <div class="over" style="max-width: 600px; padding-top: 18px">
+          <h2 class="zdisplay" id="n1">Our own<br />footage</h2>
+          <div class="limebar"></div>
+          <p class="zcaps" style="line-height: 1.8">DJI Neo 2 · clip 0149<br />20 Aug 2026 · night flight</p>
+        </div>
+        <div class="over" style="position: absolute; right: 28px; bottom: 26px">
+          <div class="barcode-wrap"><div class="barcode"></div><small>NEO2 · 0149</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 how we filmed -->
+    <section class="ticket" aria-labelledby="n2">
+      <div class="ticket__in">
+        <div class="split split--wide-left">
+          <div style="position: relative; min-height: 360px">
+            <div class="thead"><span class="tnum">02 / 06</span><span id="n2">How we filmed</span></div>
+            <figure class="photo" style="margin: 30px 0 0; transform: rotate(-1deg); max-width: 640px">
+              <img src="./art/neo2_frame_real.webp" alt="A frame from the clip at 60 s: the camera looks across the floodlit ground at an angle" style="aspect-ratio: 16 / 9" />
+              <figcaption>Frame at 60 s, as filmed. The camera looks across the ground, not straight down.</figcaption>
+            </figure>
+            <span class="tape" style="left: 40%; top: 50px; transform: rotate(3deg)"></span>
+          </div>
+          <div>
+            <p class="zlead" style="max-width: 24ch; margin: 44px 0 26px">A night flight over a floodlit football ground: players moving, buildings and trees around it.</p>
+            <dl class="specs">
+              <div><dt>Video</dt><dd>4K <small>HEVC, 59.94 fps</small></dd></div>
+              <div><dt>Length</dt><dd>177 s <small>1.25 GB</small></dd></div>
+              <div><dt>GPS in frames</dt><dd>10,615 <small>of 10,615</small></dd></div>
+              <div><dt>Flight path</dt><dd>390 m <small>over 51 × 74 m</small></dd></div>
+              <div><dt>Camera ISO</dt><dd>up to 6,400</dd></div>
+              <div><dt>Stabilisation</dt><dd>EIS <small>rolling shutter</small></dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 what we used -->
+    <section class="ticket" aria-labelledby="n3">
+      <div class="ticket__in">
+        <div class="contours"></div>
+        <div class="thead over"><span class="tnum">03 / 06</span><span id="n3">What we used</span></div>
+        <p class="zlead over" style="max-width: 40ch; margin: 34px 0 28px">No photos, no ground control: just one video file, turned into a map on the laptop.</p>
+        <ol class="pipe over" style="padding: 0; margin: 0">
+          <li><b>Pick sharp frames</b><span class="big">220</span><span> of 880 scored frames kept: the sharpest one per 2 m of flight (our standard sharpness check, not AI).</span></li>
+          <li><b>Read the GPS</b><span class="big">100%</span><span> of frames geotagged from the drone's own telemetry inside the video. ExifTool could not read it, so we wrote our own decoder.</span></li>
+          <li><b>Build the map</b><span class="big">GPU</span><span> OpenDroneMap, quick settings, on the laptop's RTX 4050. No internet, no cloud.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 04 result -->
+    <section class="ticket ticket--paper" aria-labelledby="n4">
+      <div class="ticket__in">
+        <div class="split">
+          <div style="position: relative">
+            <div class="thead"><span class="tnum">04 / 06</span><span id="n4">The result</span></div>
+            <figure class="photo" style="margin: 30px 0 0; background: #fff; transform: rotate(1deg); max-width: 520px">
+              <img src="./art/neo2_map_real.webp" alt="Map made from our Neo 2 video: the sports ground is sharp; buildings and trees around it are smeared" style="background: #282828" />
+              <figcaption>The map as it came out. Sharp in the middle, smeared at the edges.</figcaption>
+            </figure>
+            <span class="tape" style="right: 10%; top: 60px; transform: rotate(-8deg)"></span>
+          </div>
+          <div style="padding-top: 54px">
+            <h2 class="zh2">Video to map<br />in 68 minutes</h2>
+            <div class="stats">
+              <div class="stat"><svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" /><path d="M16 17V10 M16 17l5 3 M13 3h6" /></svg>
+                <div><b>67.7 min</b><span>on this laptop: 46.6 min matching and placing frames, 19.0 min building the surface</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><rect x="5" y="5" width="9" height="9" /><rect x="18" y="5" width="9" height="9" /><rect x="5" y="18" width="9" height="9" /><rect x="18" y="18" width="9" height="9" /></svg>
+                <div><b>214 / 220</b><span>frames placed, but in 7 separate pieces joined only by GPS</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><path d="M6 26V12l10-7 10 7v14z M12 26v-8h8v8" /></svg>
+                <div><b>8.24 GiB</b><span>peak memory; map extent 4.32 ha at 5 cm, smeared area included</span></div></div>
+            </div>
+            <p class="zsmall" style="margin-top: 12px">No accuracy figure: there are no surveyed checkpoints at this site, and the video's altitude reference is unknown, so heights are relative only.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 what we learnt -->
+    <section class="ticket" aria-labelledby="n5">
+      <div class="ticket__in">
+        <span class="cross" style="right: 40px; top: 30px"></span>
+        <div class="thead"><span class="tnum">05 / 06</span><span id="n5">What we learnt</span></div>
+        <div class="lessons" style="margin-top: 34px">
+          <div class="lesson"><h3 class="zh3">Open ground maps cleanly</h3><p class="zsmall">The pitch, goals, people and tennis court came out sharp and recognisable.</p></div>
+          <div class="lesson lesson--warn"><h3 class="zh3">Tall things smear</h3><p class="zsmall">Buildings and trees seen at an angle streak across the map. The quick settings drape photos over a smoothed ground, so anything tall seen sideways gets stretched.</p></div>
+          <div class="lesson lesson--warn"><h3 class="zh3">A video is not a survey</h3><p class="zsmall">The path never revisited the same ground, so the frames formed 7 loose pieces. How you fly decides the map, more than the software does.</p></div>
+        </div>
+        <figure style="margin: 30px 0 0; position: relative; height: 180px; overflow: hidden; border: 1px solid var(--z-line)">
+          <img class="halftone" src="./art/neo2_map.webp" alt="Halftone of the Neo 2 map" style="object-position: 50% 45%" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- 06 next time -->
+    <section class="ticket ticket--paper" aria-labelledby="n6">
+      <div class="ticket__in">
+        <div class="split">
+          <div>
+            <div class="thead"><span class="tnum">06 / 06</span><span id="n6">How to fly it next time</span></div>
+            <ul class="checks" style="margin-top: 34px">
+              <li>Camera pointing straight down</li>
+              <li>Steady height above the ground</li>
+              <li>Overlapping parallel passes, like mowing a lawn</li>
+              <li>Daylight: at ISO 6,400 the camera's noise reduction likely softened detail</li>
+              <li>Lay out a few marked checkpoints so the error can be measured</li>
+            </ul>
+          </div>
+          <div style="align-self: end">
+            <p class="zlead" style="max-width: 28ch; margin-bottom: 18px">That's why our accuracy numbers come from a proper survey: USGS public photos of a real debris flow.</p>
+            <p class="zsmall">Our own survey flights on 29–30 Oct were cancelled by rain. We'll fly one with checkpoints before the 21 Nov round.</p>
+            <p style="margin-top: 22px"><a class="znav__cta" href="#about" style="display: inline-block">See our accuracy numbers ↑</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+    <footer class="zfoot">
+      <span class="chapter__logo logo zfoot__logo" data-logo-full aria-label="Project Typhon"></span>
+      <span>Project Typhon · Team Vortex · hackFront India 2026 · PS T8.2</span>
+      <span>Imagery: USGS (public domain), processed by us · our own DJI Neo 2 footage · Roads © OpenStreetMap contributors · <a href="https://github.com/manasharma404/photo-gramma-tree">Source on GitHub</a></span>
+    </footer>
+  </div>
 </body>
 </html>
