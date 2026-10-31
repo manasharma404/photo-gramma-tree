@@ -108,11 +108,11 @@ html { scroll-behavior: smooth; }
 .zine p { margin: 0 0 12px; }
 
 /* ---------- decorations ---------- */
-.cross { position: absolute; width: 22px; height: 22px; pointer-events: none; z-index: 3; opacity: 0.8; }
-.cross::before, .cross::after { content: ""; position: absolute; background: var(--z-paper); }
-.cross::before { left: 50%; top: 0; bottom: 0; width: 1px; }
-.cross::after { top: 50%; left: 0; right: 0; height: 1px; }
-.ticket--paper .cross::before, .ticket--paper .cross::after { background: var(--z-ink); }
+.zine .cross { position: absolute; width: 22px; height: 22px; pointer-events: none; z-index: 3; opacity: 0.8; }
+.zine .cross::before, .zine .cross::after { content: ""; position: absolute; background: var(--z-paper); }
+.zine .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+.zine .cross::after { top: 50%; left: 0; right: 0; height: 1px; }
+.zine .ticket--paper .cross::before, .zine .ticket--paper .cross::after { background: var(--z-ink); }
 .reticle { position: absolute; border: 1px solid rgba(235, 226, 204, 0.7); border-radius: 50%; pointer-events: none; z-index: 2; }
 .reticle::before { content: ""; position: absolute; left: 50%; top: -12%; bottom: -12%; width: 1px; background: rgba(235,226,204,.6); }
 .reticle::after { content: ""; position: absolute; top: 50%; left: -12%; right: -12%; height: 1px; background: rgba(235,226,204,.6); }
@@ -165,11 +165,11 @@ html { scroll-behavior: smooth; }
 /* roadmap */
 .road { position: relative; height: 330px; }
 .road svg.path { position: absolute; inset: 0; width: 100%; height: 100%; }
-.tag { position: absolute; width: 190px; transform: translate(-50%, calc(-100% - 26px)); background: var(--z-paper-2); color: var(--z-ink);
+.zine .tag { position: absolute; width: 190px; transform: translate(-50%, calc(-100% - 26px)); background: var(--z-paper-2); color: var(--z-ink);
   padding: 12px 14px 14px; font: 500 12.5px/1.45 var(--z-mono); text-align: center;
   clip-path: polygon(0 4%, 8% 0, 22% 3%, 38% 0, 55% 4%, 70% 0, 86% 3%, 100% 0, 98% 96%, 86% 100%, 72% 97%, 56% 100%, 40% 96%, 26% 100%, 10% 97%, 0 100%); }
-.tag b { display: block; font: 700 13px var(--z-mono); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 4px; }
-.tag::after { content: ""; }
+.zine .tag b { display: block; font: 700 13px var(--z-mono); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 4px; }
+.zine .tag::after { content: ""; }
 .pin { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--z-navy); border: 3px solid var(--z-lime); transform: translate(-50%, -50%); }
 
 /* spec list (ticket stub) */
@@ -218,7 +218,7 @@ html { scroll-behavior: smooth; }
   .specs { grid-template-columns: 1fr 1fr; }
   .road { height: auto; display: grid; gap: 14px; }
   .road svg.path, .pin { display: none; }
-  .tag { position: static; transform: none; width: auto; }
+  .zine .tag { position: static; transform: none; width: auto; }
   .fade-l::before { background: linear-gradient(180deg, var(--z-navy) 0%, rgba(11,23,48,.9) 45%, rgba(11,23,48,.35) 100%); }
   .ticket { --z-notch: 12px; }
   .ticket__in > .over:has(.barcode-wrap) { display: none; }

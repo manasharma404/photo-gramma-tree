@@ -255,3 +255,9 @@ body.app { background: linear-gradient(180deg, #F5F1E6 0%, #E9E5DA 100%); }
 .tour__actions .tour__skip { border: 0; padding-left: 0; color: var(--terrain); text-decoration: underline; }
 .tour__actions button:disabled { opacity: .35; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .tour__spot, .tour__card { transition: none; } }
+
+/* clear way back to the home page (lead, 31 Oct) */
+.home-btn { text-decoration: none; color: var(--text); border: 1px solid var(--line); font: 500 13px var(--font-display); }
+.home-btn:hover { border-color: var(--blue); color: var(--blue); }
+.home-btn__arrow { display: inline-flex; transform: scaleX(-1); }
+.home-btn__arrow svg { width: 15px; height: 15px; }
