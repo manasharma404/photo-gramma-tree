@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import yaml
 
@@ -18,6 +20,25 @@ from advisor import MODES, STATUSES
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_VEHICLES_PATH = ROOT / "config" / "vehicles.yaml"
+_URL_RE = re.compile(r"https?://[^\s)\"'>,\]]+")
+_BARE_DOMAIN_ONLY_RE = re.compile(r"^(?:https?://)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/?$")
+
+
+def validate_source_string(label: str, source_text: str) -> None:
+    """Reject empty sources or home-page-only / bare-domain citations (S1)."""
+    text = str(source_text or "").strip()
+    if not text:
+        raise ValueError(f"{label} missing source citation or PLACEHOLDER")
+    if _BARE_DOMAIN_ONLY_RE.match(text):
+        raise ValueError(f"{label} cites a bare domain '{text}' instead of a specific document URL")
+    for match in _URL_RE.findall(text):
+        cleaned = match.rstrip(".,;:")
+        parsed = urlparse(cleaned)
+        path = (parsed.path or "").strip("/")
+        if not path and not parsed.query:
+            raise ValueError(
+                f"{label} cites home-page-only URL '{cleaned}'; must cite a specific document URL or PLACEHOLDER"
+            )
 
 
 def _param_value(entry: Any) -> Any:
@@ -27,14 +48,15 @@ def _param_value(entry: Any) -> Any:
 
 
 def load_vehicle_config(path: Path | None = None) -> dict[str, Any]:
-    """Load config/vehicles.yaml and verify every parameter carries a source line."""
+    """Load config/vehicles.yaml and verify every parameter carries a specific source line or PLACEHOLDER."""
     cfg_path = path or DEFAULT_VEHICLES_PATH
     raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
 
     rules: dict[str, Any] = {}
     for key, entry in raw.get("assessment_rules", {}).items():
-        if not isinstance(entry, dict) or not str(entry.get("source", "")).strip():
+        if not isinstance(entry, dict):
             raise ValueError(f"assessment_rules.{key} missing source citation or PLACEHOLDER")
+        validate_source_string(f"assessment_rules.{key}", str(entry.get("source", "")))
         rules[key] = entry["value"]
 
     vehicles: dict[str, dict[str, Any]] = {}
@@ -46,8 +68,9 @@ def load_vehicle_config(path: Path | None = None) -> dict[str, Any]:
         for field, entry in v_raw.items():
             if field == "label":
                 continue
-            if not isinstance(entry, dict) or not str(entry.get("source", "")).strip():
+            if not isinstance(entry, dict):
                 raise ValueError(f"vehicles.{mode}.{field} missing source citation or PLACEHOLDER")
+            validate_source_string(f"vehicles.{mode}.{field}", str(entry.get("source", "")))
             v_parsed[field] = entry["value"]
             v_parsed["_sources"][field] = entry["source"]
         vehicles[mode] = v_parsed

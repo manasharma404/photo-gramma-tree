@@ -66,31 +66,44 @@ CITED_SOURCES = [
         "url": "https://www.openstreetmap.org/copyright",
         "licence": "ODbL 1.0 (© OpenStreetMap contributors)",
         "date": "retrieved 2026-10-31",
+        "quote_or_paraphrase": "OpenStreetMap® is open data, licensed under the Open Data Commons Open Database License (ODbL).",
         "purpose": "Base road geometry and settlement/facility locations for Wayanad scenario",
     },
     {
-        "id": "pib_bailey_bridge_2024",
-        "title": "Press Information Bureau (PIB), Ministry of Defence: Indian Army Madras Engineer Group completes 190-ft Bailey bridge connecting Chooralmala and Mundakkai",
-        "url": "https://pib.gov.in/",
-        "licence": "Government of India public press release",
-        "date": "2024-08-01 (retrieved 2026-10-31)",
-        "purpose": "Confirms Chooralmala river bridge collapse severed Mundakkai road access and Meppadi-Chooralmala northern approach carried heavy Army bridging vehicles and ambulances, enabling ambulances/4x4 vehicles to reach Mundakkai once bridged",
+        "id": "pib_mod_2039494",
+        "title": "PIB Ministry of Defence (Release ID 2039494): Indian Army Intensifies Rescue Operations in Wayanad Landslide Affected Areas",
+        "url": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039494",
+        "licence": "Government of India public press release (GODL-India)",
+        "date": "2024-07-31 (retrieved 2026-10-31)",
+        "quote_or_paraphrase": "\"construction of a bridge on the Meppadi-Chooralmala Road will commence\" (Actions Planned for the Day)",
+        "purpose": "Confirms road-moved JCB/TATRA/Bailey bridge staging along Meppadi-Chooralmala Road and severed stream crossing requiring airlifted earth-moving equipment",
     },
     {
-        "id": "isro_nrsc_wayanad_2024",
-        "title": "ISRO National Remote Sensing Centre (NRSC): Cartosat-3 & RISAT satellite landslide impact assessment of Chooralmala-Mundakkai-Punchirimattom",
-        "url": "https://www.nrsc.gov.in/",
-        "licence": "Government of India / ISRO public disaster bulletin",
-        "date": "2024-08-01 (retrieved 2026-10-31)",
-        "purpose": "Documents 86,000 m2 crown failure near Punchirimattom (~1550 m ASL) and ~8 km debris run-out along Iruvazhinjipuzha river burying upper Punchirimattom-Mundakkai corridor",
+        "id": "pib_mod_2039871",
+        "title": "PIB Ministry of Defence (Release ID 2039871): Indian Army Intensifies Rescue Operation in Areas Affected by Landslide in Wayanad",
+        "url": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039871",
+        "licence": "Government of India public press release (GODL-India)",
+        "date": "2024-07-31 (retrieved 2026-10-31)",
+        "quote_or_paraphrase": "\"operations along six kilometre stretch of landslide affected areas\"; foot bridge completed overnight 30-31 July",
+        "purpose": "Documents 6 km landslide-affected stretch, cut-off southern areas prior to 150-ft Bailey bridge, and ambulance deployment from Kalpetta",
     },
     {
-        "id": "sphere_india_sitrep_2024",
-        "title": "Sphere India: Wayanad Landslide Situation Report & Joint Rapid Needs Assessment",
-        "url": "https://sphereindia.org.in/",
-        "licence": "Humanitarian situation report (cited for road state reconstruction)",
-        "date": "2024-07-31 to 2024-08-02 (retrieved 2026-10-31)",
-        "purpose": "Documents isolation of Mundakkai, Vellarmala, Punchirimattom, and Attamala settlements prior to Chooralmala bridge restoration and foot-only scramble access in upper debris zones",
+        "id": "pib_mod_2041094",
+        "title": "PIB Ministry of Defence (Release ID 2041094): Indian Navy Continues with Rescue and Relief Operations at Wayanad",
+        "url": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2041094",
+        "licence": "Government of India public press release (GODL-India)",
+        "date": "2024-08-03 (retrieved 2026-10-31)",
+        "quote_or_paraphrase": "\"connecting the regions of Chooralmala and Mundakkai which were isolated by the landslides\" (para 2)",
+        "purpose": "Confirms Chooralmala and Mundakkai were isolated across the river until the Bailey bridge enabled movement of machinery and ambulances, while upper disaster zones remained inaccessible by road (para 3)",
+    },
+    {
+        "id": "sphere_india_sitrep5_2024",
+        "title": "Sphere India Situation Report: Wayanad Landslide (26 August 2024, 14:00 PM IST)",
+        "url": "https://www.sphereindia.org.in/sites/default/files/2024-08/SI_Sitrep-5__Wayanad_Landslide_26-08-2024.pdf",
+        "licence": "Humanitarian situation report (Sphere India public PDF)",
+        "date": "2024-08-26 (retrieved 2026-10-31)",
+        "quote_or_paraphrase": "30 July 2024 02:17 hrs landslide buried ~700 houses in Mundakkai, Chooralmala, Vellarimala Village (p. 1)",
+        "purpose": "Confirms buried residential zones and infrastructure damage in Mundakkai, Chooralmala, and Vellarimala Village (Meppadi Panchayat)",
     },
 ]
 
@@ -204,12 +217,13 @@ def classify_wayanad_segment(
     if osm_way_id == CHOORALMALA_BRIDGE_WAY_ID or (is_bridge and 11.4970 <= mid_lat <= 11.5005):
         st = {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "blocked", "foot": "blocked"}
         cite = (
-            "PIB Ministry of Defence (2024-08-01, https://pib.gov.in/) & ISRO/NRSC (2024-08-01, "
-            "https://www.nrsc.gov.in/): Chooralmala bridge washed away by 30 July 2024 debris flow, "
-            "severing all ground access to Mundakkai until 190-ft Bailey bridge completion"
+            "PIB Ministry of Defence Release ID 2041094 (2024-08-03, para 2, "
+            "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2041094) & Release ID 2039494 "
+            "(2024-07-31, Actions Planned, https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039494): "
+            "Chooralmala-Mundakkai river crossing severed by 30 July 2024 landslides prior to Bailey bridge"
         )
         reasons = {
-            m: ["Chooralmala river bridge destroyed by landslide debris flow prior to Bailey bridge"]
+            m: ["Chooralmala river bridge severed by landslide debris flow prior to Bailey bridge"]
             for m in st
         }
         return st, cite, reasons
@@ -219,15 +233,16 @@ def classify_wayanad_segment(
         if highway in ("primary", "secondary", "tertiary", "unclassified", "residential"):
             st = {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "blocked", "foot": "partial"}
             cite = (
-                "ISRO/NRSC landslide run-out map (2024-08-01, https://www.nrsc.gov.in/) & Sphere India "
-                "SitRep (2024-07-31, https://sphereindia.org.in/): upper Mundakkai-Punchirimattom road "
-                "buried in boulders/mud; foot NDRF/Army rescue scramble only"
+                "PIB Ministry of Defence Release ID 2041094 (2024-08-03, para 3, "
+                "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2041094: upper disaster area "
+                "'inaccessible by road', rescue teams airlifted/on foot) & Sphere India SitRep-5 (2024-08-26, "
+                "p. 1, https://www.sphereindia.org.in/sites/default/files/2024-08/SI_Sitrep-5__Wayanad_Landslide_26-08-2024.pdf)"
             )
             reasons = {
-                "fire_truck": ["Upper Punchirimattom road buried in crown debris run-out"],
-                "ambulance": ["Upper Punchirimattom road buried in crown debris run-out"],
-                "jeep": ["Upper Punchirimattom road buried in crown debris run-out"],
-                "foot": ["Foot rescue teams traversed upper debris zone on foot"],
+                "fire_truck": ["Upper Punchirimattom-Mundakkai road inaccessible to vehicles due to landslide debris"],
+                "ambulance": ["Upper Punchirimattom-Mundakkai road inaccessible to vehicles due to landslide debris"],
+                "jeep": ["Upper Punchirimattom-Mundakkai road inaccessible to vehicles due to landslide debris"],
+                "foot": ["Foot rescue columns traversed upper landslide zone on foot"],
             }
             return st, cite, reasons
 
@@ -241,13 +256,14 @@ def classify_wayanad_segment(
         else:
             st = {"fire_truck": "blocked", "ambulance": "partial", "jeep": "partial", "foot": "open"}
             cite = (
-                "PIB Ministry of Defence (2024-08-01, https://pib.gov.in/) & Sphere India SitRep "
-                "(2024-07-31, https://sphereindia.org.in/): southern bank Mundakkai/Vellarmala/Attamala "
-                "roads restricted by debris/slips (4x4 & ambulance crawl once Chooralmala bridge opened; "
-                "unsuitable for heavy fire tender)"
+                "PIB Ministry of Defence Release ID 2041094 (2024-08-03, para 2, "
+                "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2041094: Bailey bridge enabled "
+                "ambulances into isolated Mundakkai) & Sphere India SitRep-5 (2024-08-26, p. 1, "
+                "https://www.sphereindia.org.in/sites/default/files/2024-08/SI_Sitrep-5__Wayanad_Landslide_26-08-2024.pdf); "
+                "PLACEHOLDER (fire_truck=blocked on debris-damaged hill roads pending drone width measurement)"
             )
             reasons = {
-                "fire_truck": ["Debris shoulders and damaged hill carriageway block heavy fire tender"],
+                "fire_truck": ["PLACEHOLDER: debris-damaged southern hill carriageway assumed blocked for 16t fire tender"],
                 "ambulance": ["Crawl-speed ambulance evacuation feasible once Chooralmala bridge is open"],
                 "jeep": ["4x4 light vehicle passage feasible once Chooralmala bridge is open"],
                 "foot": ["Passable on foot on southern bank"],
@@ -264,18 +280,21 @@ def classify_wayanad_segment(
     ):
         st = {"fire_truck": "open", "ambulance": "open", "jeep": "open", "foot": "open"}
         cite = (
-            "PIB Ministry of Defence (2024-08-01, https://pib.gov.in/): Meppadi-Chooralmala main road "
-            "and northern approach served as open staging corridor for Army bridging vehicles and ambulances"
+            "PIB Ministry of Defence Release ID 2039494 (2024-07-31, Status of Additional Columns, "
+            "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039494) & Release ID 2039871 "
+            "(2024-07-31, para 4, https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039871): "
+            "Meppadi-Chooralmala northern road carried TATRA, Bailey bridge sets, 3 JCBs, and ambulances"
         )
-        reasons = {m: ["Meppadi-Chooralmala northern corridor open in official response reports"] for m in st}
+        reasons = {m: ["Meppadi-Chooralmala northern staging corridor open in PIB Defence reports"] for m in st}
         return st, cite, reasons
 
-    # 5. Minor tea-estate tracks inside the landslide valley -> blocked for wheeled vehicles, unknown for foot.
+    # 5. Minor tea-estate tracks inside the 6 km landslide valley -> blocked for wheeled vehicles, unknown for foot.
     if highway == "track" and mid_lat < 11.5005 and 76.145 <= mid_lon <= 76.163:
         st = {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "blocked", "foot": "unknown"}
         cite = (
-            "ISRO/NRSC (2024-08-01, https://www.nrsc.gov.in/): narrow unverified tea-estate footpath/track "
-            "in landslide valley -> blocked for wheeled vehicles, unknown for foot"
+            "PLACEHOLDER (minor OSM highway=track inside 6 km landslide valley reported in PIB Release ID "
+            "2039871, 2024-07-31, https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039871: "
+            "unpaved estate footpath/track treated as blocked for wheeled vehicles, unknown for foot)"
         )
         reasons = {
             "fire_truck": ["Unpaved estate track in landslide valley impassable for heavy fire tender"],
@@ -287,7 +306,7 @@ def classify_wayanad_segment(
 
     # 6. Any other unverified minor track/path with no specific report mention -> unknown (Hard Rule 2).
     st = {"fire_truck": "unknown", "ambulance": "unknown", "jeep": "unknown", "foot": "unknown"}
-    cite = "No post-landslide passability report found for minor side track -> unknown"
+    cite = "PLACEHOLDER (no post-landslide passability report found for minor side track -> unknown)"
     reasons = {m: ["Unreported minor track kept as unknown (never assumed open)"] for m in st}
     return st, cite, reasons
 
@@ -514,7 +533,10 @@ def build_wayanad_files(overpass_data: dict[str, Any], out_dir: Path) -> dict[st
             "kind": "other_facility",
             "source": "manual",
             "population": None,
-            "population_source": "Not a residential settlement (responder staging point from PIB report 2024-08-01)",
+            "population_source": (
+                "Not a residential settlement (responder staging point along Meppadi-Chooralmala Road, "
+                "PIB Release ID 2039494, 2024-07-31, https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2039494)"
+            ),
             "nearest_segment_id": top_seg["segment_id"],
             "scenario_label": SCENARIO_LABEL,
         }
