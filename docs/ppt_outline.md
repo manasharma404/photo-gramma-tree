@@ -37,7 +37,7 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 - **12.94 ha in 145.6 min** (quick map, 248 images) · peak memory 8.61 GiB
 - Height models: +171.4 min reusing the same matching · 13.19 ha · 11.0 GiB
 - Laptop: i5-13420H, 16 GB RAM, RTX 4050 (state it plainly)
-- Notes: single strip was 10.12 ha in 50.4 min; per-hectare rate depends on overlap. Neo 2 video run: **PENDING** (running now).
+- Notes: single strip was 10.12 ha in 50.4 min; per-hectare rate depends on overlap. Neo 2 video: 220 frames in 67.7 min, 8.24 GiB.
 
 ### 7. Judge criterion 3: output an agency can open
 - Dashboard: map, 3D view, road status per vehicle (fire truck, ambulance, jeep, on foot), measuring tools
@@ -63,8 +63,10 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 
 ### 11. Our own footage: DJI Neo 2
 - Video → 220 geotagged frames (GPS decoded from the clip's telemetry)
-- Result: **PENDING** (the run reconstructed in several pieces; report what happened)
-- Notes: altitude reference unknown → heights relative only.
+- **68 minutes** from video to map on this laptop; the open sports ground maps cleanly
+- Buildings and trees around it smear: a casual video isn't a survey (camera angle, path)
+- Visual: `data/screenshots/neo2/ortho_preview.png`, crop on the ground + one smeared edge, both labelled
+- Notes: 214/220 frames in 7 pieces joined by GPS; 4.32 ha extent includes smeared area, usable area not measured; no checkpoints here, so no accuracy number; altitude reference unknown → heights relative only.
 
 ### 12. What's real, what's next
 - Real: USGS public data (labelled), our Neo 2 clip, all numbers from runs on this laptop
@@ -83,4 +85,4 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 | 7 | Phone screenshots | PENDING phone test |
 | 9 | One measurement result on the map | from `tools_test.mjs` run |
 | 10 | Advisor panel | PENDING teammate |
-| 11 | Neo 2 orthophoto | PENDING run |
+| 11 | Neo 2 orthophoto | have (`data/screenshots/neo2/ortho_preview.png`; gitignored, local only) |

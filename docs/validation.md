@@ -74,5 +74,25 @@ The USGS metadata (`SEKI_SouthFork_DebrisFlow_GNSS_metadata.xml`) states the RTK
 - **The ~6 m horizontal offset** (north, after datum conversion) also means OSM trail lines sample ground ~6 m from the real trail. Shifting the map by the checkpoint error would turn checkpoints into ground control, which the brief forbids; we report it instead.
 - **Landing zones:** no candidate for either helicopter type (FATO 24 m / 38 m) met slope ≤ 7° (PLACEHOLDER) and the clear safety ring anywhere in this steep, forested canyon.
 
+## Run 3: our own footage, DJI Neo 2 video (clip 0149, 20 Aug 2026)
+
+**Data:** one consumer-drone video clip. `pipeline/video_frames.py` scored 880 frames for sharpness and kept the sharpest per 2 m of travel: **220 frames**, geotagged from GPS decoded out of the clip's own telemetry stream. No checkpoints exist for this site, so **no accuracy figure** is possible; the altitude reference of the telemetry is unknown, so heights are relative only.
+
+| Tier | Run id | Time | Peak memory | Orthophoto extent | Reconstruction |
+|---|---|---|---|---|---|
+| quick | `2026-10-31_1111_neo2_0149_quick` | **67.7 min** (`total_seconds` 4059.5; monotonic, unaffected by the clock change) | 8.24 GiB | 4.32 ha at 5 cm (includes smeared area, see below) | 214 of 220 frames, in **7 separate pieces** (97, 64, 20, 16, 6, 6, 5 images), joined by GPS only |
+
+Stage times: feature matching + reconstruction 46.6 min, meshing 19.0 min, everything else under 2.5 min.
+
+**What came out** (preview: `data/screenshots/neo2/ortho_preview.png`):
+- **The open sports ground is usable**: pitch, goals, people, tennis court and the path beside it are sharp and recognisable.
+- **Everything around it is smeared**: tall buildings and trees are streaked outward. The quick tier drapes images over a smoothed ground surface, so tall objects seen at an angle smear across it; with the reconstruction in 7 GPS-joined pieces there is no single consistent model to fix that.
+- The 4.32 ha extent therefore overstates the useful map; the usable part has not been measured.
+
+**What this means for the product**
+1. A casual video clip is not a survey: oblique views of tall objects and a path that doesn't revisit the same ground give weak, fragmented reconstructions. This is the same lesson as Run 1 from a different angle: **capture geometry decides the result**.
+2. Capture guidance for responders: camera pointing straight down, steady height, overlapping parallel passes; open ground maps well, built-up areas need more height and overlap.
+3. The video path works end to end (telemetry → geotagged frames → map in ~68 min on this laptop) and the tool shows its failure plainly instead of hiding it.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
