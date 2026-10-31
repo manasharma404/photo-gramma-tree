@@ -50,3 +50,4 @@ def test_t14_spatial_confidence_on_real_southfork_sample(tmp_path: Path) -> None
             assert src.crs == orig.crs
             assert src.width == orig.width
             assert src.height == orig.height
+
