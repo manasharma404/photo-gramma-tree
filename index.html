@@ -7,10 +7,10 @@
   <meta name="typhon-root" content="./" />
   <title>Project Typhon</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <script type="module" crossorigin src="./assets/landing-Ceoyywhw.js"></script>
+  <script type="module" crossorigin src="./assets/landing-XAXOZgii.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/icons-L0ImoM0C.js">
   <link rel="stylesheet" crossorigin href="./assets/icons-DBsx-xbe.css">
-  <link rel="stylesheet" crossorigin href="./assets/landing-CcdKtFlm.css">
+  <link rel="stylesheet" crossorigin href="./assets/landing-DuPCxh8W.css">
 </head>
 <!-- Hero = the lead's illustration (heading included). Overlays follow the lead's reference.
      Honesty: callouts name what Typhon measures (no numbers on an illustration); thumbnails are our own
@@ -83,8 +83,32 @@
   <!-- About and Drone data live below the hero (lead, 31 Oct): ticket style in the shared Typhon v2 palette.
        Copy and numbers are ours (numbers load from spec.json); pictures are halftones of our own data. -->
   <div class="zine zband">
+    <!-- transition from the hero: a dotted survey route with waypoints; the ridge is a real W-E profile of our model -->
+    <section class="descent" aria-label="How Typhon works, as a flight path">
+      <svg class="descent__path" viewBox="0 0 1200 560" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M600 0 C 600 90, 330 110, 330 190 S 860 260, 860 340 S 600 430, 600 560" fill="none" stroke="#2A4EA8" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+      </svg>
+      <span class="descent__drone" data-icon="drone" aria-hidden="true"></span>
+      <div class="wp wp--right" style="--x: 27.5%; --y: 33.9%"><span class="wp__dot"></span><p class="wp__label"><b>WP 01 · Fly</b>Consumer drone, its own GPS<br /><span>Checkpoint SF16 · 36.3451° N · 118.7584° W</span></p></div>
+      <div class="wp" style="--x: 71.7%; --y: 60.7%"><span class="wp__dot"></span><p class="wp__label"><b>WP 02 · Process</b>On one laptop, no internet<br /><span>Checkpoint SF18 · 36.3445° N · 118.7580° W</span></p></div>
+      <div class="wp" style="--x: 50%; --y: 96%"><span class="wp__dot wp__dot--lime"></span></div>
+      <div class="compass-rose" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width=".6" />
+          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width=".4" stroke-dasharray="1 2" />
+          <path d="M50 4v12M50 84v12M4 50h12M84 50h12" stroke="currentColor" stroke-width=".6" />
+          <path d="M50 18 57 50 50 57 43 50z" fill="currentColor" /><path d="M50 82 57 50 50 43 43 50z" fill="currentColor" opacity=".25" /></svg>
+        <span>N</span>
+      </div>
+      <p class="collar collar--top" aria-hidden="true"><span>118.7600° W</span><span>118.7590° W</span><span>118.7570° W</span><span>118.7560° W</span></p>
+      <figure class="ridge ridge--descent">
+        <img src="./art/ridge_we.svg" alt="West to east surface profile through our South Fork height model" />
+        <figcaption>W → E profile through our South Fork surface model · 90 m of relief, trees included</figcaption>
+      </figure>
+    </section>
+
     <header class="chapter" id="about">
       <div><p class="zcaps lime">About</p><h2 class="zdisplay">The first map<br />after the landslide</h2></div>
+      <p class="chapter__coords" aria-hidden="true">36.3451° N<br />118.7578° W<br />South Fork, California</p>
     </header>
     <main class="zpage">
 
@@ -224,8 +248,13 @@
     </section>
   </main>
 
+    <figure class="ridge ridge--divider">
+      <img src="./art/ridge_ns.svg" alt="North to south surface profile through our South Fork height model" />
+      <figcaption>N → S profile through the same model · 130 m of relief, trees included</figcaption>
+    </figure>
     <header class="chapter" id="drone-data">
       <div><p class="zcaps lime">Drone data</p><h2 class="zdisplay">What our drone<br />taught us</h2></div>
+      <p class="chapter__coords" aria-hidden="true">DJI Neo 2 · clip 0149<br />20 Aug 2026 · night<br />390 m flight path</p>
     </header>
     <div class="zpage">
 
