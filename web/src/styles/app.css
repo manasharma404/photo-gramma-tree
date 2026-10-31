@@ -168,3 +168,23 @@ body.app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-r
   .viewswitch { top: var(--space-3); bottom: auto; left: var(--space-3); transform: none; }
   .maplibregl-ctrl-bottom-right { bottom: 44%; }
 }
+
+/* ---- HUD vibe shared with the landing page: caps micro-labels, hairlines, paper map ---- */
+:root { --hair: rgba(47, 62, 46, 0.16); --paper: #F2F2EC; }
+.field label, .field__label, .strip__card header, .layers header, .tabpanel h2, .insight__label, .legend, .rail button {
+  font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.16em; }
+.field label, .field__label { font-size: 10px; }
+.strip__card header, .layers header { font-size: 11px; font-weight: 500; }
+.tabpanel h2 { font-size: 11px; font-weight: 500; color: var(--text-2); }
+.insight__label { font-size: 10px; letter-spacing: 0.14em; }
+.rail button { font-size: 9.5px; letter-spacing: 0.12em; }
+.legend { font-size: 9.5px; }
+.panel__head h1 { font: 300 26px var(--font-display); letter-spacing: 0.01em; }
+.card, .insight, .item { border-color: var(--hair); }
+.card { box-shadow: 0 1px 2px rgba(47, 62, 46, 0.04), 0 6px 18px rgba(47, 62, 46, 0.06); }
+.topbar, .rail, .panel, .strip { border-color: var(--hair); }
+.strip { background: var(--paper); }
+.stage { background: var(--paper); }
+.stage::before, .stage::after { content: "+"; position: absolute; z-index: 1; font: 300 18px var(--font-display); color: rgba(47, 62, 46, 0.35); pointer-events: none; }
+.stage::before { left: 14px; bottom: 74px; }
+.stage::after { right: 74px; top: 360px; }

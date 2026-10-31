@@ -24,6 +24,7 @@ export const ICONS = {
   arrow: svg('<path d="M5 12h14M13 6l6 6-6 6"/>', 18),
   expand: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', 18),
   mountain: svg('<path d="M2 18c3-1 5-6 8-9 2 2 3 4 5 4 2-2 3-3 4-3l3 8"/><path d="M6 18c2-2 4-3 6-3"/>', 28),
+  drone: svg('<circle cx="5" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/>', 26),
   export: svg('<path d="M12 3v12M7 8l5-5 5 5M5 15v5h14v-5"/>'),
 };
 

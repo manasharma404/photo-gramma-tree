@@ -43,7 +43,7 @@ export function createMap(container, active, onSegmentClick) {
                  attribution: "Imagery: USGS (public domain), processed by Project Typhon · Roads © OpenStreetMap contributors" },
       } : {},
       layers: [
-        { id: "bg", type: "background", paint: { "background-color": css("--stone") } },
+        { id: "bg", type: "background", paint: { "background-color": css("--paper") || "#F2F2EC" } },
         ...(tiles ? [{ id: "ortho", type: "raster", source: "ortho" }] : []),
       ],
     },

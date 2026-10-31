@@ -13,10 +13,8 @@ mountIcons();
 
 // Facts come from the running app (spec.json); anything missing says so instead of guessing.
 (async () => {
-  const [active, spec] = await Promise.all([api.active(), api.spec()]);
-  if (active?.terrain?.thumb) document.getElementById("mini-3d").style.backgroundImage = `url(${active.terrain.url}${active.terrain.thumb})`;
+  const spec = await api.spec();
   const a = spec?.accuracy, t = spec?.timing;
-  document.getElementById("mini-acc").textContent = a ? `±${Math.round(a.horizontal.rmse_h_m)} m` : "—";
   const fact = (value, label) => `<div class="fact"><b>${value}</b><span>${label}</span></div>`;
   document.getElementById("facts").innerHTML =
     fact("0", "internet connections needed at runtime")
