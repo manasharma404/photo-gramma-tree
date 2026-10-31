@@ -37,9 +37,15 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 |---|---|---|---|---|---|
 | USGS F01-5 strip, quick tier | 109 | 50.4 min | 6.97 GiB | 10.12 ha | ~5.0 min/ha |
 | USGS F01-5 strip, full tier | 109 | 66.6 min (incremental) | 7.01 GiB | 9.07 ha | DSM/DTM at 0.10 m |
-| USGS F01-4 block (5 parallel lines) | 248 | PENDING | PENDING | PENDING | GPU feature extraction confirmed |
+| USGS F01-4 block (5 parallel lines), quick tier | 248 | 145.6 min | 8.61 GiB | 12.94 ha | ~11.2 min/ha; GPU feature extraction |
 
-**Accuracy, single-strip diagnostic:** 35.0 m horizontal RMSE at N = 2 checkpoints; height model +58.6 m with an 8° cross-track tilt. Cause, measured: one straight flight line lets the model roll about that line (errors are 34.7–34.8 m across the line, 3–5 m along it). **Capture rule we derived: never map from one straight line; fly at least two parallel lines.** Block result: PENDING.
+**Accuracy without ground control (USGS RTK checkpoints):**
+| Flight geometry | Checkpoints | Horizontal RMSE | Max |
+|---|---|---|---|
+| One straight line (F01-5) | 2 | 35.0 m | 35.1 m |
+| Block of 5 parallel lines (F01-4) | 3 | **6.4 m** | 7.9 m |
+
+One straight line lets the model roll about the line (errors 34.7–34.8 m across it, 3–5 m along it). **Capture rule we derived: never map from one straight line; fly at least two parallel lines.** Vertical accuracy for the block: PENDING (full tier running). N is small (ASPRS asks for ≥ 30), so treat these as prototype measurements.
 
 ## Run it (Windows)
 Needs Docker Desktop (WSL2), `uv`, Node 22, ffmpeg, exiftool.

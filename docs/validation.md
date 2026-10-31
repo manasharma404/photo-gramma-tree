@@ -38,5 +38,26 @@ Every number here comes from a run in `data/runs/` (gitignored; run ids given) o
 2. Absolute heights from consumer GPS altitude can be off by tens of metres. Report heights **relative to the surrounding ground** (pile height, bank height), where a constant offset cancels, and say so in the UI.
 3. Next run: add a neighbouring strip (`F01-4`) and repeat both tables.
 
+## Run 2: USGS South Fork, flight F01 part 4 (a block of 5 parallel lines)
+
+**Data:** 248 USGS images (`F01-4` zip), same camera, again **without ground control**. The parallel lines remove the single-strip roll ambiguity.
+
+| Tier | Run id | Time | Peak memory | Map area | Notes |
+|---|---|---|---|---|---|
+| quick | `2026-10-31_0546_southfork_f01_4_quick` | 145.6 min | 8.61 GiB | 12.94 ha | from scratch, GPU features (`--feature-type sift`); ~11.2 min/ha |
+| full | PENDING | | | | |
+
+### Horizontal (orthophoto vs RTK targets)
+| Checkpoints | RMSE_x | RMSE_y | RMSE_H | Max | Method |
+|---|---|---|---|---|---|
+| 3 (SF16, SF17, SF18) | 1.07 m | 6.33 m | **6.42 m** | 7.88 m | detector candidates confirmed visually; IDs by consistent shift |
+
+- All three shifts point the same way (~1 m west, 5–8 m north): a correctly shaped map placed by consumer-grade camera GPS. USGS states ~3 m horizontal for these camera positions; the remainder may include the RTK file's datum (likely NAD83(2011), ~1–1.5 m from WGS84 here; unconfirmed).
+- **Compared with Run 1 (single strip): 35.0 m → 6.4 m** from flight geometry alone. That's the capture-protocol rule in numbers.
+- N = 3 is far below the ASPRS recommendation of 30; we report it as a prototype measurement, not a compliance test.
+
+### Vertical
+PENDING: needs the full tier's DSM/DTM.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
