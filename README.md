@@ -55,12 +55,28 @@ uv sync
 uv run pytest
 cd web && npm install && npm run build && cd ..
 ```
-Process a survey and serve it:
+**1. Images in.** Either a photo survey, or a drone video turned into geotagged stills:
 ```
-uv run python -m pipeline.subset --images <folder> --rtk <checkpoints.csv> --out-dir <dir>
-uv run python -m pipeline.run_odm --project <name> --tier quick --images-list <dir>/subset.txt --extra --feature-type sift
-uv run python -m pipeline.tiles --ortho data/projects/<name>/odm_orthophoto/odm_orthophoto.tif --project <name>
-uv run python -m pipeline.activate --run <quick_run_id> --full <full_run_id>
+uv run python -m pipeline.subset --images <photo folder> --rtk <checkpoints.csv> --out-dir <dir>
+uv run python -m pipeline.video_frames --video <clip.mp4> --project <name>
+```
+**2. Map.** Quick tier first (orthophoto), full tier later (adds DSM/DTM). Each run is logged in `data/runs/<run_id>/` with time and peak memory. Ground control is refused on purpose: checkpoints only measure error.
+```
+uv run python -m pipeline.run_odm --project <name> --tier quick --images-list <list.txt> --extra --feature-type sift
+uv run python -m pipeline.run_odm --project <name> --tier full  --images-list <list.txt> --extra --feature-type sift
+```
+**3. Accuracy** (only where surveyed checkpoints exist). `find_targets` saves crops; a person confirms the IDs in `confirmed.json` before errors are computed.
+```
+uv run python -m accuracy.find_targets --ortho <odm_orthophoto.tif> --rtk <checkpoints.csv> --out data/runs/<run_id>/targets
+uv run python -m accuracy.compute_errors --confirmed data/runs/<run_id>/targets/confirmed.json --rtk <checkpoints.csv> --run-id <run_id> --out data/runs/<run_id> --dsm <dsm.tif>
+uv run python -m accuracy.vertical --dtm <dtm.tif> --rtk <checkpoints.csv> --accuracy data/runs/<run_id>/accuracy.json
+```
+**4. Roads, tiles, 3D, serve.** OSM roads are fetched once beforehand (`scripts/prefetch_osm_southfork.py`); nothing touches the internet after that.
+```
+uv run python -m roads.segments --osm data/prefetch/osm_southfork.gpkg --dsm <dsm.tif> --dtm <dtm.tif> --ortho <odm_orthophoto.tif> --accuracy data/runs/<run_id>/accuracy.json --out data/projects/<name>/roads
+uv run python -m pipeline.tiles --ortho <odm_orthophoto.tif> --project <name>
+uv run python -m pipeline.terrain --dsm <dsm.tif> --ortho <odm_orthophoto.tif> --project <name>
+uv run python -m pipeline.activate --run <quick_run_id> --full <full_run_id> --accuracy data/runs/<run_id>/accuracy.json
 uv run python -m api.main
 ```
 Then open `http://localhost:8000` (laptop) or `http://<laptop-ip>:8000` (phone on the hotspot). Field reports: `/field`. Advisor setup (Neo4j, Wayanad): [docs/runbook_advisor.md](docs/runbook_advisor.md).
