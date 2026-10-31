@@ -116,7 +116,7 @@ a { color: inherit; text-decoration: none; }
   background: url("/contours.svg") center / 1400px auto repeat;
   -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 46%, transparent 45%, #000 85%);
   mask-image: radial-gradient(ellipse 70% 62% at 50% 46%, transparent 45%, #000 85%); }
-.hero::after { background: linear-gradient(transparent, var(--forest)); height: 6vh; opacity: .9; }
+.hero::after { background: linear-gradient(transparent, #E7E9EE); height: 10vh; opacity: 1; }
 .features img, .view3d { box-shadow: 0 8px 22px rgba(15, 30, 61, 0.28); }
 .pill-cta { background: var(--forest); color: var(--sand); }
 .pill-cta:hover { background: var(--forest-2, #1B2F5C); }

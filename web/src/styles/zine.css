@@ -238,3 +238,62 @@ html { scroll-behavior: smooth; }
 .zfoot { align-items: flex-end; padding-top: 40px; }
 .zfoot__logo { width: 100%; opacity: 1; }
 .zfoot__logo svg { height: auto; width: min(100%, 440px); }
+
+/* ---------- light map sheet below the hero (lead, 31 Oct): no dark band, map furniture instead ----------
+   dotted graticule, faint contours, coordinate collar, compass, survey route with waypoints, and ridge
+   lines drawn from our own height model (scripts/ridge_lines.py). */
+.zband {
+  position: relative; color: var(--z-ink); padding-bottom: 8px;
+  background-color: var(--sand, #F5F1E6);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cpath d='M0 .5H240M.5 0V240' stroke='%230F1E3D' stroke-opacity='.22' stroke-dasharray='1.5 7' fill='none'/%3E%3Cpath d='M114 120h12M120 114v12' stroke='%230F1E3D' stroke-opacity='.18'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #E7E9EE 0, var(--sand, #F5F1E6) 420px);
+  background-position: center top;
+}
+.zband::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background: url("/contours.svg") center top / 1400px auto repeat;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, transparent 22%, transparent 78%, #000 100%);
+  mask-image: linear-gradient(90deg, #000 0, transparent 22%, transparent 78%, #000 100%); }
+.zband > * { position: relative; }
+.zband .chapter .zdisplay { color: var(--z-ink); }
+.zband .chapter .zcaps.lime { color: var(--blue, #2A4EA8); }
+.zband .chapter .zcaps.lime::before { content: ""; display: inline-block; width: 28px; height: 2px; background: currentColor; vertical-align: middle; margin-right: 12px; }
+.chapter__coords { margin: 0 0 12px auto; text-align: right; font: 500 11px/1.8 var(--z-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--terrain, #56607A);
+  padding-right: 14px; border-right: 1px solid rgba(15, 30, 61, .3); }
+.zband .zfoot { color: var(--z-ink); opacity: .85; }
+.zband .zfoot__logo { color: var(--z-ink); --logo-cutout: var(--sand, #F5F1E6); }
+/* tickets on paper: darker frame so they stand off the light sheet */
+.zband .ticket { background: #D9CCAA; }
+.zband .ticket--paper .ticket__in { background: #FBF8F0; }
+
+/* survey route from "Explore" into the first section */
+.descent { height: 560px; max-width: 1240px; margin: 0 auto; }
+.descent__path { position: absolute; inset: 0; height: 100%; width: 100%; }
+.descent__drone { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); color: var(--blue, #2A4EA8);
+  background: var(--sand, #F5F1E6); padding: 6px; border-radius: 50%; border: 1px solid rgba(42, 78, 168, .35); }
+.wp { position: absolute; left: var(--x); top: var(--y); }
+.wp__dot { position: absolute; left: 0; top: 0; width: 16px; height: 16px; transform: translate(-50%, -50%); border-radius: 50%;
+  background: var(--sand, #F5F1E6); border: 3px solid var(--blue, #2A4EA8); box-shadow: 0 0 0 6px rgba(42, 78, 168, .12); }
+.wp__dot--lime { border-color: var(--z-lime); box-shadow: 0 0 0 6px rgba(181, 211, 52, .25); }
+.wp__label { position: absolute; left: 22px; top: -14px; width: 270px; margin: 0; font: 400 13px/1.5 var(--z-body); color: var(--terrain, #56607A); }
+.wp__label b { display: block; font: 600 13px var(--z-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--z-ink); margin-bottom: 2px; }
+.wp__label span { font: 500 10.5px var(--z-mono); letter-spacing: .12em; color: var(--blue, #2A4EA8); }
+.wp--right .wp__label { left: auto; right: 22px; text-align: right; }
+.compass-rose { position: absolute; right: 2%; top: 80px; width: 120px; color: var(--z-ink); opacity: .75; }
+.compass-rose span { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font: 600 12px var(--z-mono); letter-spacing: .2em; }
+.collar { position: absolute; left: 0; right: 0; top: 14px; display: flex; justify-content: space-between; margin: 0; padding: 0 2%;
+  font: 500 10px var(--z-mono); letter-spacing: .14em; color: var(--terrain, #56607A); opacity: .8; pointer-events: none; }
+.collar span::before { content: "+ "; color: var(--blue, #2A4EA8); }
+.ridge { margin: 0; }
+.ridge img { display: block; width: 100%; height: 120px; }
+.ridge figcaption { font: 500 10.5px var(--z-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--terrain, #56607A); margin-top: 8px; }
+.ridge--descent { position: absolute; left: 0; right: 0; bottom: 0; }
+.ridge--divider { max-width: 1240px; margin: 64px auto 0; padding: 0 clamp(16px, 3vw, 32px); }
+@media (max-width: 860px) {
+  .descent { height: 720px; }
+  .wp__label, .wp--right .wp__label { left: 0; right: auto; top: 16px; width: 160px; transform: translateX(-50%); text-align: center; }
+  .compass-rose { width: 76px; top: 120px; }
+  .collar span:nth-child(even) { display: none; }
+}
+.zband { overflow-x: clip; }
+.ridge figcaption { padding: 0 16px; }
