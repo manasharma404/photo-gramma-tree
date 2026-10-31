@@ -190,11 +190,22 @@ def test_advisor_handlers_and_sqlite_reports_validate_against_contracts(
     assert exc_info.value.status_code == 404
 
 
-def test_qr_generator_url_and_ascii(tmp_path: Path):
+def test_qr_generator_url_and_ascii(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    import io
+    from scripts.qr import main as qr_main
+
     url = build_field_url(ip="192.168.137.1", port=8000, path="/field")
     assert url == "http://192.168.137.1:8000/field"
     art = render_qr_ascii(url)
     assert len(art.splitlines()) >= 15
+
+    # Ensure scripts/qr.py main() does not crash on Windows cp1252 consoles
+    raw = io.BytesIO()
+    cp1252_stdout = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+    monkeypatch.setattr("sys.stdout", cp1252_stdout)
+    out_png = tmp_path / "qr.png"
+    qr_main(["--ip", "192.168.137.1", "--port", "8000", "--out", str(out_png)])
+    assert out_png.exists() and out_png.stat().st_size > 100
 
 
 def test_full_http_asgi_stack_via_testclient(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
