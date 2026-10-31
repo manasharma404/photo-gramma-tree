@@ -1,0 +1,139 @@
+# Vehicle passability profiles for Vortex (PS T8.2).
+# Every numeric value either cites its official specification / standard + retrieval date
+# or is explicitly marked PLACEHOLDER (operational threshold to be calibrated with responders).
+# Do NOT label any rule or threshold here as "AI" or "model".
+
+assessment_rules:
+  min_coverage_fraction:
+    value: 0.70
+    source: "PLACEHOLDER (minimum fraction of segment corridor covered by valid DSM pixels before declaring road status; below this -> unknown)"
+  default_width_tolerance_m:
+    value: 0.20
+    source: "PLACEHOLDER (fallback horizontal clear-width tolerance in metres when DSM/orthophoto RMSE_H tolerance is not provided on the segment)"
+  default_height_tolerance_m:
+    value: 0.04
+    source: "PLACEHOLDER (fallback vertical local surface-fit obstruction tolerance in metres when DSM tolerance is not provided on the segment)"
+  ml_disagreement_p_blocked:
+    value: 0.60
+    source: "PLACEHOLDER (if optional pre-trained road-damage model reports p_blocked >= 0.60 while geometry says open/partial, flag needs_verification: true; never flip geometric blocked to open)"
+
+vehicles:
+  fire_truck:
+    label: "State Fire Service Water Tender Type B (IS 950 / 16-ton chassis)"
+    width_m:
+      value: 2.50
+      source: "Bureau of Indian Standards IS 950:2012 (Functional Requirements for Water Tender, Type B for Fire Brigade Use) max overall width 2.50 m; Maharashtra Fire Service Type B Water Tender spec (https://mahafireservice.gov.in/), retrieved 2026-10-31"
+    height_m:
+      value: 3.60
+      source: "Bureau of Indian Standards IS 950:2012 max overall appliance height 3.60 m; Maharashtra Fire Service Type B Water Tender spec (https://mahafireservice.gov.in/), retrieved 2026-10-31"
+    ground_clearance_m:
+      value: 0.23
+      source: "Bureau of Indian Standards IS 950 minimum ground clearance requirement 230 mm (0.23 m), retrieved 2026-10-31"
+    overhead_clearance_margin_m:
+      value: 0.90
+      source: "National Building Code of India (NBC 2016, Part 4 Fire and Life Safety) 4.50 m minimum overhead clearance minus 3.60 m IS 950 appliance height, retrieved 2026-10-31"
+    clearance_per_side_m:
+      value: 0.50
+      source: "PLACEHOLDER (0.50 m lateral buffer per side -> 3.50 m minimum clear lane for single-file emergency transit; note NBC 2016 Part 4 requires 6.0 m for high-rise outrigger deployment)"
+    partial_clearance_per_side_m:
+      value: 0.20
+      source: "PLACEHOLDER (0.20 m tight crawl lateral buffer per side -> 2.90 m minimum clear width for escorted slow passage)"
+    max_obstruction_open_m:
+      value: 0.12
+      source: "PLACEHOLDER (~50% of 0.23 m IS 950 minimum ground clearance for unobstructed passage)"
+    max_obstruction_partial_m:
+      value: 0.22
+      source: "PLACEHOLDER (just under 0.23 m IS 950 ground clearance; requires spotter / slow crawl)"
+    max_obstructed_length_partial_m:
+      value: 10.0
+      source: "PLACEHOLDER (maximum continuous debris length in metres passable at crawl before segment is treated as blocked)"
+
+  ambulance:
+    label: "Force Traveller Ambulance 3350 WB (AIS-125 Type B/C Standard Body)"
+    width_m:
+      value: 1.90
+      source: "Force Motors Traveller Ambulance 3350 WB (AIS-125 compliant Type B/C) specification: overall width 1900 mm (https://www.forcemotors.com/), retrieved 2026-10-31"
+    height_m:
+      value: 2.55
+      source: "Force Motors Traveller Ambulance 3350 WB specification: overall height 2550 mm (https://www.forcemotors.com/), retrieved 2026-10-31"
+    ground_clearance_m:
+      value: 0.20
+      source: "Force Motors Traveller Ambulance 3350 WB specification: ground clearance 200 mm (https://www.forcemotors.com/), retrieved 2026-10-31"
+    overhead_clearance_margin_m:
+      value: 0.30
+      source: "PLACEHOLDER (vertical overhead buffer above 2.55 m ambulance roof)"
+    clearance_per_side_m:
+      value: 0.35
+      source: "PLACEHOLDER (0.35 m lateral buffer per side -> 2.60 m minimum clear width for normal emergency transit)"
+    partial_clearance_per_side_m:
+      value: 0.15
+      source: "PLACEHOLDER (0.15 m tight lateral buffer per side -> 2.20 m minimum clear width for slow crawl)"
+    max_obstruction_open_m:
+      value: 0.10
+      source: "PLACEHOLDER (50% of 0.20 m Force Traveller ground clearance for safe patient transport)"
+    max_obstruction_partial_m:
+      value: 0.18
+      source: "PLACEHOLDER (below 0.20 m ground clearance; slow crawl only)"
+    max_obstructed_length_partial_m:
+      value: 8.0
+      source: "PLACEHOLDER (maximum continuous debris patch length in metres for partial ambulance passage)"
+
+  jeep:
+    label: "Mahindra Thar 4WD (3-Door utility / reconnaissance 4x4)"
+    width_m:
+      value: 1.82
+      source: "Mahindra Thar 4WD (3-Door) official specification: overall width 1820 mm (https://auto.mahindra.com/suv/thar), retrieved 2026-10-31"
+    height_m:
+      value: 1.855
+      source: "Mahindra Thar 4WD (3-Door) official specification: overall height 1855 mm (https://auto.mahindra.com/suv/thar), retrieved 2026-10-31"
+    ground_clearance_m:
+      value: 0.226
+      source: "Mahindra Thar 4WD (3-Door) official specification: unladen ground clearance 226 mm (https://auto.mahindra.com/suv/thar), retrieved 2026-10-31"
+    overhead_clearance_margin_m:
+      value: 0.25
+      source: "PLACEHOLDER (vertical overhead buffer above 1.855 m 4x4 roof)"
+    clearance_per_side_m:
+      value: 0.30
+      source: "PLACEHOLDER (0.30 m lateral buffer per side -> 2.42 m minimum clear width for unobstructed 4WD passage)"
+    partial_clearance_per_side_m:
+      value: 0.15
+      source: "PLACEHOLDER (0.15 m tight lateral buffer per side -> 2.12 m minimum clear width for low-range crawl)"
+    max_obstruction_open_m:
+      value: 0.15
+      source: "PLACEHOLDER (unobstructed 4WD passability height below 0.226 m ground clearance)"
+    max_obstruction_partial_m:
+      value: 0.25
+      source: "PLACEHOLDER (low-range 4WD wheel-placement / straddle limit over rough debris; verify on ground)"
+    max_obstructed_length_partial_m:
+      value: 15.0
+      source: "PLACEHOLDER (maximum continuous rough debris length in metres for partial 4WD passage)"
+
+  foot:
+    label: "Responder / NDRF search-and-rescue foot team"
+    width_m:
+      value: 0.60
+      source: "PLACEHOLDER (single responder width with pack; compare NBC 2016 Part 4 Clause 4.4.2.4 unit exit width 0.50 m)"
+    height_m:
+      value: 2.00
+      source: "PLACEHOLDER (upright responder headroom with helmet/pack; NBC 2016 Part 4 corridor headroom >= 2.0 m)"
+    ground_clearance_m:
+      value: null
+      source: "Not applicable to foot access (governed by step-over / scramble height limits below)"
+    overhead_clearance_margin_m:
+      value: 0.10
+      source: "PLACEHOLDER (helmet clearance margin)"
+    clearance_per_side_m:
+      value: 0.20
+      source: "PLACEHOLDER (0.20 m per side -> 1.00 m clear path suitable for two-person stretcher carry; NBC 2016 Part 4 minimum exit width 1.00 m)"
+    partial_clearance_per_side_m:
+      value: 0.05
+      source: "PLACEHOLDER (0.05 m per side -> 0.70 m single-file scramble path without stretcher)"
+    max_obstruction_open_m:
+      value: 0.35
+      source: "PLACEHOLDER (normal step-over height in metres without scrambling)"
+    max_obstruction_partial_m:
+      value: 1.20
+      source: "PLACEHOLDER (unassisted scramble limit over consolidated debris; above 1.20 m treated as blocked without rope/ladder)"
+    max_obstructed_length_partial_m:
+      value: 35.0
+      source: "PLACEHOLDER (maximum continuous debris scramble length in metres before treated as blocked for foot teams)"

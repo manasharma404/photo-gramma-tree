@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vortex Field Responder Report</title>
+  <link rel="stylesheet" href="/field-static/field.css">
+</head>
+<body>
+  <main class="container">
+    <header class="topbar">
+      <div class="brand">Vortex &middot; Field Report</div>
+      <div id="net-pill" class="net-pill">Checking link...</div>
+    </header>
+
+    <section id="freshness-line" class="freshness-bar" aria-live="polite">
+      <strong>Survey:</strong> loading &middot; <strong>Analysis:</strong> loading &middot; <strong>Field reports:</strong> 0
+    </section>
+
+    <div id="scenario-banner" class="banner-warn hidden"></div>
+
+    <section class="card">
+      <label class="field-label" for="project-select">Active Incident / Scenario</label>
+      <select id="project-select"></select>
+    </section>
+
+    <section class="card">
+      <h2>1. Pick where you are</h2>
+      <div class="tab-group">
+        <button id="tab-places" type="button" class="tab-btn active">Settlements &amp; Facilities</button>
+        <button id="tab-segments" type="button" class="tab-btn">Road Segments</button>
+      </div>
+      <input id="loc-search" type="text" placeholder="Filter place or road segment...">
+      <div id="loc-list" class="location-list" role="listbox" aria-label="Nearby places and road segments"></div>
+      <p id="picked-summary" class="loc-sub" style="margin: 10px 0 0;"></p>
+    </section>
+
+    <section class="card">
+      <h2>2. Ground observation</h2>
+      <div class="kind-grid">
+        <button type="button" class="kind-btn selected" data-kind="dead_end">
+          Dead End
+          <small>Road blocked / impassable</small>
+        </button>
+        <button type="button" class="kind-btn" data-kind="cleared">
+          Cleared
+          <small>Debris cleared / open</small>
+        </button>
+        <button type="button" class="kind-btn" data-kind="new_debris">
+          New Debris
+          <small>Fresh slip / boulder fall</small>
+        </button>
+        <button type="button" class="kind-btn" data-kind="other">
+          Other Note
+          <small>Flag for verification</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. Vehicles affected</h2>
+      <div class="mode-grid">
+        <label class="mode-chip"><input type="checkbox" name="mode" value="fire_truck" checked> Fire Truck</label>
+        <label class="mode-chip"><input type="checkbox" name="mode" value="ambulance" checked> Ambulance</label>
+        <label class="mode-chip"><input type="checkbox" name="mode" value="jeep" checked> 4x4 Jeep</label>
+        <label class="mode-chip"><input type="checkbox" name="mode" value="foot" checked> Foot Team</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4. Details (optional)</h2>
+      <label class="field-label" for="report-callsign">Team / Callsign</label>
+      <input id="report-callsign" type="text" placeholder="e.g. NDRF Team-2 / Ward Officer">
+      <label class="field-label" for="report-note" style="margin-top: 10px;">Ground note</label>
+      <textarea id="report-note" placeholder="e.g. Culvert washed out 20m before school gate"></textarea>
+      <button id="submit-btn" type="button" class="submit-btn" disabled>Submit Field Report</button>
+      <div id="toast" class="toast hidden" role="status"></div>
+    </section>
+
+    <section class="card">
+      <h2>Recent Field Reports</h2>
+      <ul id="recent-reports" class="report-list">
+        <li>Loading...</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Decision-Support Priorities (Top 5)</h2>
+      <p class="loc-sub" style="margin-top: -4px; margin-bottom: 8px;">
+        Weighted decision support (PLACEHOLDER weights; not automated dispatch).
+      </p>
+      <ul id="priority-preview" class="report-list">
+        <li>Loading...</li>
+      </ul>
+    </section>
+  </main>
+  <script src="/field-static/field.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Weighted decision-support configuration for Vortex priority engine (T11).
+# IMPORTANT: Hand-set operational weights for responder decision support only —
+# NOT a trained model, NOT "AI", and NOT automated dispatch.
+# Every parameter is marked PLACEHOLDER until reviewed with disaster management officers.
+
+weights_source: "config/priority.yaml (PLACEHOLDER hand-set decision-support weights; not AI, not dispatch)"
+
+weights:
+  access_difficulty:
+    value: 0.30
+    source: "PLACEHOLDER (weight for multi-vehicle isolation severity)"
+  damage_severity:
+    value: 0.25
+    source: "PLACEHOLDER (weight for blockage severity on nearest/connecting road segments)"
+  population_exposure:
+    value: 0.20
+    source: "PLACEHOLDER (weight for known settlement population; kept null when population is unknown, never 0)"
+  critical_facilities:
+    value: 0.15
+    source: "PLACEHOLDER (weight for hospitals, shelters, schools, and landing zones)"
+  alternative_routes:
+    value: 0.10
+    source: "PLACEHOLDER (weight for lack of redundant edge-disjoint vehicle routes)"
+
+scaling:
+  population_reference_max:
+    value: 250
+    source: "PLACEHOLDER (rural hill-hamlet population mapped to 100 on the 0-100 exposure scale)"
+  level_thresholds:
+    critical: 75.0   # PLACEHOLDER
+    high: 50.0       # PLACEHOLDER
+    moderate: 25.0   # PLACEHOLDER

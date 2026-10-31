@@ -1,0 +1,29 @@
+# Thresholds for teammate's image & coverage quality module (quality/check.py, T12).
+# All values are marked PLACEHOLDER until calibrated against ODM tie-point retention on Neo 2 & USGS data.
+# Note: Blur (laplacian_var) and mean brightness (mean_luma) measurements are imported directly
+# from pipeline/frame_quality.py without re-implementation.
+
+sharpness:
+  blurry_laplacian_var_below: 100.0     # PLACEHOLDER: Laplacian variance below this flags "blur"
+  no_texture_laplacian_var_below: 20.0  # PLACEHOLDER: near-zero edge energy
+  no_texture_luma_std_below: 6.0        # PLACEHOLDER: grayscale std-dev below this flags "no_texture"
+  reference_good_laplacian_var: 350.0   # PLACEHOLDER: Laplacian variance mapped to sharpness score 1.0
+
+exposure:
+  dark_mean_luma_below: 40.0            # PLACEHOLDER: 0-255 mean luma below this flags "dark"
+  overexposed_mean_luma_above: 225.0    # PLACEHOLDER: 0-255 mean luma above this flags "overexposed"
+  highlight_clip_luma: 250              # PLACEHOLDER: pixel intensity >= 250 counted as clipped highlight
+  max_overexposed_fraction: 0.25        # PLACEHOLDER: >25% highlight-clipped pixels flags "overexposed"
+  shadow_clip_luma: 5                   # PLACEHOLDER: pixel intensity <= 5 counted as crushed shadow
+  max_shadow_clip_fraction: 0.50        # PLACEHOLDER: >50% shadow-clipped pixels flags "dark"
+
+overlap_orb:
+  orb_nfeatures: 1200                   # PLACEHOLDER: max ORB keypoints per downscaled frame
+  orb_max_dim_px: 800                   # PLACEHOLDER: max image side (px) for ORB matching
+  lowe_ratio: 0.75                      # PLACEHOLDER: KNN match ratio threshold
+  min_inlier_matches: 10                # PLACEHOLDER: minimum matched features before homography overlap
+  min_overlap_fraction: 0.45            # PLACEHOLDER: pairs below 45% estimated overlap enter low_overlap_pairs
+
+footprint:
+  default_agl_m: 60.0                   # PLACEHOLDER: fallback relative flight height (m) when XMP RelativeAltitude absent
+  default_hfov_deg: 73.7                # PLACEHOLDER: fallback horizontal FOV (deg, ~24mm full-frame equiv) when FocalLengthIn35mmFilm absent
