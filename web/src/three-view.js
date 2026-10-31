@@ -19,7 +19,8 @@ export async function createThreeView(container, terrainMeta, baseUrl) {
   const zmin = meta.z_min;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(css("--surface-2"));
+  const sky = new THREE.Color(css("--sand"));
+  scene.background = sky;
   const camera = new THREE.PerspectiveCamera(45, 1, 1, 20000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -73,9 +74,25 @@ export async function createThreeView(container, terrainMeta, baseUrl) {
     return new THREE.Vector3(ex - (x0 + W / 2), heightAt(ex, ny_) + 0.5, -(ny_ - (y0 + H / 2)));
   };
 
-  camera.position.set(0, Math.max(W, H) * 0.6, Math.max(W, H) * 0.6);
-  controls.target.set(0, 0, 0);
+  // Frame the photographed terrain (not the empty grid), three-quarter view from the south.
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity, sx = 0, sy = 0, sz = 0, n = 0;
+  for (let j = 0; j < ny; j += 4) for (let i = 0; i < nx; i += 4) {
+    const k = j * nx + i;
+    if (!Number.isFinite(z[k])) continue;
+    const x = (i / (nx - 1) - 0.5) * W, zz = (j / (ny - 1) - 0.5) * H;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, zz); maxZ = Math.max(maxZ, zz);
+    sx += x; sy += base[k]; sz += zz; n++;
+  }
+  // aim at the centre of mass of the terrain (two separate map pieces would put a bbox centre in empty space)
+  const centre = n ? new THREE.Vector3(sx / n, (sy / n) * exaggeration, sz / n) : new THREE.Vector3();
+  const size = Math.max(maxX - minX, maxZ - minZ, 50);
+  const home = centre.clone().add(new THREE.Vector3(size * 0.2, size * 0.7, size * 0.95));
+  camera.position.copy(home);
+  controls.target.copy(centre);
+  controls.maxPolarAngle = Math.PI * 0.48; // don't go under the ground
+  controls.enableDamping = true;
   controls.update();
+  scene.fog = new THREE.Fog(sky, size * 1.1, size * 2.6); // edges fade into the sand background
 
   const resize = () => {
     const w = container.clientWidth, h = container.clientHeight;
@@ -107,6 +124,6 @@ export async function createThreeView(container, terrainMeta, baseUrl) {
         }
       }
     },
-    resetView() { camera.position.set(0, Math.max(W, H) * 0.6, Math.max(W, H) * 0.6); controls.target.set(0, 0, 0); },
+    resetView() { camera.position.copy(home); controls.target.copy(centre); },
   };
 }
