@@ -5,7 +5,7 @@
   "n_checkpoints": 3,
   "checkpoint_method": "rtk",
   "checkpoint_stated_accuracy_m": 0.009,
-  "datum_note": "USGS F01-4 block (5 parallel flight lines, 248 images), no ground control. Positions are detector candidates confirmed visually by Claude from crops (targets/top4_sheet.png); IDs assigned by consistent shift (all three ~1 m W, 5-8 m N); lead to re-confirm. SF15, SF19, SF20 (chalk marks) not identifiable at 5 cm; excluded. RTK checkpoints converted from NAD83(2011) (stated in the USGS metadata) to ITRF2020/WGS84 at epoch 2024.33 before comparison (about 1.5 m west and 0.6 m down at South Fork). The reference was converted; the map was not corrected.",
+  "datum_note": "USGS F01-4 block (5 parallel flight lines, 248 images), no ground control. Positions are detector candidates confirmed visually by Claude from crops (targets/top4_sheet.png); IDs assigned by consistent shift (all three ~1 m W, 5-8 m N before the datum conversion); lead to re-confirm. SF15, SF19, SF20 (chalk marks) not identifiable at 5 cm; excluded. RTK checkpoints converted from NAD83(2011) (stated in the USGS metadata) to ITRF2020/WGS84 at epoch 2024.33 before comparison (about 1.5 m west and 0.6 m down at South Fork). The reference was converted; the map was not corrected.",
   "horizontal": {
     "rmse_x_m": 0.589,
     "rmse_y_m": 6.065,
@@ -40,7 +40,7 @@
       "found_by": "manual"
     }
   ],
-  "standard_note": "ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full compliance; this assessment uses n_checkpoints.",
+  "standard_note": "ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full compliance; this assessment uses 3.",
   "vertical_relative": {
     "std_m": 1.09,
     "offset_m": 43.49,
