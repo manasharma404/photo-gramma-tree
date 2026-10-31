@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import io
 import socket
+import sys
 from pathlib import Path
 
 import qrcode
@@ -62,19 +63,30 @@ def render_qr_ascii(url: str) -> str:
     return buf.getvalue()
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ip", default=None, help="Override laptop hotspot/LAN IPv4 (e.g. 192.168.137.1)")
     ap.add_argument("--port", type=int, default=8000, help="API server port (default: 8000)")
     ap.add_argument("--path", default="/field", help="Target path (default: /field)")
     ap.add_argument("--out", type=Path, default=None, help="Optional PNG path to save QR image")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     url = build_field_url(ip=args.ip, port=args.port, path=args.path)
     ascii_art = render_qr_ascii(url)
 
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            pass
+
     print(f"\nVortex Field Responder URL: {url}\n")
-    print(ascii_art)
+    try:
+        print(ascii_art)
+    except UnicodeEncodeError:
+        if hasattr(sys.stdout, "buffer"):
+            sys.stdout.buffer.write((ascii_art + "\n").encode("utf-8", errors="replace"))
+            sys.stdout.flush()
 
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)

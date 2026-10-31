@@ -78,6 +78,36 @@ def test_health_socket_probe_truthfulness(monkeypatch: pytest.MonkeyPatch):
     assert check_internet_reachable(host="1.1.1.1", port=53, timeout_s=1.0) is True
 
 
+def test_health_endpoint_fakes_wifi_off_and_wifi_on(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """V4: /health endpoint reports internet_reachable=False when Wi-Fi is off and True when Wi-Fi is on."""
+    monkeypatch.setenv("VORTEX_ADVISOR_DB", str(tmp_path / "reports.db"))
+    app = create_app(root_dir=ROOT)
+    health_route = next(r for r in app.routes if getattr(r, "path", None) == "/health")
+
+    # Fake Wi-Fi OFF (socket probe fails with network unreachable)
+    def _wifi_off(addr, timeout=1.0):
+        raise OSError("Simulated Wi-Fi off: network is unreachable")
+
+    monkeypatch.setattr("api.main.socket.create_connection", _wifi_off)
+    res_off = health_route.endpoint()
+    assert res_off["status"] == "ok"
+    assert res_off["internet_reachable"] is False
+    assert res_off["offline_mode"] is True
+
+    # Fake Wi-Fi ON (socket probe succeeds)
+    @contextlib.contextmanager
+    def _wifi_on(addr, timeout=1.0):
+        yield object()
+
+    monkeypatch.setattr("api.main.socket.create_connection", _wifi_on)
+    res_on = health_route.endpoint()
+    assert res_on["status"] == "ok"
+    assert res_on["internet_reachable"] is True
+    assert res_on["offline_mode"] is False
+
+
 def test_field_page_and_static_assets_have_zero_external_urls():
     for fname in ("field.html", "field.css", "field.js"):
         fpath = FIELD_STATIC_DIR / fname
@@ -160,11 +190,22 @@ def test_advisor_handlers_and_sqlite_reports_validate_against_contracts(
     assert exc_info.value.status_code == 404
 
 
-def test_qr_generator_url_and_ascii(tmp_path: Path):
+def test_qr_generator_url_and_ascii(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    import io
+    from scripts.qr import main as qr_main
+
     url = build_field_url(ip="192.168.137.1", port=8000, path="/field")
     assert url == "http://192.168.137.1:8000/field"
     art = render_qr_ascii(url)
     assert len(art.splitlines()) >= 15
+
+    # Ensure scripts/qr.py main() does not crash on Windows cp1252 consoles
+    raw = io.BytesIO()
+    cp1252_stdout = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+    monkeypatch.setattr("sys.stdout", cp1252_stdout)
+    out_png = tmp_path / "qr.png"
+    qr_main(["--ip", "192.168.137.1", "--port", "8000", "--out", str(out_png)])
+    assert out_png.exists() and out_png.stat().st_size > 100
 
 
 def test_full_http_asgi_stack_via_testclient(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
@@ -185,6 +226,18 @@ def test_full_http_asgi_stack_via_testclient(tmp_path: Path, monkeypatch: pytest
     with TestClient(create_app(root_dir=ROOT)) as client:
         assert client.get("/health").status_code == 200
         assert client.get("/health").json()["offline_mode"] is True
+        assert client.get("/health").json()["internet_reachable"] is False
+
+        @contextlib.contextmanager
+        def _fake_online(addr, timeout=1.0):
+            yield object()
+
+        with monkeypatch.context() as mp:
+            mp.setattr("api.main.socket.create_connection", _fake_online)
+            h_on = client.get("/health").json()
+            assert h_on["internet_reachable"] is True
+            assert h_on["offline_mode"] is False
+
         assert client.get("/field").status_code == 200
         assert client.get("/field-static/field.css").status_code == 200
         assert client.get("/field-static/field.js").status_code == 200

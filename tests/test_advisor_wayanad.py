@@ -1,18 +1,26 @@
-"""Tests for T6 Wayanad (Chooralmala-Mundakkai) offline scenario builder and T3-T5-T11 pipeline."""
+"""Tests for T6 Wayanad offline scenario, C1 WorldPop population, and C2 offline situation report."""
+from __future__ import annotations
+
 import json
 from pathlib import Path
+import re
 
 import jsonschema
+import numpy as np
 import pytest
+import rasterio
+from rasterio.transform import from_bounds
 
 from advisor.assess import assess_collection
 from advisor.priorities import compute_priorities
 from advisor.report import compute_access_report, generate_project_report
+from advisor.sitrep import generate_sitrep
 from scripts.prefetch_wayanad import (
     CHOORALMALA_BRIDGE_WAY_ID,
     SCENARIO_LABEL,
     build_wayanad_files,
 )
+from scripts.prefetch_worldpop_wayanad import attach_worldpop_to_places_fc
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTRACTS = ROOT / "contracts"
@@ -73,7 +81,6 @@ def test_build_wayanad_files_offline_fixture_runs_t3_to_t5(tmp_path: Path):
         backend="networkx",
     )
     jsonschema.validate(rep, ACCESS_SCHEMA, cls=jsonschema.Draft202012Validator)
-    # Chooralmala bridge segment must appear in reopen_plan reconnecting Mundakkai & GVHSS Vellarmala!
     assert len(rep["reopen_plan"]) >= 1
     top_seg = rep["reopen_plan"][0]["segment_id"]
     bridge_segs = {
@@ -88,6 +95,78 @@ def test_build_wayanad_files_offline_fixture_runs_t3_to_t5(tmp_path: Path):
     assert prio["decision_support"] is True
 
 
+def test_c1_worldpop_attachment_and_c2_offline_sitrep(tmp_path: Path):
+    proj_root = tmp_path / "data" / "projects" / "wayanad_c1"
+    build_wayanad_files(_synthetic_wayanad_overpass(), proj_root)
+
+    # Create a tiny offline WorldPop-style GeoTIFF with positive grid counts and NoData outside
+    tif_path = proj_root / "worldpop_wayanad_2020.tif"
+    arr = np.full((12, 12), -99999.0, dtype=np.float32)
+    arr[2:10, 2:10] = 140.0
+    transform = from_bounds(76.145, 11.475, 76.170, 11.510, 12, 12)
+    with rasterio.open(
+        tif_path,
+        "w",
+        driver="GTiff",
+        height=12,
+        width=12,
+        count=1,
+        dtype="float32",
+        crs="EPSG:4326",
+        transform=transform,
+        nodata=-99999.0,
+    ) as dst:
+        dst.write(arr, 1)
+
+    places_fc = json.loads((proj_root / "places.geojson").read_text(encoding="utf-8"))
+    # Add an out-of-raster settlement to verify missing cells stay null (never 0)
+    places_fc["features"].append(
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [76.2500, 11.6000]},
+            "properties": {
+                "mock": False,
+                "place_id": "place_OUTSIDE",
+                "name": "Uninhabited Edge Point",
+                "kind": "settlement",
+                "source": "osm",
+                "population": None,
+                "population_source": "PLACEHOLDER",
+                "nearest_segment_id": None,
+            },
+        }
+    )
+
+    summary = attach_worldpop_to_places_fc(places_fc, tif_path, radius_m=750.0)
+    assert summary["settlements_filled"] == 3
+    assert summary["settlements_null"] == 1
+    jsonschema.validate(places_fc, PLACES_SCHEMA, cls=jsonschema.Draft202012Validator)
+
+    by_name = {f["properties"]["name"]: f["properties"] for f in places_fc["features"]}
+    assert by_name["Mundakkai"]["population"] > 0
+    assert "750 m" in by_name["Mundakkai"]["population_source"]
+    # Non-settlement school and out-of-coverage settlement stay null, never 0
+    assert by_name["GVHSS Vellarmala"]["population"] is None
+    assert by_name["Uninhabited Edge Point"]["population"] is None
+    (proj_root / "places.geojson").write_text(json.dumps(places_fc, indent=2), encoding="utf-8")
+
+    sitrep_dir = proj_root / "sitrep"
+    written = generate_sitrep(
+        project="wayanad_c1",
+        out_dir=sitrep_dir,
+        data_root=tmp_path,
+        backend="networkx",
+    )
+    md_text = written["markdown"].read_text(encoding="utf-8")
+    html_text = written["html"].read_text(encoding="utf-8")
+
+    assert "scenario reconstructed from reports, not drone-measured" in md_text
+    assert "decision support" in md_text.lower()
+    assert "Sarvam Translate" in md_text
+    # Self-contained offline HTML must have zero external http/https CDN or stylesheet links
+    assert re.findall(r"https?://", html_text) == []
+
+
 def test_prefetched_wayanad_project_end_to_end_if_present():
     wayanad_dir = ROOT / "data" / "projects" / "wayanad"
     if not (wayanad_dir / "roads" / "segments.geojson").exists():
@@ -99,6 +178,15 @@ def test_prefetched_wayanad_project_end_to_end_if_present():
     jsonschema.validate(seg_fc, SEGMENTS_SCHEMA, cls=jsonschema.Draft202012Validator)
     jsonschema.validate(places_fc, PLACES_SCHEMA, cls=jsonschema.Draft202012Validator)
 
+    # C1 verification on real prefetched Wayanad settlements
+    settlement_pops = [
+        f["properties"]["population"]
+        for f in places_fc["features"]
+        if f["properties"]["kind"] == "settlement"
+    ]
+    assert len(settlement_pops) >= 5
+    assert all(isinstance(p, int) and p > 0 for p in settlement_pops)
+
     state = assess_collection(seg_fc)
     jsonschema.validate(state, STATE_SCHEMA, cls=jsonschema.Draft202012Validator)
 
@@ -109,8 +197,9 @@ def test_prefetched_wayanad_project_end_to_end_if_present():
     assert by_name["Chooralmala"]["reachable"]["ambulance"] is True
     assert by_name["Mundakai"]["reachable"]["ambulance"] is False
 
-    # Reopen plan ranks the Chooralmala river bridge clearance to reconnect southern bank places!
     assert len(rep["reopen_plan"]) >= 1
+    assert rep["reopen_plan"][0]["reconnects_people"] is not None
+    assert rep["reopen_plan"][0]["reconnects_people"] > 0
     bridge_segs = {
         f["properties"]["segment_id"]
         for f in seg_fc["features"]

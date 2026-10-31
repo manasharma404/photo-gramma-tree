@@ -1,17 +1,26 @@
-"""Unit tests for vehicle profiles (T2) and road segment assessment engine (T3)."""
-import copy
+"""Unit tests for vehicle profiles (T2), S1 source verification, and road segment assessment engine (T3)."""
 import json
+import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 import jsonschema
 import pytest
+import yaml
 
 from advisor import MODES
-from advisor.assess import assess_collection, assess_segment, load_vehicle_config
+from advisor.assess import (
+    assess_collection,
+    assess_segment,
+    load_vehicle_config,
+    validate_source_string,
+)
+from scripts.prefetch_wayanad import CITED_SOURCES, classify_wayanad_segment
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTRACTS = ROOT / "contracts"
 ADVISOR_STATE_SCHEMA = json.loads((CONTRACTS / "advisor_state.schema.json").read_text(encoding="utf-8"))
+URL_RE = re.compile(r"https?://[^\s)\"'>,\]]+")
 
 
 def _make_props(**overrides):
@@ -45,14 +54,74 @@ def test_vehicle_config_has_sources_for_all_modes():
 
 
 def test_vehicle_config_rejects_missing_source(tmp_path):
-    bad_yaml = (ROOT / "config" / "vehicles.yaml").read_text(encoding="utf-8").replace(
-        'source: "PLACEHOLDER (~50% of 0.23 m IS 950 minimum ground clearance for unobstructed passage)"',
-        'source: ""',
-    )
+    raw_yaml = (ROOT / "config" / "vehicles.yaml").read_text(encoding="utf-8")
+    target_line = 'source: "PLACEHOLDER (~50% of 0.23 m IS 950:2012 minimum road clearance for unobstructed passage)"'
+    assert target_line in raw_yaml
+    bad_yaml = raw_yaml.replace(target_line, 'source: ""')
     p = tmp_path / "bad_vehicles.yaml"
     p.write_text(bad_yaml, encoding="utf-8")
     with pytest.raises(ValueError, match="missing source"):
         load_vehicle_config(p)
+
+
+def test_vehicle_config_rejects_bare_domain_or_homepage_source(tmp_path):
+    raw_yaml = (ROOT / "config" / "vehicles.yaml").read_text(encoding="utf-8")
+    target_line = 'source: "PLACEHOLDER (~50% of 0.23 m IS 950:2012 minimum road clearance for unobstructed passage)"'
+
+    # Case 1: home-page URL with no document path
+    bad_home = raw_yaml.replace(target_line, 'source: "Cited from https://pib.gov.in/ retrieved 2026-10-31"')
+    p1 = tmp_path / "bad_home.yaml"
+    p1.write_text(bad_home, encoding="utf-8")
+    with pytest.raises(ValueError, match="home-page-only URL"):
+        load_vehicle_config(p1)
+
+    # Case 2: bare domain string without path
+    bad_domain = raw_yaml.replace(target_line, 'source: "forcemotors.com"')
+    p2 = tmp_path / "bad_domain.yaml"
+    p2.write_text(bad_domain, encoding="utf-8")
+    with pytest.raises(ValueError, match="bare domain"):
+        load_vehicle_config(p2)
+
+
+def test_s1_no_bare_domain_sources_across_configs_wayanad_and_register():
+    # 1. config/vehicles.yaml (checked via load_vehicle_config)
+    load_vehicle_config(ROOT / "config" / "vehicles.yaml")
+
+    # 2. config/priority.yaml
+    prio_raw = yaml.safe_load((ROOT / "config" / "priority.yaml").read_text(encoding="utf-8"))
+    validate_source_string("priority.weights_source", prio_raw.get("weights_source", ""))
+    for k, entry in prio_raw.get("weights", {}).items():
+        validate_source_string(f"priority.weights.{k}", entry.get("source", ""))
+    validate_source_string(
+        "priority.scaling.population_reference_max",
+        prio_raw["scaling"]["population_reference_max"]["source"],
+    )
+
+    # 3. scripts/prefetch_wayanad.py CITED_SOURCES & road classification states
+    for item in CITED_SOURCES:
+        validate_source_string(f"wayanad.CITED_SOURCES.{item['id']}", item["url"])
+    sample_probes = [
+        (380928388, 76.1600, 11.4991, "tertiary", {"bridge": "yes"}),
+        (380928999, 76.1530, 11.4820, "residential", {}),
+        (380928408, 76.1560, 11.4900, "tertiary", {}),
+        (30778557, 76.1590, 11.5030, "primary", {}),
+        (999999001, 76.1520, 11.4900, "track", {}),
+        (999999002, 76.1700, 11.5080, "track", {}),
+    ]
+    for way_id, lon, lat, hw, tags in sample_probes:
+        _, cite, _ = classify_wayanad_segment(way_id, lon, lat, hw, tags)
+        validate_source_string(f"wayanad.segment.{way_id}", cite)
+
+    # 4. docs/sources_teammate.md must exist and contain zero bare-homepage URLs
+    reg_path = ROOT / "docs" / "sources_teammate.md"
+    assert reg_path.is_file(), "docs/sources_teammate.md missing"
+    reg_text = reg_path.read_text(encoding="utf-8")
+    urls = URL_RE.findall(reg_text)
+    assert len(urls) >= 6
+    for raw_url in urls:
+        cleaned = raw_url.rstrip(".,;:|`")
+        parsed = urlparse(cleaned)
+        assert (parsed.path or "").strip("/") or parsed.query, f"Bare homepage URL in sources_teammate.md: {cleaned}"
 
 
 def test_mock_example_segments_validate_and_default_to_unknown():
@@ -78,7 +147,7 @@ def test_clean_wide_road_is_open_for_all_vehicles():
 def test_multi_vehicle_differentiation_by_width():
     # Width 2.65 m with tight tolerance 0.10 m:
     # fire_truck crawl=2.90m -> 2.65+0.10=2.75 < 2.90 -> blocked
-    # ambulance crawl=2.20m, open=2.60m (+0.10=2.70m) -> partial (near open threshold)
+    # ambulance crawl=2.225m, open=2.625m (+0.10=2.725m) -> partial (near open threshold)
     # jeep open=2.42m (+0.10=2.52m) -> 2.65 >= 2.52 -> open
     # foot open=1.00m (+0.10=1.10m) -> open
     res = assess_segment(
@@ -174,3 +243,92 @@ def test_field_reports_override_and_set_source():
     assert seg["status_by_mode"]["fire_truck"] == "blocked"
     assert seg["status_by_mode"]["ambulance"] == "blocked"
     assert seg["status_by_mode"]["jeep"] == "open"
+
+
+def test_c3_crasar_road_damage_cli_crops_and_fusion_rules(tmp_path):
+    import subprocess
+    import sys
+    import cv2
+    import numpy as np
+    from ml.road_damage import (
+        CRASAR_MODEL_ID,
+        load_crops_directory,
+        predict_crops_to_ml_scores,
+        prepare_masked_unet_crop,
+    )
+
+    ml_schema = json.loads((CONTRACTS / "ml_scores.schema.json").read_text(encoding="utf-8"))
+    crops_dir = tmp_path / "crops"
+    crops_dir.mkdir(parents=True)
+
+    # Create two RGB road crop images (seg_A dark gray asphalt, seg_B bright orange/brown debris)
+    img_a = np.full((128, 128, 3), 50, dtype=np.uint8)
+    img_b = np.full((128, 128, 3), 210, dtype=np.uint8)
+    cv2.imwrite(str(crops_dir / "seg_A.png"), img_a)
+    cv2.imwrite(str(crops_dir / "seg_B.png"), img_b)
+
+    tensor = prepare_masked_unet_crop(img_a, target_size=128)
+    assert tensor.shape == (4, 128, 128)
+    assert tensor.dtype == np.float32
+    assert float(tensor[3, 64, 64]) == 1.0
+
+    # 1. Offline CLI without 977 MB CRASAR PyTorch Lightning weights -> honest null probabilities
+    out_null = tmp_path / "ml_scores_null.json"
+    proc = subprocess.run(
+        [sys.executable, "-m", "ml.road_damage", "--crops-dir", str(crops_dir), "--out", str(out_null)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    null_doc = json.loads(out_null.read_text(encoding="utf-8"))
+    jsonschema.validate(null_doc, ml_schema, cls=jsonschema.Draft202012Validator)
+    assert [s["segment_id"] for s in null_doc["scores"]] == ["seg_A", "seg_B"]
+    assert all(s["p_blocked"] is None and s["model"] == CRASAR_MODEL_ID for s in null_doc["scores"])
+
+    # 2. Local predictor forward pass -> normalized [clear, partial, blocked] + fusion check
+    def _mock_unet_probs(chw: np.ndarray) -> np.ndarray:
+        # img_a road stripe has low red (70/255=0.27); img_b background/circle has higher red (>0.45)
+        mean_r = float(np.mean(chw[0][chw[3] > 0.5]))
+        if mean_r < 0.40:
+            return np.broadcast_to(np.array([0.85, 0.10, 0.05], dtype=np.float32)[:, None, None], (3, 128, 128))
+        return np.broadcast_to(np.array([0.05, 0.10, 0.85], dtype=np.float32)[:, None, None], (3, 128, 128))
+
+    scored_doc = predict_crops_to_ml_scores(
+        load_crops_directory(crops_dir),
+        predictor_fn=_mock_unet_probs,
+        target_size=128,
+        mock=True,
+    )
+    jsonschema.validate(scored_doc, ml_schema, cls=jsonschema.Draft202012Validator)
+    by_seg = {s["segment_id"]: s for s in scored_doc["scores"]}
+    assert by_seg["seg_A"]["p_blocked"] < 0.15
+    assert by_seg["seg_B"]["p_blocked"] > 0.75
+
+    # Fuse into advisor.assess: seg_A is geometrically blocked (must NOT flip to open!);
+    # seg_B is geometrically open (disagreement with high p_blocked -> needs_verification=True)
+    seg_fc = {
+        "type": "FeatureCollection",
+        "mock": True,
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[0, 0], [0.001, 0]]},
+                "properties": _make_props(segment_id="seg_A", min_clear_width_m=1.1, max_obstruction_m=1.6),
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[0.001, 0], [0.002, 0]]},
+                "properties": _make_props(segment_id="seg_B", min_clear_width_m=5.2, max_obstruction_m=0.02),
+            },
+        ],
+    }
+    fused = assess_collection(seg_fc, ml_scores=scored_doc)
+    jsonschema.validate(fused, ADVISOR_STATE_SCHEMA, cls=jsonschema.Draft202012Validator)
+    st_map = {s["segment_id"]: s for s in fused["segments"]}
+    assert all(v == "blocked" for v in st_map["seg_A"]["status_by_mode"].values())
+    assert st_map["seg_A"]["needs_verification"] is True
+    assert all(v == "open" for v in st_map["seg_B"]["status_by_mode"].values())
+    assert st_map["seg_B"]["needs_verification"] is True
+
