@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F2F2EC" />
+  <meta name="typhon-root" content="./" />
+  <title>Project Typhon</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <script type="module" crossorigin src="./assets/landing-C1oQ5LDc.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icons-DacvQs1G.js">
+  <link rel="stylesheet" crossorigin href="./assets/icons-B7mFigCz.css">
+  <link rel="stylesheet" crossorigin href="./assets/landing-J-ieV19E.css">
+</head>
+<!-- Hero = the lead's illustration (heading included). Overlays follow the lead's reference.
+     Honesty: callouts name what Typhon measures (no numbers on an illustration); thumbnails are our own
+     processed data (USGS public survey); coordinates/altitude are the real South Fork site
+     (web/scripts/landing_thumbs.py). -->
+<body class="landing">
+  <section class="hero">
+    <nav class="lnav">
+      <a class="brand" href="./" aria-label="Project Typhon home"><span class="logo logo--mark" data-logo-mark></span></a>
+      <div class="lnav__links">
+        <a href="./" aria-current="page">Home</a>
+        <a href="app/">Map</a>
+        <a href="app/">Insights</a>
+        <a href="#about">About</a>
+        <a href="#data">Drone data</a>
+      </div>
+      <a class="pill-cta" href="app/">Get started <span data-icon="arrow"></span></a>
+    </nav>
+
+    <!-- left column -->
+    <aside class="col col--left">
+      <div class="tag"><span class="tag__icon" data-icon="drone"></span><p class="caps">Drone mapping<br />for a safer<br />tomorrow</p></div>
+      <div class="vline"></div>
+      <p class="caps coords">36.3451° N<br />118.7578° W<br />South Fork, California</p>
+      <ol class="features">
+        <li><span class="caps num">01</span><div><p class="caps">Rapid<br />2D mapping</p><img src="./landing/ortho.jpg" alt="Our orthophoto of the South Fork debris flow" /></div></li>
+        <li><span class="caps num">02</span><div><p class="caps">Accurate terrain<br />reconstruction</p><img src="./landing/terrain.jpg" alt="Our 3D terrain model" /></div></li>
+        <li><span class="caps num">03</span><div><p class="caps">Actionable insights<br />for relief teams</p><img src="./landing/dashboard.jpg" alt="The Typhon dashboard" /></div></li>
+      </ol>
+    </aside>
+
+    <p class="caps tagline">We build immediate<br />2D and 3D maps for<br />post landslide<br />relief efforts.</p>
+
+    <!-- callouts over the illustration: capabilities, not measurements -->
+    <div class="hero__art" aria-hidden="false">
+      <div class="callout" style="--x: 41%; --y: 44%; --dy: 34px"><span class="caps">Debris flow</span><b>volume ± tolerance</b></div>
+      <div class="callout" style="--x: 38%; --y: 64%; --dy: 52px"><span class="caps">Affected settlements</span><b>cut off, per vehicle</b></div>
+      <div class="callout" style="--x: 71%; --y: 52%; --dy: 62px"><span class="caps">Roads</span><b>open · partial · blocked</b></div>
+    </div>
+
+    <!-- right column -->
+    <aside class="col col--right">
+      <a class="view3d" href="app/" aria-label="Open the 3D view"><img src="./landing/terrain.jpg" alt="" /><span class="caps">3D view</span><span class="view3d__target" data-icon="act"></span></a>
+      <ul class="layers-list caps">
+        <li class="on"><a href="app/">Terrain</a></li>
+        <li><a href="app/">Roads</a></li>
+        <li><a href="app/">Landing zones</a></li>
+        <li><a href="app/">Checkpoints</a></li>
+        <li><a href="field">Field reports</a></li>
+      </ul>
+      <div class="compass" aria-hidden="true">
+        <span class="caps compass__n">N</span>
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="0.6"/>
+          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.4" stroke-dasharray="1 2"/>
+          <path d="M50 6v10M50 84v10M6 50h10M84 50h10" stroke="currentColor" stroke-width="0.6"/>
+          <path d="M50 20 56 50 50 56 44 50z" fill="currentColor" opacity=".75"/></svg>
+      </div>
+      <p class="caps coords">36.3451° N<br />118.7578° W<br />Alt 1,200 m</p>
+    </aside>
+
+    <span class="cross" style="left: 22%; top: 17%" aria-hidden="true"></span>
+    <span class="cross" style="left: 79%; top: 30%" aria-hidden="true"></span>
+    <span class="cross" style="left: 67%; top: 23%" aria-hidden="true"></span>
+
+    <div class="corner corner--left caps">From<br />data<br />to<br />impact</div>
+    <a class="explore caps" href="#about">Explore<span data-icon="chevron"></span></a>
+    <div class="corner corner--right caps">Safer<br />communities<br />stronger<br />tomorrows</div>
+    <p class="credit caps">Illustration</p>
+  </section>
+
+  <div class="about-band">
+  <section class="about" id="about">
+    <div class="about__grid">
+      <div>
+        <p class="caps">About</p>
+        <h2>The first map after the landslide.</h2>
+      </div>
+      <div>
+        <p>A consumer drone flies over the damage. On one laptop, with no internet, Typhon turns the photos into a map and a 3D model,
+          checks which roads a fire truck, an ambulance, a jeep or a team on foot can still use, and measures what the relief
+          teams need: gap spans, debris volumes, landing zones and working space.</p>
+        <p>No ground control points are used to build the map. We measure its error against surveyed checkpoints and show that
+          number next to every measurement, instead of a beautiful map with unknown accuracy.</p>
+      </div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <p class="muted small" id="data">Drone data: USGS South Fork Campground debris-flow survey, 30 Apr 2024 (public domain), processed by us without its
+      ground control; our own DJI Neo 2 footage. Roads © OpenStreetMap contributors.</p>
+  </section>
+  </div>
+</body>
+</html>

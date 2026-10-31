@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F8F6EF" />
+  <meta name="typhon-root" content="../" />
+  <title>Project Typhon · Map</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <script type="module" crossorigin src="../assets/app-n4ZfWmIU.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/icons-DacvQs1G.js">
+  <link rel="stylesheet" crossorigin href="../assets/icons-B7mFigCz.css">
+  <link rel="stylesheet" crossorigin href="../assets/app-DPYA8hxT.css">
+</head>
+<body class="app">
+  <!-- Layout follows docs/ui_layout_brief.md and the lead's dashboard reference; tokens in src/styles/tokens.css -->
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="Project Typhon home"><span class="logo" data-logo></span></a>
+    <div class="field">
+      <label for="site">Site</label>
+      <select id="site"></select>
+    </div>
+    <div class="field field--grow">
+      <span class="field__label">Dataset</span>
+      <span class="field__value" id="dataset">—</span>
+    </div>
+    <div class="field">
+      <span class="field__label">Vehicle</span>
+      <div class="segmented" id="vehicle" role="radiogroup" aria-label="Vehicle type"></div>
+    </div>
+    <div class="field">
+      <span class="field__label">Last processed</span>
+      <span class="field__value" id="freshness">—</span>
+    </div>
+    <span class="pill" id="offline"><span class="dot"></span><span id="offline-text">checking…</span></span>
+  </header>
+
+  <div class="workspace">
+    <nav class="rail" role="tablist" aria-label="Sections">
+      <button role="tab" data-tab="act" aria-selected="true"><span data-icon="act"></span>Act now</button>
+      <button role="tab" data-tab="roads"><span data-icon="roads"></span>Roads</button>
+      <button role="tab" data-tab="measure"><span data-icon="measure"></span>Measure</button>
+      <button role="tab" data-tab="accuracy"><span data-icon="accuracy"></span>Accuracy<span class="hide-sm"> &amp; spec</span></button>
+      <button role="tab" data-tab="reports"><span data-icon="reports"></span><span class="hide-sm">Field </span>reports</button>
+    </nav>
+
+    <aside class="panel" id="panel">
+      <header class="panel__head" id="panel-head">
+        <span class="grabber" aria-hidden="true"></span>
+        <div>
+          <h1 id="panel-title">Act now</h1>
+          <p id="panel-sub">What needs attention first, and why.</p>
+        </div>
+      </header>
+      <div class="panel__body">
+        <section class="tabpanel" id="tab-act"></section>
+        <section class="tabpanel" id="tab-roads" hidden></section>
+        <section class="tabpanel" id="tab-measure" hidden></section>
+        <section class="tabpanel" id="tab-accuracy" hidden></section>
+        <section class="tabpanel" id="tab-reports" hidden></section>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div id="map"></div>
+      <div id="three" hidden></div>
+
+      <button class="fab card" id="layers-btn" aria-label="Layers" aria-expanded="false"><span data-icon="layers"></span></button>
+      <section class="layers card" id="layers" aria-label="Layers">
+        <header><span data-icon="layers"></span>Layers</header>
+        <div id="layer-list"></div>
+      </section>
+
+      <div class="toolcol card" id="tools" role="toolbar" aria-label="Measure tools">
+        <button data-tool="select" aria-pressed="true" title="Select"><span data-icon="cursor"></span></button>
+        <button data-tool="span" title="Span: draw a line across a gap, double-click to finish"><span data-icon="line"></span></button>
+        <button data-tool="volume" title="Debris volume: draw around the pile, double-click to finish"><span data-icon="polygon"></span></button>
+        <button data-tool="working-space" title="Working space: click a point"><span data-icon="point"></span></button>
+        <button data-tool="landing-zones" title="Landing zones: search the map"><span data-icon="landing"></span></button>
+        <button data-tool="clear" title="Clear measurements"><span data-icon="trash"></span></button>
+      </div>
+
+      <div class="viewswitch card">
+        <div class="segmented" role="radiogroup" aria-label="View">
+          <button role="radio" data-view="2d" aria-checked="true">2D</button>
+          <button role="radio" data-view="3d" aria-checked="false" id="btn-3d">3D</button>
+        </div>
+        <label class="exag" id="exaggeration" hidden>Height ×<span id="exag-value">1</span>
+          <input type="range" id="exag" min="1" max="3" step="0.5" value="1" />
+        </label>
+      </div>
+
+      <div class="legend card" id="legend"></div>
+      <div class="hint" id="statusline" role="status"></div>
+    </main>
+  </div>
+
+  <footer class="strip">
+    <article class="card strip__card" id="card-overview"></article>
+    <article class="card strip__card strip__card--click" id="card-3d" tabindex="0">
+      <header><span>3D view</span><span data-icon="expand"></span></header>
+      <div class="thumb" id="thumb-3d"></div>
+    </article>
+    <article class="card strip__card" id="card-profile">
+      <header><span>Cross-section</span></header>
+      <div id="profile-body"></div>
+    </article>
+    <article class="card strip__card" id="card-accuracy">
+      <header><span>Accuracy</span></header>
+      <div id="accuracy-mini"></div>
+    </article>
+  </footer>
+</body>
+</html>

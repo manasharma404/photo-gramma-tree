@@ -1,0 +1,13 @@
+{
+  "source": "data/runs/2026-10-31_0546_southfork_f01_4_quick/odm_orthophoto.tif",
+  "bounds_wsen": [
+    -118.7604565,
+    36.3429145,
+    -118.7550991,
+    36.34724
+  ],
+  "min_zoom": 14,
+  "max_zoom": 20,
+  "tiles": 377,
+  "url": "/tiles/southfork_f01_4/ortho/{z}/{x}/{y}.png"
+}
