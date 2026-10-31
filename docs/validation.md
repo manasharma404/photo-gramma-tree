@@ -45,7 +45,7 @@ Every number here comes from a run in `data/runs/` (gitignored; run ids given) o
 | Tier | Run id | Time | Peak memory | Map area | Notes |
 |---|---|---|---|---|---|
 | quick | `2026-10-31_0546_southfork_f01_4_quick` | 145.6 min | 8.61 GiB | 12.94 ha | from scratch, GPU features (`--feature-type sift`); ~11.2 min/ha |
-| full | PENDING | | | | |
+| full | `2026-10-31_0819_southfork_f01_4_full` | 171.4 min (incremental) | 11.0 GiB | 13.19 ha | reused matching; DSM/DTM at 0.10 m; peak memory close to the 12 GB WSL limit |
 
 ### Horizontal (orthophoto vs RTK targets)
 | Checkpoints | RMSE_x | RMSE_y | RMSE_H | Max | Method |
@@ -57,7 +57,19 @@ Every number here comes from a run in `data/runs/` (gitignored; run ids given) o
 - N = 3 is far below the ASPRS recommendation of 30; we report it as a prototype measurement, not a compliance test.
 
 ### Vertical
-PENDING: needs the full tier's DSM/DTM.
+| Compared | N | Result |
+|---|---|---|
+| DSM at the 3 checkpoint targets (absolute) | 3 | RMSE_V **44.08 m** |
+| DTM vs RTK ground points, absolute (map shift applied) | 326 | mean offset **+42.86 m** |
+| same, after removing the constant offset (**relative heights**) | 326 | spread **1.09 m** (std); 0.50 m if a slight tilt is also removed |
+
+- **Absolute heights are unreliable** (+43 m): the model is placed vertically by the cameras' consumer-GPS altitudes, which read high (Run 1 found the same).
+- **Relative heights are good to about ±1.1 m.** Debris volume, pile height, obstruction height and span banks are all measured against nearby ground, so the offset cancels. `accuracy/vertical.py` records this as `vertical_relative` in `accuracy.json`; `measure/` and `roads/` use it for height/volume tolerances (labelled), and the absolute RMSE_V stays reported as is.
+
+### What the block shows about roads and landing zones (real outputs)
+- **Trails under canopy:** 16 trail segments fall inside the map; their corridors are only 5–43% visible (tree canopy and green vegetation are set aside as "not visible"). With the assessment engine's 70% minimum, every one is **unknown**, not open or blocked. A drone cannot certify a forest trail it cannot see; the tool says so instead of guessing.
+- **The ~6 m horizontal offset** also means OSM trail lines sample ground ~6 m from the real trail. Shifting the map by the checkpoint error would turn checkpoints into ground control, which the brief forbids; we report it instead.
+- **Landing zones:** no candidate for either helicopter type (FATO 24 m / 38 m) met slope ≤ 7° (PLACEHOLDER) and the clear safety ring anywhere in this steep, forested canyon.
 
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).

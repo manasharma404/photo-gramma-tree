@@ -202,7 +202,10 @@ def main():
 
     rmse_v = None
     if args.accuracy and args.accuracy.exists():
-        rmse_v = json.loads(args.accuracy.read_text(encoding="utf-8"))["vertical"]["rmse_v_m"]
+        acc = json.loads(args.accuracy.read_text(encoding="utf-8"))
+        # debris heights are relative to the fitted road surface, so a constant absolute offset cancels:
+        # prefer the relative vertical spread (accuracy/vertical.py) over the absolute RMSE_V
+        rmse_v = (acc.get("vertical_relative") or {}).get("std_m", acc["vertical"]["rmse_v_m"])
 
     dsm = rasterio.open(args.dsm)
     dtm = rasterio.open(args.dtm) if args.dtm else None

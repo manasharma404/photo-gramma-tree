@@ -43,7 +43,20 @@ class Surfaces:
 
     @property
     def rmse_v(self):
-        return self.acc["vertical"]["rmse_v_m"] if self.acc else None
+        """Vertical tolerance for RELATIVE measurements (volume, pile height, span banks).
+
+        These compare heights with nearby ground, so a constant absolute offset cancels: use the
+        relative figure from accuracy/vertical.py when present, else the absolute RMSE_V.
+        """
+        if not self.acc:
+            return None
+        rel = self.acc.get("vertical_relative") or {}
+        return rel.get("std_m", self.acc["vertical"]["rmse_v_m"])
+
+    @property
+    def rmse_v_label(self):
+        rel = (self.acc or {}).get("vertical_relative")
+        return "relative vertical spread (offset removed, accuracy/vertical.py)" if rel else "RMSE_V"
 
     def window(self, ds, bounds, res=None):
         """Read a window as a float array with NaN for nodata; optional resampling to `res` metres."""
@@ -97,7 +110,7 @@ def volume(s, polygon_wgs, rim_m=1.0):
               "reference_surface": "polygon-rim fit (plane through DSM 0-1 m outside the polygon)",
               "valid_fraction": round(float(np.isfinite(z[inside]).mean()), 3)}
     return _result("volume", s, shape(polygon_wgs), result, tol, "m3",
-                   "conservative bound: RMSE_V x footprint area (accuracy.json)" if tol else "accuracy not measured yet",
+                   f"conservative bound: {s.rmse_v_label} x footprint area (accuracy.json)" if tol else "accuracy not measured yet",
                    None, [])
 
 

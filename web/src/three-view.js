@@ -52,7 +52,7 @@ export async function createThreeView(container, terrainMeta, baseUrl) {
   const overlays = new THREE.Group();
   scene.add(overlays);
 
-  let exaggeration = 1.5;
+  let exaggeration = 1; // real heights by default; the slider exaggerates
   const applyHeights = () => {
     for (let i = 0; i < pos.count; i++) pos.setY(i, base[i] * exaggeration);
     pos.needsUpdate = true;

@@ -1,6 +1,8 @@
 # Follow-up 2 for the teammate's agent: real data, integration, finish
 
-**Status: DRAFT, sent when the lead's real South Fork files are in `samples/`.**
+**Status: READY (31 Oct ~17:00 IST).** Real files are in `samples/southfork_f01_4/`.
+
+**What the real data looks like (so nothing surprises you):** the map contains only **footpaths** (OSM `highway=path`), 16 segments, all 5–43% visible under tree canopy, so with your 70% minimum they'll all come out **unknown**: that's correct behaviour, keep it. No landing zone was found (steep canyon). Accuracy: horizontal ±6.4 m RMSE at 3 checkpoints; vertical absolute ±44 m but `vertical_relative.std_m` = 1.09 m (use the relative figure for any height/volume tolerance you show). Wayanad stays your vehicle-road story.
 
 Paste everything below into your agent, run from the root of the `vortex` repo.
 

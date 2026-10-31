@@ -38,6 +38,7 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 | USGS F01-5 strip, quick tier | 109 | 50.4 min | 6.97 GiB | 10.12 ha | ~5.0 min/ha |
 | USGS F01-5 strip, full tier | 109 | 66.6 min (incremental) | 7.01 GiB | 9.07 ha | DSM/DTM at 0.10 m |
 | USGS F01-4 block (5 parallel lines), quick tier | 248 | 145.6 min | 8.61 GiB | 12.94 ha | ~11.2 min/ha; GPU feature extraction |
+| USGS F01-4 block, full tier (height models) | 248 | 171.4 min (incremental) | 11.0 GiB | 13.19 ha | DSM/DTM at 0.10 m |
 
 **Accuracy without ground control (USGS RTK checkpoints):**
 | Flight geometry | Checkpoints | Horizontal RMSE | Max |
@@ -45,7 +46,7 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 | One straight line (F01-5) | 2 | 35.0 m | 35.1 m |
 | Block of 5 parallel lines (F01-4) | 3 | **6.4 m** | 7.9 m |
 
-One straight line lets the model roll about the line (errors 34.7–34.8 m across it, 3–5 m along it). **Capture rule we derived: never map from one straight line; fly at least two parallel lines.** Vertical accuracy for the block: PENDING (full tier running). N is small (ASPRS asks for ≥ 30), so treat these as prototype measurements.
+One straight line lets the model roll about the line (errors 34.7–34.8 m across it, 3–5 m along it). **Capture rule we derived: never map from one straight line; fly at least two parallel lines.** **Vertical (block):** absolute heights are off by +43 m (consumer-GPS camera altitudes), but heights **relative to nearby ground are good to ±1.1 m** (326 surveyed ground points). Volumes and heights are relative, so their tolerances use the ±1.1 m figure. N is small (ASPRS asks for ≥ 30), so treat these as prototype measurements.
 
 ## Run it (Windows)
 Needs Docker Desktop (WSL2), `uv`, Node 22, ffmpeg, exiftool.
