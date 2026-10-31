@@ -402,3 +402,57 @@ def test_export_numeric_accuracy_reprojected_checkpoints_and_bw_patterns(tmp_pat
     assert len(markers) == 4
 
     _assert_single_page_a3_landscape_pdf(out_dir / "map_a3.pdf")
+
+
+def test_f2_pdf_map_and_kmz_on_real_southfork_sample(tmp_path: Path) -> None:
+    """F2: Test PDF map and KMZ on real South Fork sample data."""
+    sf_dir = ROOT / "samples" / "southfork_f01_4"
+    if not sf_dir.is_dir() or not (sf_dir / "segments.geojson").is_file():
+        return
+
+    out_dir = tmp_path / "sf_exports"
+    manifest = export_project_all(
+        project="southfork_f01_4",
+        out_dir=out_dir,
+        project_dir_override=sf_dir,
+        orthophoto_override=sf_dir / "orthophoto_small.tif",
+        accuracy_override=sf_dir / "accuracy.json",
+        captured="30 Apr 2024",
+        basis="USGS public data (30 Apr 2024), not our footage",
+    )
+
+    # 1. Manifest and accuracy
+    assert manifest["project"] == "southfork_f01_4"
+    assert "±6.09 m at 3 checkpoints" in manifest["accuracy_line"]
+    assert manifest["layer_counts"]["roads_status"] == 498
+    assert manifest["layer_counts"]["checkpoints"] == 3
+
+    # 2. PDF map check
+    pdf_path = out_dir / "map_a3.pdf"
+    _assert_single_page_a3_landscape_pdf(pdf_path)
+
+    # 3. KMZ check: name, description, layer summary split
+    kmz_path = out_dir / "vortex.kmz"
+    assert kmz_path.is_file()
+    with zipfile.ZipFile(kmz_path, "r") as zf:
+        kml_text = zf.read("doc.kml").decode("utf-8")
+        assert "<name>Project Typhon: road access map: southfork_f01_4</name>" in kml_text
+        assert "USGS public data (30 Apr 2024), not our footage" in kml_text
+        assert "Capture date: 30 Apr 2024" in kml_text
+        assert "Processed:" in kml_text
+        assert "unknown inside mapped area: 16" in kml_text
+        assert "outside mapped area: 482" in kml_text
+
+    # 4. Default flags check: without captured and basis, defaults must be honest
+    out_default = tmp_path / "sf_default"
+    export_project_all(
+        project="southfork_f01_4",
+        out_dir=out_default,
+        project_dir_override=sf_dir,
+        orthophoto_override=sf_dir / "orthophoto_small.tif",
+        accuracy_override=sf_dir / "accuracy.json",
+    )
+    with zipfile.ZipFile(out_default / "vortex.kmz", "r") as zf:
+        kml_def = zf.read("doc.kml").decode("utf-8")
+        assert "Data basis: not stated" in kml_def
+        assert "Capture date: capture date: not recorded" in kml_def

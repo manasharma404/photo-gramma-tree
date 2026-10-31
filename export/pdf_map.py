@@ -179,30 +179,24 @@ def write_pdf_map(
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
     accuracy_line = format_accuracy_line(inp.accuracy)
 
-    # Determine survey / analysis timestamp honestly
-    survey_time = "not recorded"
+    # Determine timestamps honestly
+    processed_time = "not recorded"
     if inp.run_doc:
-        survey_time = str(inp.run_doc.get("ended_at") or inp.run_doc.get("started_at") or "not recorded")
-    if survey_time == "not recorded" and inp.advisor_state.get("updated_at"):
-        survey_time = f"{inp.advisor_state['updated_at']} (analysis)"
+        processed_time = str(inp.run_doc.get("ended_at") or inp.run_doc.get("started_at") or "not recorded")
+    if processed_time == "not recorded" and inp.advisor_state.get("updated_at"):
+        processed_time = f"{inp.advisor_state['updated_at']} (analysis)"
 
-    is_scenario = inp.segments_fc.get("scenario_label") is not None or any(
-        s.get("source") == "scenario" for s in inp.advisor_state.get("segments", [])
-    )
-    provenance_tag = (
-        str(inp.segments_fc.get("scenario_label") or "scenario reconstructed from reports, not drone-measured")
-        if is_scenario
-        else ("MOCK CONTRACT FIXTURE" if inp.advisor_state.get("mock") else "Drone photogrammetry assessment")
-    )
+    captured_time = str(inp.captured) if inp.captured else "capture date: not recorded"
+    data_basis = str(inp.basis) if inp.basis else "not stated"
+    survey_time = processed_time
 
     fig = plt.figure(figsize=(A3_WIDTH_IN, A3_HEIGHT_IN), dpi=150)
     ax = fig.add_axes([0.06, 0.12, 0.65, 0.79])
     panel_ax = fig.add_axes([0.73, 0.12, 0.25, 0.79])
     panel_ax.axis("off")
 
-    bounds_candidates: list[tuple[float, float, float, float]] = []
-
-    # 1. Orthophoto basemap if available
+    # 1. Determine map extent: strictly fit to orthophoto bounds (fallback: measured: true segments, then all)
+    obbox: dict[str, float] | None = None
     if inp.orthophoto_path is not None and inp.orthophoto_path.is_file():
         png_bytes, obbox = warp_orthophoto_to_wgs84_png(inp.orthophoto_path, max_dim=1400)
         arr = cv2.imdecode(np.frombuffer(png_bytes, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -214,31 +208,39 @@ def write_pdf_map(
                 origin="upper",
                 zorder=1,
             )
-            bounds_candidates.append((obbox["west"], obbox["south"], obbox["east"], obbox["north"]))
 
-    # Collect vector bounds
-    for gdf in layers.values():
-        valid = gdf[gdf.geometry.notna() & (~gdf.geometry.is_empty)]
-        if len(valid) > 0:
-            tb = valid.total_bounds
-            if all(np.isfinite(tb)):
-                bounds_candidates.append((float(tb[0]), float(tb[1]), float(tb[2]), float(tb[3])))
+    roads_gdf = layers["roads_status"]
+    has_measured = "measured" in roads_gdf.columns
 
-    if bounds_candidates:
-        xmin = min(b[0] for b in bounds_candidates)
-        ymin = min(b[1] for b in bounds_candidates)
-        xmax = max(b[2] for b in bounds_candidates)
-        ymax = max(b[3] for b in bounds_candidates)
+    if obbox is not None:
+        xmin, ymin, xmax, ymax = obbox["west"], obbox["south"], obbox["east"], obbox["north"]
+    elif has_measured and (roads_gdf["measured"] == True).any():
+        measured_gdf = roads_gdf[roads_gdf["measured"] == True]
+        valid = measured_gdf[measured_gdf.geometry.notna() & (~measured_gdf.geometry.is_empty)]
+        tb = valid.total_bounds
+        xmin, ymin, xmax, ymax = float(tb[0]), float(tb[1]), float(tb[2]), float(tb[3])
     else:
-        xmin, ymin, xmax, ymax = 0.0, 0.0, 0.01, 0.01
+        bounds_candidates: list[tuple[float, float, float, float]] = []
+        for gdf in layers.values():
+            valid = gdf[gdf.geometry.notna() & (~gdf.geometry.is_empty)]
+            if len(valid) > 0:
+                tb = valid.total_bounds
+                if all(np.isfinite(tb)):
+                    bounds_candidates.append((float(tb[0]), float(tb[1]), float(tb[2]), float(tb[3])))
+        if bounds_candidates:
+            xmin = min(b[0] for b in bounds_candidates)
+            ymin = min(b[1] for b in bounds_candidates)
+            xmax = max(b[2] for b in bounds_candidates)
+            ymax = max(b[3] for b in bounds_candidates)
+        else:
+            xmin, ymin, xmax, ymax = 0.0, 0.0, 0.01, 0.01
 
     dx = max(xmax - xmin, 1e-4)
     dy = max(ymax - ymin, 1e-4)
-    xmin, xmax = xmin - 0.06 * dx, xmax + 0.06 * dx
-    ymin, ymax = ymin - 0.06 * dy, ymax + 0.06 * dy
+    xmin, xmax = xmin - 0.05 * dx, xmax + 0.05 * dx
+    ymin, ymax = ymin - 0.05 * dy, ymax + 0.05 * dy
 
     # Thin sparse midpoint markers when hundreds of segments are present so print stays clean
-    roads_gdf = layers["roads_status"]
     marker_stride = max(1, len(roads_gdf) // 90)
 
     for idx, (_, row) in enumerate(roads_gdf.iterrows()):
@@ -358,7 +360,7 @@ def write_pdf_map(
 
     # Header banner
     fig.suptitle(
-        f"VORTEX POST-LANDSLIDE ACCESSIBILITY MAP — PROJECT: {inp.project.upper()}",
+        f"Project Typhon: road access map: {inp.project}",
         x=0.5,
         y=0.965,
         fontsize=14,
@@ -430,12 +432,17 @@ def write_pdf_map(
     leg.get_title().set_fontweight("bold")
 
     status_counts = roads_gdf["display_status"].value_counts().to_dict() if len(roads_gdf) else {}
+    inside_gdf = roads_gdf[roads_gdf["measured"] == True] if has_measured else roads_gdf
+    outside_gdf = roads_gdf[roads_gdf["measured"] == False] if has_measured else roads_gdf.iloc[0:0]
+    inside_counts = inside_gdf["display_status"].value_counts().to_dict() if len(inside_gdf) else {}
+
     meta_lines = [
         "SURVEY & ASSESSMENT METADATA",
         "-" * 34,
         f"Project: {inp.project}",
-        f"Data basis: {provenance_tag}",
-        f"Survey / analysis time:\n  {survey_time}",
+        f"Data basis: {data_basis}",
+        f"Processed: {processed_time}",
+        f"Capture date: {captured_time}",
         f"CRS: WGS 84 (EPSG:4326)",
         "",
         "ACCURACY STATEMENT (from accuracy.json)",
@@ -443,8 +450,19 @@ def write_pdf_map(
         "",
         "LAYER SUMMARY",
         f"  Road segments: {len(roads_gdf)}",
-        f"    open={status_counts.get('open', 0)}, partial={status_counts.get('partial', 0)},",
-        f"    blocked={status_counts.get('blocked', 0)}, unknown={status_counts.get('unknown', 0)}",
+    ]
+    if len(outside_gdf) > 0:
+        meta_lines.extend([
+            f"    Inside mapped area: {len(inside_gdf)}",
+            f"      unknown inside mapped area: {inside_counts.get('unknown', 0)}",
+            f"    outside mapped area: {len(outside_gdf)}",
+        ])
+    else:
+        meta_lines.extend([
+            f"    open={status_counts.get('open', 0)}, partial={status_counts.get('partial', 0)},",
+            f"    blocked={status_counts.get('blocked', 0)}, unknown={status_counts.get('unknown', 0)}",
+        ])
+    meta_lines.extend([
         f"  Cut-off/unverified places: {len(cp_gdf)}",
         f"  Landing zones: {len(lz_gdf)}",
         f"  Checkpoints: {len(chk_gdf)}",
@@ -453,7 +471,7 @@ def write_pdf_map(
         "OPERATIONAL NOTE",
         "  Decision-support map only (not dispatch).",
         "  'unknown' is never treated as 'open'.",
-    ]
+    ])
     panel_ax.text(
         0.02,
         0.54,
@@ -469,7 +487,7 @@ def write_pdf_map(
     fig.text(
         0.06,
         0.035,
-        f"{accuracy_line}  |  Survey/Analysis Time: {survey_time}  |  Basis: {provenance_tag}",
+        f"{accuracy_line}  |  Processed: {processed_time}  |  Capture: {captured_time}  |  Basis: {data_basis}",
         fontsize=8.5,
         fontweight="bold",
     )

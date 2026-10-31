@@ -24,6 +24,8 @@ def export_project_all(
     dsm_override: Path | None = None,
     accuracy_override: Path | None = None,
     measurements_dir_override: Path | None = None,
+    captured: str | None = None,
+    basis: str | None = None,
 ) -> dict[str, Any]:
     """Run E1-E5 exports for a project and write export_manifest.json (E6)."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -37,6 +39,8 @@ def export_project_all(
         dsm_override=dsm_override,
         accuracy_override=accuracy_override,
         measurements_dir_override=measurements_dir_override,
+        captured=captured,
+        basis=basis,
     )
 
     layers = build_all_layers(inp)
@@ -77,6 +81,9 @@ def export_project_all(
         layers=layers,
         kmz_path=out_dir / "vortex.kmz",
         orthophoto_path=inp.orthophoto_path,
+        data_basis=inp.basis,
+        processed_time=str(inp.run_doc.get("ended_at") or inp.run_doc.get("started_at") or inp.advisor_state.get("updated_at") or "not recorded") if inp.run_doc else str(inp.advisor_state.get("updated_at") or "not recorded"),
+        captured_time=inp.captured,
     )
     entries.append(
         {
@@ -155,6 +162,8 @@ def main() -> None:
     ap.add_argument("--orthophoto", type=Path, default=None, help="Optional orthophoto GeoTIFF path")
     ap.add_argument("--dsm", type=Path, default=None, help="Optional DSM GeoTIFF path")
     ap.add_argument("--accuracy", type=Path, default=None, help="Optional accuracy.json path")
+    ap.add_argument("--captured", type=str, default=None, help="Optional capture date string (e.g. '30 Apr 2024')")
+    ap.add_argument("--basis", type=str, default=None, help="Optional data basis string")
     args = ap.parse_args()
 
     manifest = export_project_all(
@@ -164,6 +173,8 @@ def main() -> None:
         orthophoto_override=args.orthophoto,
         dsm_override=args.dsm,
         accuracy_override=args.accuracy,
+        captured=args.captured,
+        basis=args.basis,
     )
     print(
         f"Exported {len(manifest['files'])} artifacts for project '{args.project}' -> {args.out} "
