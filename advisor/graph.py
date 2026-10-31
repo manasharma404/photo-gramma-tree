@@ -309,12 +309,15 @@ def assemble_access_report(
     """Build a schema-compliant access_report.json using the supplied reachability backend."""
     passable_by_mode: dict[str, set[str]] = {}
     optimistic_by_mode: dict[str, set[str]] = {}
+    all_connected_by_mode: dict[str, set[str]] = {}
     for mode in MODES:
         passable_by_mode[mode] = reachability_fn(mode, {"open", "partial"}, None)
         optimistic_by_mode[mode] = reachability_fn(mode, {"open", "partial", "unknown"}, None)
+        all_connected_by_mode[mode] = reachability_fn(mode, {"open", "partial", "unknown", "blocked"}, None)
 
     places_out: list[dict[str, Any]] = []
     isolated_by_mode: dict[str, list[str]] = {m: [] for m in MODES}
+    unverified_by_mode: dict[str, list[str]] = {m: [] for m in MODES}
 
     for p in topology.places:
         reach_map: dict[str, bool | None] = {}
@@ -323,6 +326,8 @@ def assemble_access_report(
             if p.junction_id is None or topology.base_junction_id is None:
                 reach_map[mode] = None
                 alt_map[mode] = 0
+                if p.place_id != topology.base_place_id:
+                    unverified_by_mode[mode].append(p.place_id)
             elif p.junction_id in passable_by_mode[mode]:
                 reach_map[mode] = True
                 alt_map[mode] = count_alternative_routes(topology, p.junction_id, mode)
@@ -330,10 +335,26 @@ def assemble_access_report(
                 # Only reachable through unknown segments -> unknown (null), never open or blocked.
                 reach_map[mode] = None
                 alt_map[mode] = 0
-            else:
+                if p.place_id != topology.base_place_id:
+                    unverified_by_mode[mode].append(p.place_id)
+            elif p.junction_id in all_connected_by_mode[mode]:
+                # Road path exists in graph, but every route contains at least one blocked segment.
                 reach_map[mode] = False
                 alt_map[mode] = 0
                 isolated_by_mode[mode].append(p.place_id)
+            else:
+                # Disconnected component in provided road network: check if nearest segment is confirmed blocked
+                nsid = p.nearest_segment_id
+                seg_st = topology.segments[nsid].status_by_mode[mode] if (nsid and nsid in topology.segments) else "unknown"
+                if seg_st == "blocked":
+                    reach_map[mode] = False
+                    alt_map[mode] = 0
+                    isolated_by_mode[mode].append(p.place_id)
+                else:
+                    reach_map[mode] = None
+                    alt_map[mode] = 0
+                    if p.place_id != topology.base_place_id:
+                        unverified_by_mode[mode].append(p.place_id)
 
         places_out.append(
             {
@@ -429,6 +450,7 @@ def assemble_access_report(
         "modes": list(MODES),
         "base_place_id": topology.base_place_id,
         "isolated_places_by_mode": isolated_by_mode,
+        "unverified_places_by_mode": unverified_by_mode,
         "places": places_out,
         "reopen_plan": reopen_plan,
         "computed_with": computed_with,
