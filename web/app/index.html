@@ -39,7 +39,8 @@
     </nav>
 
     <aside class="panel" id="panel">
-      <header class="panel__head">
+      <header class="panel__head" id="panel-head">
+        <span class="grabber" aria-hidden="true"></span>
         <div>
           <h1 id="panel-title">Act now</h1>
           <p id="panel-sub">What needs attention first, and why.</p>
@@ -58,6 +59,7 @@
       <div id="map"></div>
       <div id="three" hidden></div>
 
+      <button class="fab card" id="layers-btn" aria-label="Layers" aria-expanded="false"><span data-icon="layers"></span></button>
       <section class="layers card" id="layers" aria-label="Layers">
         <header><span data-icon="layers"></span>Layers</header>
         <div id="layer-list"></div>

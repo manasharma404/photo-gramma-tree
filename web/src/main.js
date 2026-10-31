@@ -28,7 +28,12 @@ const status = (msg) => ($("statusline").textContent = msg || "");
 
 async function boot() {
   mountIcons();
-  initTabs();
+  initTabs(() => $("panel").classList.add("expanded")); // phone: picking a section opens the sheet
+  $("panel-head").addEventListener("click", () => $("panel").classList.toggle("expanded"));
+  $("layers-btn").addEventListener("click", () => {
+    const open = $("layers").classList.toggle("open");
+    $("layers-btn").setAttribute("aria-expanded", String(open));
+  });
   document.addEventListener("click", (e) => {
     const go = e.target.closest("[data-goto]");
     if (go) showTab(go.dataset.goto);
