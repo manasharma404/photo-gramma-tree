@@ -99,8 +99,9 @@ Disconnect from upstream internet, then run in this exact order:
 ### Step 3.1 — Verify or restart Neo4j offline
 ```powershell
 docker compose --env-file .env -f neo4j/docker-compose.yml restart
-Start-Sleep -Seconds 25
-uv run python -c "from advisor.neo4j_client import open_driver; d = open_driver(timeout_s=5.0); print('GDS:', d.execute_query('RETURN gds.version() AS v').records[0]['v']); d.close()"
+# Neo4j Community on Windows requires 35-45 seconds on startup before accepting Bolt connections:
+Start-Sleep -Seconds 45
+uv run python -c "from advisor.neo4j_client import open_driver; d = open_driver(timeout_s=10.0); print('GDS:', d.execute_query('RETURN gds.version() AS v').records[0]['v']); d.close()"
 ```
 **Expected output:**
 ```text
