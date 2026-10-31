@@ -1,12 +1,8 @@
-// About and Drone data pages ("field ticket" style). Numbers come from the running app (spec.json);
-// anything missing says "not measured" instead of guessing.
-import "@fontsource/barlow-condensed/latin-700-italic.css";
-import "@fontsource/barlow-condensed/latin-800-italic.css";
-import "@fontsource/barlow-condensed/latin-800.css";
-import "@fontsource/ibm-plex-mono/latin-400.css";
-import "@fontsource/ibm-plex-mono/latin-500.css";
-import "@fontsource/ibm-plex-mono/latin-600.css";
-import "@fontsource/ibm-plex-mono/latin-700.css";
+// About and Drone data sections on the home page (ticket style, Typhon v2 palette, the lead's fonts).
+// Numbers come from the running app (spec.json); anything missing says "not measured" instead of guessing.
+import "@fontsource/space-grotesk/latin-600.css";
+import "@fontsource/space-grotesk/latin-700.css";
+import "@fontsource/inter/latin-600.css";
 import "./styles/zine.css";
 import { api } from "./api.js";
 import { num } from "./format.js";

@@ -9,10 +9,7 @@ export default defineConfig({
   base: "/",
   build: {
     outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 2000,
-    rollupOptions: { input: {
-      landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html"),
-      about: resolve(__dirname, "about/index.html"), neo2: resolve(__dirname, "neo2/index.html"),
-    } },
+    rollupOptions: { input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html") } },
   },
   server: {
     proxy: {

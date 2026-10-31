@@ -5,6 +5,7 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "./styles/tokens.css";
 import "./styles/landing.css";
+import "./zine.js";
 import { SNAPSHOT, api } from "./api.js";
 import { mountIcons } from "./icons.js";
 import { num } from "./format.js";

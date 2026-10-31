@@ -7,7 +7,7 @@ import { mkdirSync } from "node:fs";
 const base = (process.argv[2] || "http://localhost:8000").replace(/\/$/, "");
 const out = "../data/screenshots/pages";
 mkdirSync(out, { recursive: true });
-const pages = [["home", "/"], ["about", "/about/"], ["neo2", "/neo2/"]];
+const pages = [["home", "/"], ["app", "/app/"]];
 const sizes = [["desktop", { width: 1440, height: 900 }], ["phone", { width: 390, height: 844 }]];
 
 const browser = await chromium.launch({ channel: "msedge", headless: true });

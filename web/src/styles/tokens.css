@@ -9,18 +9,25 @@
   --tracking-caps: 0.12em;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
   --radius: 10px; --radius-pill: 999px;
-  --shadow: 0 1px 2px rgba(47, 62, 46, 0.06), 0 8px 24px rgba(47, 62, 46, 0.08);
+  --shadow: 0 1px 2px rgba(15, 30, 61, 0.06), 0 8px 24px rgba(15, 30, 61, 0.08);
 
-  /* brand palette */
-  --sand: #F8F6EF;   /* background */
+  /* Typhon v2 palette (31 Oct, lead): the brand kit's sand/stone paper + the deck's navy, blue and lime.
+     The old names are kept so every component picks the new colours up: --forest is now navy ink,
+     --sage the lime highlight, --terrain slate, --ocean the data blue. */
+  --navy: #0F1E3D;   /* ink, dark surfaces, buttons */
+  --navy-2: #1B2F5C; /* hover, raised dark surfaces */
+  --blue: #2A4EA8;   /* data, links, active states */
+  --lime: #B5D334;   /* small highlights only */
+  --paper: #EBE2CC;  /* ticket paper */
+  --sand: #F5F1E6;   /* background */
   --stone: #E6E1D6;  /* surfaces, cards */
-  --sage: #A7B399;   /* accents, highlights */
-  --forest: #2F3E2E; /* text, key elements, buttons */
-  --terrain: #6B7F6A;/* secondary, icons */
-  --ocean: #0F3D4E;  /* data overlays, graphs */
+  --sage: var(--lime);
+  --forest: var(--navy);
+  --terrain: #56607A;
+  --ocean: var(--blue);
 
-  --bg: var(--sand); --surface: #FFFFFF; --surface-2: var(--stone); --line: #D8D2C4;
-  --text: var(--forest); --text-2: #5C6B5B; --focus: var(--ocean);
+  --bg: var(--sand); --surface: #FFFFFF; --surface-2: var(--stone); --line: #D6D1C4;
+  --text: var(--forest); --text-2: #56607A; --focus: var(--ocean);
   --accent: var(--sage); --primary: var(--forest); --on-primary: var(--sand);
 
   /* road status (meaning fixed by the brief) */
