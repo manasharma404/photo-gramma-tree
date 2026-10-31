@@ -8,7 +8,7 @@ a { color: inherit; text-decoration: none; }
 .hero { position: relative; height: 100vh; min-height: 760px; overflow: hidden; background: var(--paper); }
 .hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 14vh; background: linear-gradient(transparent, var(--paper)); pointer-events: none; }
 /* the illustration: centred, edges fade into the paper; callouts are positioned in % of the artwork */
-.hero__art { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); z-index: 1;
+.hero__art { position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%); z-index: 1;
   width: min(84vw, calc((100vh - 40px) * 1.777)); aspect-ratio: 1672 / 941; }
 .hero__art::before { content: ""; position: absolute; inset: 0; background: url("/hero.webp") center / 100% 100% no-repeat;
   -webkit-mask-image: radial-gradient(ellipse 58% 60% at 50% 48%, #000 62%, transparent 100%);
@@ -17,6 +17,7 @@ a { color: inherit; text-decoration: none; }
 /* nav */
 .brand { display: flex; align-items: center; color: var(--ink); --logo-cutout: var(--paper); }
 .logo svg { display: block; height: 20px; width: auto; }
+.logo--mark svg { height: 34px; }
 .lnav { position: absolute; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: space-between; padding: 26px 52px; z-index: 3; }
 .lnav__links { display: flex; gap: 56px; }
 .lnav__links a { font: 500 12px var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 75%, transparent); position: relative; padding-bottom: 10px; }

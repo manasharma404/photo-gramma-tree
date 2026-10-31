@@ -1,5 +1,6 @@
 // Line icons in the brand style (stroke, rounded). Inline SVG: nothing loads from the internet.
 import logoLockup from "./assets/logo-lockup.svg?raw"; // the lead's logo, recoloured by scripts/make_logo.py
+import logoMark from "./assets/logo-mark.svg?raw";
 
 const svg = (d, size = 22) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -30,6 +31,7 @@ export const ICONS = {
 
 export function mountIcons(root = document) {
   root.querySelectorAll("[data-logo]").forEach((el) => (el.innerHTML = logoLockup));
+  root.querySelectorAll("[data-logo-mark]").forEach((el) => (el.innerHTML = logoMark));
   root.querySelectorAll("[data-icon]").forEach((el) => {
     if (!el.dataset.iconMounted) {
       el.insertAdjacentHTML("afterbegin", ICONS[el.dataset.icon] || "");
