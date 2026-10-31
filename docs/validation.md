@@ -2,6 +2,9 @@
 
 Every number here comes from a run in `data/runs/` (gitignored; run ids given) or from the USGS files listed in `data/LICENSES.md`. Nothing is estimated unless labelled.
 
+## Datum (confirmed 31 Oct, 17:40 IST)
+The USGS metadata (`SEKI_SouthFork_DebrisFlow_GNSS_metadata.xml`) states the RTK points are **NAD83(2011)** (EPSG:6319 / UTM 11N EPSG:6340), ellipsoid heights on GRS80, orthometric heights NAVD88 via GEOID18, with checkpoint accuracy ~0.03 m horizontal and ~0.07 m vertical (95%). Our map is placed by camera GPS (WGS84). PROJ gives the difference at South Fork for epoch 2024.33 as **1.52 m towards 279° (west) and −0.63 m in height** (ITRF2014 and ITRF2020 routes agree to 1 mm). `accuracy/datum.py` now converts the checkpoints into the map's frame before comparing. **This converts the reference, not the map:** checkpoints still only measure error. Results before the conversion are kept in each run as `accuracy.pre_datum.json` and quoted below in brackets.
+
 ## Run 1: USGS South Fork, flight F01 part 5 only (single strip) — diagnostic
 
 **Data:** 109 USGS images (`F01-5` zip; Ricoh GR II, global shutter, ~110 m AGL stated, 2.9 cm GSD stated), processed **without ground control** (GPS in the images only). Reference: USGS RTK targets and ground points (`SEKI_SouthFork_DebrisFlow_2024_RTK_GNSS.csv`).
@@ -17,14 +20,14 @@ Every number here comes from a run in `data/runs/` (gitignored; run ids given) o
 ### Horizontal (orthophoto vs RTK targets)
 | Checkpoints | RMSE_x | RMSE_y | RMSE_H | Max | Method |
 |---|---|---|---|---|---|
-| 2 (SF10, SF11) | 24.11 m | 25.39 m | **35.01 m** | 35.09 m | targets found by `accuracy/find_targets.py`, confirmed visually (crops in the run's `targets/`) |
+| 2 (SF10, SF11) | 22.63 m | 25.65 m | **34.21 m** (35.01 m before datum conversion) | 34.43 m | targets found by `accuracy/find_targets.py`, confirmed visually (crops in the run's `targets/`) |
 
-- Both shifts are **34.7–34.8 m across the flight line, 3–5 m along it**: the signature of the roll ambiguity.
+- Both shifts are **~35 m across the flight line, 3–5 m along it**: the signature of the roll ambiguity.
 - Three more targets are visible (SF09, SF12, SF18/19 candidates) but their numbers can't be read at 5 cm, and their implied shifts don't fit; excluded rather than guessed.
-- RTK horizontal datum: not stated in the CSV (likely NAD83(2011); ~1–1.5 m from WGS84 here). Negligible at this error; must be confirmed for a good run.
+- Datum converted (see top); it changes this result by under 1 m.
 - ASPRS Ed. 2 asks for ≥ 30 checkpoints for full compliance; N = 2 is a diagnostic, not a compliance test.
 
-### Vertical (DTM vs 823 RTK ground points, ellipsoid heights)
+### Vertical (DTM vs 823 RTK ground points, ellipsoid heights; computed before the datum conversion, which would add ~0.6 m)
 | Compared at | N | Mean dz | Std | RMSE | Tilt across track |
 |---|---|---|---|---|---|
 | surveyed positions | 823 | +58.6 m | 7.6 m | 59.1 m | −0.148 m/m (−8.4°) |
@@ -50,25 +53,25 @@ Every number here comes from a run in `data/runs/` (gitignored; run ids given) o
 ### Horizontal (orthophoto vs RTK targets)
 | Checkpoints | RMSE_x | RMSE_y | RMSE_H | Max | Method |
 |---|---|---|---|---|---|
-| 3 (SF16, SF17, SF18) | 1.07 m | 6.33 m | **6.42 m** | 7.88 m | detector candidates confirmed visually; IDs by consistent shift |
+| 3 (SF16, SF17, SF18) | 0.59 m | 6.07 m | **6.09 m** (6.42 m before datum conversion) | 7.65 m | detector candidates confirmed visually; IDs by consistent shift |
 
-- All three shifts point the same way (~1 m west, 5–8 m north): a correctly shaped map placed by consumer-grade camera GPS. USGS states ~3 m horizontal for these camera positions; the remainder may include the RTK file's datum (likely NAD83(2011), ~1–1.5 m from WGS84 here; unconfirmed).
-- **Compared with Run 1 (single strip): 35.0 m → 6.4 m** from flight geometry alone. That's the capture-protocol rule in numbers.
+- All three shifts point the same way (~0.5 m east, 4–8 m north): a correctly shaped map placed by consumer-grade camera GPS. The datum conversion removed most of the east–west error (1.07 → 0.59 m) but almost none of the north error, so **the ~6 m north offset is the map, not the datum.** USGS states ~3 m horizontal for these camera positions.
+- **Compared with Run 1 (single strip): 34.2 m → 6.1 m** from flight geometry alone. That's the capture-protocol rule in numbers.
 - N = 3 is far below the ASPRS recommendation of 30; we report it as a prototype measurement, not a compliance test.
 
 ### Vertical
 | Compared | N | Result |
 |---|---|---|
-| DSM at the 3 checkpoint targets (absolute) | 3 | RMSE_V **44.08 m** |
-| DTM vs RTK ground points, absolute (map shift applied) | 326 | mean offset **+42.86 m** |
-| same, after removing the constant offset (**relative heights**) | 326 | spread **1.09 m** (std); 0.50 m if a slight tilt is also removed |
+| DSM at the 3 checkpoint targets (absolute) | 3 | RMSE_V **44.70 m** (44.08 m before datum conversion) |
+| DTM vs RTK ground points, absolute (map shift applied) | 326 | mean offset **+43.49 m** (+42.86 m before) |
+| same, after removing the constant offset (**relative heights**) | 326 | spread **1.09 m** (std; unchanged by the datum); 0.50 m if a slight tilt is also removed (before conversion) |
 
 - **Absolute heights are unreliable** (+43 m): the model is placed vertically by the cameras' consumer-GPS altitudes, which read high (Run 1 found the same).
 - **Relative heights are good to about ±1.1 m.** Debris volume, pile height, obstruction height and span banks are all measured against nearby ground, so the offset cancels. `accuracy/vertical.py` records this as `vertical_relative` in `accuracy.json`; `measure/` and `roads/` use it for height/volume tolerances (labelled), and the absolute RMSE_V stays reported as is.
 
 ### What the block shows about roads and landing zones (real outputs)
 - **Trails under canopy:** 16 trail segments fall inside the map; their corridors are only 5–43% visible (tree canopy and green vegetation are set aside as "not visible"). With the assessment engine's 70% minimum, every one is **unknown**, not open or blocked. A drone cannot certify a forest trail it cannot see; the tool says so instead of guessing.
-- **The ~6 m horizontal offset** also means OSM trail lines sample ground ~6 m from the real trail. Shifting the map by the checkpoint error would turn checkpoints into ground control, which the brief forbids; we report it instead.
+- **The ~6 m horizontal offset** (north, after datum conversion) also means OSM trail lines sample ground ~6 m from the real trail. Shifting the map by the checkpoint error would turn checkpoints into ground control, which the brief forbids; we report it instead.
 - **Landing zones:** no candidate for either helicopter type (FATO 24 m / 38 m) met slope ≤ 7° (PLACEHOLDER) and the clear safety ring anywhere in this steep, forested canyon.
 
 ## Tool vs tape (span, pile, staged block)

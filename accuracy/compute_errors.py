@@ -8,7 +8,8 @@ confirmed.json lists checkpoints a person has confirmed in the orthophoto:
 
 Errors are map minus surveyed, in metres in the map CRS. dz needs a DSM and uses
 the RTK ellipsoid height, since ODM's output heights are relative to the WGS84
-ellipsoid (from image EXIF). Checkpoints are never used to correct the map.
+ellipsoid (from image EXIF). The RTK points are first converted from NAD83(2011)
+to the map's WGS84 frame (accuracy/datum.py). Checkpoints are never used to correct the map.
 """
 import argparse
 import csv
@@ -18,6 +19,8 @@ from pathlib import Path
 
 import jsonschema
 from pyproj import Transformer
+
+from accuracy.datum import NOTE as DATUM_NOTE, rtk_to_wgs84
 
 ROOT = Path(__file__).resolve().parent.parent
 STANDARD_NOTE = ("ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full "
@@ -52,13 +55,14 @@ def main():
     per_point, dxs, dys, dzs, horiz, precisions, arrows = [], [], [], [], [], [], []
     for p in conf["points"]:
         r = rtk[p["id"]]
-        sx, sy = to_map.transform(float(r["longitude"]), float(r["latitude"]))
+        lon, lat, h = rtk_to_wgs84(r)
+        sx, sy = to_map.transform(lon, lat)
         dx, dy = p["x"] - sx, p["y"] - sy
         dz = None
         if dsm is not None:
             z = next(dsm.sample([(p["x"], p["y"])]))[0]
             if dsm.nodata is None or z != dsm.nodata:
-                dz = round(float(z) - float(r["ellipsoid_ht_m"]), 3)
+                dz = round(float(z) - h, 3)
                 dzs.append(dz)
         dxs.append(dx)
         dys.append(dy)
@@ -69,7 +73,7 @@ def main():
                           "found_by": p["found_by"]})
         arrows.append({"type": "Feature",
                        "geometry": {"type": "LineString",
-                                    "coordinates": [[float(r["longitude"]), float(r["latitude"])],
+                                    "coordinates": [[lon, lat],
                                                     list(to_wgs(p["x"], p["y"]))]},
                        "properties": {"id": p["id"], "code": r["code"], "error_h_m": round(math.hypot(dx, dy), 2),
                                       "dx_m": round(dx, 2), "dy_m": round(dy, 2), "dz_m": dz,
@@ -84,7 +88,7 @@ def main():
         "n_checkpoints": len(per_point),
         "checkpoint_method": "rtk",
         "checkpoint_stated_accuracy_m": max(precisions) if precisions else None,
-        "datum_note": args.datum_note or conf.get("note"),
+        "datum_note": " ".join(filter(None, [args.datum_note or conf.get("note"), DATUM_NOTE])),
         "horizontal": {"rmse_x_m": round(rx, 3), "rmse_y_m": round(ry, 3),
                        "rmse_h_m": round(math.hypot(rx, ry), 3), "max_error_m": round(max(horiz), 3)},
         "vertical": {"rmse_v_m": round(rms(dzs), 3) if dzs else None,

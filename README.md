@@ -43,8 +43,10 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 **Accuracy without ground control (USGS RTK checkpoints):**
 | Flight geometry | Checkpoints | Horizontal RMSE | Max |
 |---|---|---|---|
-| One straight line (F01-5) | 2 | 35.0 m | 35.1 m |
-| Block of 5 parallel lines (F01-4) | 3 | **6.4 m** | 7.9 m |
+| One straight line (F01-5) | 2 | 34.2 m | 34.4 m |
+| Block of 5 parallel lines (F01-4) | 3 | **6.1 m** | 7.6 m |
+
+The USGS checkpoints are NAD83(2011) (stated in their metadata); we convert them to the map's WGS84 frame first (`accuracy/datum.py`, 1.5 m at this site). That converts the reference, never the map.
 
 One straight line lets the model roll about the line (errors 34.7–34.8 m across it, 3–5 m along it). **Capture rule we derived: never map from one straight line; fly at least two parallel lines.** **Vertical (block):** absolute heights are off by +43 m (consumer-GPS camera altitudes), but heights **relative to nearby ground are good to ±1.1 m** (326 surveyed ground points). Volumes and heights are relative, so their tolerances use the ±1.1 m figure. N is small (ASPRS asks for ≥ 30), so treat these as prototype measurements.
 

@@ -10,6 +10,17 @@ def test_rms():
     assert compute_errors.rms([]) is None
 
 
+def test_datum_moves_rtk_about_1_5_m_west_and_0_6_m_down():
+    from pyproj import Geod
+    from accuracy.datum import rtk_to_wgs84
+    row = {"longitude": "-118.76384247", "latitude": "36.35005250", "ellipsoid_ht_m": "1092.296"}  # USGS base SFKW
+    lon, lat, h = rtk_to_wgs84(row)
+    az, _, dist = Geod(ellps="GRS80").inv(-118.76384247, 36.35005250, lon, lat)
+    assert dist == pytest.approx(1.52, abs=0.05)
+    assert az % 360 == pytest.approx(279, abs=5)
+    assert h - 1092.296 == pytest.approx(-0.63, abs=0.05)
+
+
 def _scene(px_m=0.05, size=400):
     """Yellowish sand with one white target (with bluish triangles) and one white rock."""
     rgb = np.zeros((size, size, 3), np.uint8)

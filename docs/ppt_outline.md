@@ -22,10 +22,10 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 - Notes: ODM in Docker on the laptop GPU; checkpoints never used to correct the map.
 
 ### 4. Judge criterion 1: positional error, measured
-- **35.0 m → 6.4 m** horizontal, without ground control (USGS RTK checkpoints)
+- **34.2 m → 6.1 m** horizontal, without ground control (USGS RTK checkpoints)
 - One straight flight line (N=2) vs a block of 5 parallel lines (N=3)
 - Visual: the two numbers big; checkpoint-error arrows screenshot (Accuracy tab)
-- Notes: N is tiny vs ASPRS's 30, so these are prototype measurements. One line lets the model roll about it. RTK datum unconfirmed (~1–1.5 m). Capture rule we derived: **never map from one straight line.**
+- Notes: N is tiny vs ASPRS's 30, so these are prototype measurements. One line lets the model roll about it. Checkpoints converted from NAD83(2011) (USGS metadata) to WGS84 first, 1.5 m here; that took the block from 6.4 to 6.1 m, so the remaining ~6 m north offset is the map. Capture rule we derived: **never map from one straight line.**
 
 ### 5. Heights: what to trust
 - Absolute heights off by **+43 m** (consumer GPS altitude)
@@ -51,7 +51,7 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 - Notes: a drone can't certify what it can't see; the tool says so. Thresholds are PLACEHOLDERs until sourced.
 
 ### 9. Measuring tools (click on the map)
-- Span 59.4 ± 9.1 m · debris volume 67.6 ± 277 m³ · working space 1.5 × 2.0 m (fails)
+- Span 59.4 ± 8.6 m · debris volume 67.6 ± 277 m³ · working space 1.5 × 2.0 m (fails)
 - Every result carries its tolerance
 - Notes: tolerances are large where the ground is rough or small; tool-vs-tape comparison **PENDING** (our survey flight was rained out).
 

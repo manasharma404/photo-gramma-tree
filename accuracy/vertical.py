@@ -21,6 +21,8 @@ import numpy as np
 import rasterio
 from pyproj import Transformer
 
+from accuracy.datum import rtk_to_wgs84
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -34,9 +36,9 @@ def main():
 
     with rasterio.open(args.dtm) as ds, open(args.rtk, encoding="utf-8-sig") as f:
         to_map = Transformer.from_crs(4326, ds.crs, always_xy=True)
-        rows = [r for r in csv.DictReader(f) if r["code"] == "TOPO"]
-        xy = np.array([to_map.transform(float(r["longitude"]), float(r["latitude"])) for r in rows]) + np.array(shift)
-        ell = np.array([float(r["ellipsoid_ht_m"]) for r in rows])
+        rows = [rtk_to_wgs84(r) for r in csv.DictReader(f) if r["code"] == "TOPO"]  # into the map's frame
+        xy = np.array([to_map.transform(lon, lat) for lon, lat, _ in rows]) + np.array(shift)
+        ell = np.array([h for _, _, h in rows])
         z = np.array([v[0] for v in ds.sample(xy)], float)
         ok = np.isfinite(z) & (z != ds.nodata) & (z > 0)
     dz = z[ok] - ell[ok]
@@ -44,7 +46,7 @@ def main():
         "std_m": round(float(dz.std()), 2),
         "offset_m": round(float(dz.mean()), 2),
         "n": int(ok.sum()),
-        "reference": "USGS RTK ground (TOPO) points, ellipsoid heights",
+        "reference": "USGS RTK ground (TOPO) points, ellipsoid heights, converted from NAD83(2011) to ITRF2020/WGS84",
         "surface": str(args.dtm).replace("\\", "/"),
         "horizontal_shift_applied_m": [round(shift[0], 2), round(shift[1], 2)],
         "method": "DTM minus surveyed ground height; std after removing the mean offset (absolute heights are off by offset_m; "

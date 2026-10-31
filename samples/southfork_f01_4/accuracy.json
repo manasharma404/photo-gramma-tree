@@ -5,51 +5,51 @@
   "n_checkpoints": 3,
   "checkpoint_method": "rtk",
   "checkpoint_stated_accuracy_m": 0.009,
-  "datum_note": "USGS F01-4 block (5 parallel flight lines, 248 images), no ground control. Positions are detector candidates confirmed visually by Claude from crops (targets/top4_sheet.png); IDs assigned by consistent shift (all three ~1 m W, 5-8 m N); lead to re-confirm. SF15, SF19, SF20 (chalk marks) not identifiable at 5 cm; excluded. RTK horizontal datum not stated in the CSV (likely NAD83(2011), ~1-1.5 m from WGS84 here): part of the error may be datum, not map.",
+  "datum_note": "USGS F01-4 block (5 parallel flight lines, 248 images), no ground control. Positions are detector candidates confirmed visually by Claude from crops (targets/top4_sheet.png); IDs assigned by consistent shift (all three ~1 m W, 5-8 m N); lead to re-confirm. SF15, SF19, SF20 (chalk marks) not identifiable at 5 cm; excluded. RTK checkpoints converted from NAD83(2011) (stated in the USGS metadata) to ITRF2020/WGS84 at epoch 2024.33 before comparison (about 1.5 m west and 0.6 m down at South Fork). The reference was converted; the map was not corrected.",
   "horizontal": {
-    "rmse_x_m": 1.071,
-    "rmse_y_m": 6.325,
-    "rmse_h_m": 6.415,
-    "max_error_m": 7.876
+    "rmse_x_m": 0.589,
+    "rmse_y_m": 6.065,
+    "rmse_h_m": 6.094,
+    "max_error_m": 7.648
   },
   "vertical": {
-    "rmse_v_m": 44.075,
-    "max_error_m": 44.481
+    "rmse_v_m": 44.702,
+    "max_error_m": 45.108
   },
   "relative": [],
   "per_point": [
     {
       "id": "SF16",
-      "dx_m": -1.111,
-      "dy_m": 4.548,
-      "dz_m": 43.385,
+      "dx_m": 0.38,
+      "dy_m": 4.282,
+      "dz_m": 44.012,
       "found_by": "manual"
     },
     {
       "id": "SF17",
-      "dx_m": -1.38,
-      "dy_m": 6.132,
-      "dz_m": 44.481,
+      "dx_m": 0.111,
+      "dy_m": 5.866,
+      "dz_m": 45.108,
       "found_by": "manual"
     },
     {
       "id": "SF18",
-      "dx_m": -0.55,
-      "dy_m": 7.856,
-      "dz_m": 44.351,
+      "dx_m": 0.941,
+      "dy_m": 7.59,
+      "dz_m": 44.978,
       "found_by": "manual"
     }
   ],
   "standard_note": "ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full compliance; this assessment uses n_checkpoints.",
   "vertical_relative": {
     "std_m": 1.09,
-    "offset_m": 42.86,
+    "offset_m": 43.49,
     "n": 326,
-    "reference": "USGS RTK ground (TOPO) points, ellipsoid heights",
+    "reference": "USGS RTK ground (TOPO) points, ellipsoid heights, converted from NAD83(2011) to ITRF2020/WGS84",
     "surface": "data/projects/southfork_f01_4/odm_dem/dtm.tif",
     "horizontal_shift_applied_m": [
-      -1.01,
-      6.18
+      0.48,
+      5.91
     ],
     "method": "DTM minus surveyed ground height; std after removing the mean offset (absolute heights are off by offset_m; heights relative to nearby ground are good to about std_m)"
   }
