@@ -80,7 +80,11 @@ def main():
             if track[i]["lat"] is None:
                 items.append({"image": f"video:{i}", "score": None, "usable": False, "reasons": ["other"]})
                 continue
-            m = frame_quality.measure(frame_at(args.video, i, fps, W, H))
+            try:
+                m = frame_quality.measure(frame_at(args.video, i, fps, W, H))
+            except ValueError:  # e.g. the last frames of a clip: seeking that close to the end decodes nothing
+                items.append({"image": f"video:{i}", "score": None, "usable": False, "reasons": ["other"]})
+                continue
             reasons = []
             if m["mean_luma"] < thresholds["dark_mean_luma_below"]:
                 reasons.append("dark")
@@ -117,7 +121,7 @@ def main():
     exe = shutil.which("exiftool") or str(EXIFTOOL_FALLBACK)
     subprocess.run([exe, "-q", "-overwrite_original", f"-csv={csv_path}", str(out_dir)], check=True)
 
-    rel = lambda p: str(p.relative_to(ROOT)).replace("\\", "/")
+    rel = lambda p: str(Path(p).resolve().relative_to(ROOT)).replace("\\", "/")  # resolve: --video may be relative
     (out_dir.parent / "images.txt").write_text("\n".join(rel(out_dir / k) for k in kept) + "\n", encoding="utf-8")
     iq = {"mock": False, "method": "standard_check", "model": None, "version": None, "source": rel(args.video),
           "items": items}
