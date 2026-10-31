@@ -5,14 +5,21 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "./styles/tokens.css";
 import "./styles/landing.css";
-import { api } from "./api.js";
+import { SNAPSHOT, api } from "./api.js";
 import { mountIcons } from "./icons.js";
 import { num } from "./format.js";
 
 mountIcons();
 
+// The field form needs the Typhon laptop; in the public read-only snapshot it's a label, not a dead link.
+if (SNAPSHOT) document.querySelectorAll('a[href="field"]').forEach((a) => {
+  a.removeAttribute("href");
+  a.title = "Field reports run on the Typhon laptop";
+});
+
 // Facts come from the running app (spec.json); anything missing says so instead of guessing.
 (async () => {
+  if (!document.getElementById("facts")) return; // the About page now lives at about/
   const spec = await api.spec();
   const a = spec?.accuracy, t = spec?.timing;
   const fact = (value, label) => `<div class="fact"><b>${value}</b><span>${label}</span></div>`;

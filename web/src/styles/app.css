@@ -232,3 +232,26 @@ body.app { background: linear-gradient(180deg, #F4F2EB 0%, #E8E5DA 100%); }
 
 .hide-sm { display: inline; }
 @media (max-width: 760px) { .hide-sm { display: none; } .rail button { text-transform: uppercase; } }
+
+/* guided tour (src/tour.js) */
+.tour-btn { cursor: pointer; font: inherit; color: var(--text); border: 1px solid var(--line); }
+.tour-btn span { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--forest); color: var(--sand); font: 600 11px var(--font-display); }
+.tour { position: fixed; inset: 0; z-index: 1000; }
+.tour__shade { position: absolute; inset: 0; }
+.tour--plain .tour__shade { background: rgba(26, 34, 26, 0.58); }
+.tour__spot { position: absolute; border-radius: 12px; pointer-events: none; transition: left .25s, top .25s, width .25s, height .25s;
+  box-shadow: 0 0 0 9999px rgba(26, 34, 26, 0.58), 0 0 0 3px var(--sage); }
+.tour__card { position: absolute; background: var(--sand); color: var(--forest); border-radius: 14px; padding: 20px 20px 16px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .3); transition: left .25s, top .25s; }
+.tour__count { margin: 0 0 6px; font: 500 11px var(--font-display); letter-spacing: .18em; text-transform: uppercase; color: var(--terrain); }
+.tour__card h2 { margin: 0 0 8px; font: 500 21px/1.2 var(--font-display); }
+.tour__text { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: #3E4A3D; }
+.tour__dots { display: flex; gap: 5px; margin-bottom: 14px; }
+.tour__dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.tour__dots span.on { width: 18px; border-radius: 3px; background: var(--forest); }
+.tour__actions { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; }
+.tour__actions button { font: 500 13px var(--font-display); border-radius: var(--radius-pill); padding: 8px 16px; cursor: pointer; border: 1px solid var(--line); background: transparent; color: var(--forest); }
+.tour__actions .tour__next { background: var(--forest); color: var(--sand); border-color: var(--forest); }
+.tour__actions .tour__skip { border: 0; padding-left: 0; color: var(--terrain); text-decoration: underline; }
+.tour__actions button:disabled { opacity: .35; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .tour__spot, .tour__card { transition: none; } }

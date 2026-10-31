@@ -11,6 +11,7 @@ import { LAYER_GROUPS, createMap, legendHTML, segmentsForVehicle, setData, setGr
 import { accuracyMiniHTML, initTabs, renderAccuracy, renderActNow, renderMeasureIntro, renderReports, renderRoads,
   renderSegmentDetail, showTab } from "./panel.js";
 import { initTools } from "./tools.js";
+import { initTour } from "./tour.js";
 
 const $ = (id) => document.getElementById(id);
 const app = { vehicle: "foot", segments: null, state: null, three: null, mapReady: false };
@@ -80,6 +81,7 @@ async function boot() {
   $("accuracy-mini").innerHTML = accuracyMiniHTML(spec);
   renderOverview(active);
   await loadAdvisor();
+  initTour(() => app.spec);
 
   const fillMap = () => {
     app.mapReady = true;
