@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#F8F6EF" />
   <title>Project Typhon</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 </head>
-<!-- data-hero-has-heading="true" once the lead's hero image (which includes the heading) replaces the stand-in -->
-<body class="landing" data-hero-has-heading="false">
-  <section class="hero" style="--hero-image: url('/hero-standin.png')">
+<!-- Hero = the lead's image (includes the heading), so data-hero-has-heading="true" hides our HTML heading.
+     It is an illustration, not survey output: keep the "Illustration" caption. -->
+<body class="landing" data-hero-has-heading="true">
+  <section class="hero" style="--hero-image: url('/hero.webp')">
     <nav class="lnav">
-      <a class="brand" href="/" aria-label="Project Typhon home"><span data-icon="mountain"></span><span class="brand__word">TYPHON</span></a>
+      <a class="brand" href="/" aria-label="Project Typhon home"><span class="logo" data-logo></span></a>
       <div class="lnav__links">
         <a href="/" aria-current="page">Home</a>
         <a href="/app/">Map</a>
@@ -42,7 +44,7 @@
 
     <a class="explore" href="#about"><span class="explore__circle" data-icon="chevron"></span><span class="caps">Explore<br />the terrain</span></a>
     <a class="cta" href="/app/">Get started <span data-icon="arrow"></span></a>
-    <p class="credit" id="hero-credit">Stand-in image: a render of our own 3D map of the USGS South Fork debris flow (public data)</p>
+    <p class="credit" id="hero-credit">Illustration</p>
   </section>
 
   <section class="about" id="about">

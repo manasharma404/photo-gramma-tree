@@ -17,7 +17,8 @@ body.app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-r
   background: var(--surface); border-bottom: 1px solid var(--line); }
 .topbar > * { flex-shrink: 0; }
 .topbar > .field--grow { flex: 1 1 0; min-width: 0; }
-.brand { display: flex; align-items: center; gap: var(--space-3); color: var(--forest); text-decoration: none; }
+.brand { display: flex; align-items: center; color: var(--forest); text-decoration: none; --logo-cutout: var(--surface); }
+.logo svg { display: block; height: 20px; width: auto; }
 .brand__word { font: 500 var(--fs-m) var(--font-display); letter-spacing: 0.38em; }
 .field { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .field--grow { flex: 1; }
