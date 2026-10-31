@@ -13,6 +13,7 @@ __pycache__/
 # Web
 node_modules/
 web/dist/
+web/dist-snapshot/
 
 # Neo4j (teammate) runtime folders
 neo4j/data/

@@ -43,8 +43,10 @@ async function boot() {
 
   const [active, health] = await Promise.all([api.active(), api.health()]);
   const off = $("offline");
-  off.dataset.state = !health ? "down" : health.internet_reachable ? "online" : "offline";
-  $("offline-text").textContent = !health ? "API not reachable" : health.internet_reachable ? "Online (not needed)" : "Offline mode";
+  off.dataset.state = !health ? "down" : health.snapshot || !health.internet_reachable ? "offline" : "online";
+  $("offline-text").textContent = !health ? "API not reachable"
+    : health.snapshot ? `Read-only snapshot · ${new Date(health.captured_at).toLocaleDateString([], { day: "numeric", month: "short" })}`
+    : health.internet_reachable ? "Online (not needed)" : "Offline mode";
 
   if (!active) {
     $("site").innerHTML = `<option>No map processed yet</option>`;

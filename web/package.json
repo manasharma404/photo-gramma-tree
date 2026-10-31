@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:snapshot": "vite build --mode snapshot --base ./ --outDir dist-snapshot",
     "preview": "vite preview"
   },
   "dependencies": {

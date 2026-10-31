@@ -33,24 +33,28 @@ function crossIcon(color, halo) {
 
 export function createMap(container, active, onSegmentClick) {
   const tiles = active?.tiles;
+  const image = active?.image; // snapshot builds use one orthophoto image instead of a tile pyramid
+  const attribution = "Imagery: USGS (public domain), processed by Project Typhon · Roads © OpenStreetMap contributors";
+  const bwsen = image ? image.bounds_wsen : tiles?.bounds_wsen;
+  const ortho = image
+    ? { type: "image", url: image.url, coordinates: [[bwsen[0], bwsen[3]], [bwsen[2], bwsen[3]], [bwsen[2], bwsen[1]], [bwsen[0], bwsen[1]]] }
+    : tiles ? { type: "raster", tiles: [tiles.url], tileSize: 256, minzoom: tiles.min_zoom, maxzoom: tiles.max_zoom,
+                bounds: tiles.bounds_wsen, // don't request tiles outside our map
+                attribution } : null;
   const map = new maplibregl.Map({
     container,
     style: {
       version: 8,
-      sources: tiles ? {
-        ortho: { type: "raster", tiles: [tiles.url], tileSize: 256, minzoom: tiles.min_zoom, maxzoom: tiles.max_zoom,
-                 bounds: tiles.bounds_wsen, // don't request tiles outside our map
-                 attribution: "Imagery: USGS (public domain), processed by Project Typhon · Roads © OpenStreetMap contributors" },
-      } : {},
+      sources: ortho ? { ortho } : {},
       layers: [
         { id: "bg", type: "background", paint: { "background-color": "#F2F2EC", "background-opacity": 0 } }, // transparent: the stage contours show through
-        ...(tiles ? [{ id: "ortho", type: "raster", source: "ortho" }] : []),
+        ...(ortho ? [{ id: "ortho", type: "raster", source: "ortho" }] : []),
       ],
     },
-    bounds: tiles ? [[tiles.bounds_wsen[0], tiles.bounds_wsen[1]], [tiles.bounds_wsen[2], tiles.bounds_wsen[3]]] : undefined,
+    bounds: bwsen ? [[bwsen[0], bwsen[1]], [bwsen[2], bwsen[3]]] : undefined,
     fitBoundsOptions: { padding: 60 },
     maxZoom: 22,
-    attributionControl: { compact: true },
+    attributionControl: { compact: true, ...(image ? { customAttribution: attribution } : {}) },
   });
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
