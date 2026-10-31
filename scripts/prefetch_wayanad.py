@@ -567,6 +567,17 @@ def build_wayanad_files(overpass_data: dict[str, Any], out_dir: Path) -> dict[st
         "features": place_features,
     }
 
+    # If WorldPop 2020 cache is present on disk, attach settlement populations offline (C1/T16).
+    worldpop_tif = out_dir / "worldpop_wayanad_2020.tif"
+    if worldpop_tif.is_file():
+        from scripts.prefetch_worldpop_wayanad import attach_worldpop_to_places_fc
+
+        attach_worldpop_to_places_fc(places_fc, worldpop_tif)
+        place_gpkg_rows = []
+        for feat in places_fc["features"]:
+            px, py = feat["geometry"]["coordinates"][:2]
+            place_gpkg_rows.append({**feat["properties"], "geometry": Point(float(px), float(py))})
+
     (roads_dir / "segments.geojson").write_text(json.dumps(segments_fc, indent=2), encoding="utf-8")
     (out_dir / "places.geojson").write_text(json.dumps(places_fc, indent=2), encoding="utf-8")
 

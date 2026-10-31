@@ -229,7 +229,7 @@ def compute_priorities(
 
         level = _score_to_level(score, thresholds)
 
-        # Actionable decision-support text (never "dispatch").
+        # Actionable decision-support text (never "dispatch"; unknown is never "open").
         if pid == base_pid and score is not None and score < 25.0:
             action = "Decision support: active responder staging base; maintain approach clearance"
         elif score is None:
@@ -240,10 +240,16 @@ def compute_priorities(
                 f"prioritize clearing blocked approach ({nsid or 'nearest corridor'})"
             )
         elif reach.get("ambulance") is False and reach.get("jeep") is False:
-            action = (
-                f"Decision support: reachable on foot only; clear blockage toward {name} "
-                f"to restore 4x4/ambulance evacuation"
-            )
+            if reach.get("foot") is True:
+                action = (
+                    f"Decision support: reachable on foot only; clear blockage toward {name} "
+                    f"to restore 4x4/ambulance evacuation"
+                )
+            else:
+                action = (
+                    f"Decision support: all wheeled vehicles blocked and foot access unverified; "
+                    f"verify foot access and clear blockage toward {name}"
+                )
         elif reach.get("ambulance") is False:
             action = f"Decision support: 4x4 jeep access available; widen/clear {nsid or 'corridor'} for ambulance"
         elif (alt_routes.get("ambulance") or 0) <= 1:
