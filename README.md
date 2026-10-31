@@ -71,7 +71,7 @@ uv run python -m pipeline.run_odm --project <name> --tier full  --images-list <l
 **3. Accuracy** (only where surveyed checkpoints exist). `find_targets` saves crops; a person confirms the IDs in `confirmed.json` before errors are computed.
 ```
 uv run python -m accuracy.find_targets --ortho <odm_orthophoto.tif> --rtk <checkpoints.csv> --out data/runs/<run_id>/targets
-uv run python -m accuracy.compute_errors --confirmed data/runs/<run_id>/targets/confirmed.json --rtk <checkpoints.csv> --run-id <run_id> --out data/runs/<run_id> --dsm <dsm.tif>
+uv run python -m accuracy.compute_errors --confirmed data/runs/<run_id>/targets/confirmed.json --rtk <checkpoints.csv> --run-id <run_id> --out data/runs/<run_id>/accuracy.json --dsm <dsm.tif>
 uv run python -m accuracy.vertical --dtm <dtm.tif> --rtk <checkpoints.csv> --accuracy data/runs/<run_id>/accuracy.json
 ```
 **4. Roads, tiles, 3D, serve.** OSM roads are fetched once beforehand (`scripts/prefetch_osm_southfork.py`); nothing touches the internet after that.

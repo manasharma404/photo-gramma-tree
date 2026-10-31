@@ -70,7 +70,7 @@ def main():
         if r.get("horiz_precision_m"):
             precisions.append(float(r["horiz_precision_m"]))
         per_point.append({"id": p["id"], "dx_m": round(dx, 3), "dy_m": round(dy, 3), "dz_m": dz,
-                          "found_by": p["found_by"]})
+                          "found_by": p["found_by"], "lon": round(lon, 8), "lat": round(lat, 8)})
         arrows.append({"type": "Feature",
                        "geometry": {"type": "LineString",
                                     "coordinates": [[lon, lat],

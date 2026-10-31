@@ -34,8 +34,9 @@ export function renderActNow(ctx) {
   const unknown = measured.filter((f) => f.properties.status === "unknown");
   const lenKm = (fs) => fs.reduce((s, f) => s + (f.properties.length_m || 0), 0) / 1000;
   const places = access?.places || [];
+  // Advisor contract: false = every route blocked (cut off); null = only unknown roads lead there (unverified).
   const cut = places.filter((p) => p.reachable?.[vehicle] === false);
-  const anyBlocked = (fc?.features || []).some((f) => f.properties.status === "blocked");
+  const unverified = places.filter((p) => p.place_id !== access?.base_place_id && p.reachable?.[vehicle] == null);
   const critical = (priorities?.items || []).filter((i) => i.level === "critical");
   const acc = spec?.accuracy;
 
@@ -43,9 +44,8 @@ export function renderActNow(ctx) {
       <span>Ranked by decision-support rules; see the list below.</span></div></div>` : "")
     + insight("roads", `Blocked for ${esc(vehicleLabel)}`, measured.length
       ? `${blocked.length} <small>of ${measured.length} measured segments · ${lenKm(blocked).toFixed(2)} km</small>` : NOT_MEASURED, "roads")
-    // "Unreachable" from the advisor also covers roads that are only unknown; with nothing blocked, that's unverified, not cut off.
-    + insight("act", `${anyBlocked ? "Places cut off or unverified" : "Places with unverified access"} for ${esc(vehicleLabel)}`,
-      places.length ? `${cut.length} <small>of ${places.length}</small>` : NOT_MEASURED)
+    + insight("act", `Places cut off for ${esc(vehicleLabel)}`,
+      places.length ? `${cut.length} <small>of ${places.length} · ${unverified.length} with access unverified</small>` : NOT_MEASURED)
     + insight("layers", "Road we couldn't see (canopy, no data)", measured.length
       ? `${Math.round((unknown.length / measured.length) * 100)}% <small>of measured segments</small>` : NOT_MEASURED, "roads")
     + insight("accuracy", "Map accuracy", acc ? `± ${num(acc.horizontal.rmse_h_m, "m", 1)} <small>at ${acc.n_checkpoints} checkpoints</small>` : NOT_MEASURED, "accuracy")

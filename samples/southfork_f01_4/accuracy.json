@@ -23,21 +23,27 @@
       "dx_m": 0.38,
       "dy_m": 4.282,
       "dz_m": 44.012,
-      "found_by": "manual"
+      "found_by": "manual",
+      "lon": -118.75840602,
+      "lat": 36.34507882
     },
     {
       "id": "SF17",
       "dx_m": 0.111,
       "dy_m": 5.866,
       "dz_m": 45.108,
-      "found_by": "manual"
+      "found_by": "manual",
+      "lon": -118.75797936,
+      "lat": 36.34477065
     },
     {
       "id": "SF18",
       "dx_m": 0.941,
       "dy_m": 7.59,
       "dz_m": 44.978,
-      "found_by": "manual"
+      "found_by": "manual",
+      "lon": -118.75797825,
+      "lat": 36.34445856
     }
   ],
   "standard_note": "ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full compliance; this assessment uses 3.",
