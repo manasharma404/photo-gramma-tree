@@ -17,7 +17,8 @@
 | `web/` (all, incl. panels) | Lead (panels back from her, 02:20) | Map, 3D view, data panels, design system and styling. Panels read her `/advisor/*` JSON |
 | `scripts/qr.py`, hotspot runbook | Her | |
 | `neo4j/`, `config/vehicles.yaml`, `config/priority.yaml` | Her | Every number cited or `PLACEHOLDER` |
-| `pipeline/ accuracy/ measure/ export/ config/quality.yaml` | Lead | She may import, not edit |
+| `export/` | **Her** (moved from lead, 05:50) | GeoJSON, GeoPackage, KMZ, COG, PDF map, manifest. See `docs/teammate_followup_1.md` |
+| `pipeline/ accuracy/ measure/ config/quality.yaml` | Lead | She may import, not edit |
 | `contracts/` | Shared | Changes only via the lead + `PLAN.md` decisions log |
 
 **Hard rules:** no invented numbers (missing = `PLACEHOLDER`, mocks carry `"mock": true`); hand-written weights and rules are never called "AI"; no internet at runtime (downloads only in `scripts/prefetch_*.py`, run while online); "unknown" never becomes "open"; priorities are decision support, never "dispatch"; no CDN links in `web/` (bundle everything); ask before pushing; never force-push; if something is impossible or more than 2 hours late, stop and tell the lead.
@@ -71,6 +72,25 @@ T17 → T16 → T14 → T15 → T13 → T12 → T11 → T6 (use South Fork only)
 | R6 | Status per vehicle + reasons | **Her** (T3), published via `/advisor/state` |
 | O1 | Her docs assume F1–F5 flights, ArUco checkpoints, tape distances | Out of date (rain). Validation = USGS RTK + Neo 2 video |
 | O2 | Training a segmentation model | Not by 21:30 → Later; T15 uses a pre-trained model only |
+
+## Status after round 1 (reviewed 31 Oct 05:45; merged into `main`)
+| Item | Code | Verified for real | Next |
+|---|---|---|---|
+| T1 Neo4j | Done | **No**: never started (sandbox); test skipped | Follow-up 1, V1 |
+| T2 Vehicle profiles | Done | Sources are partly home-page only | S1 |
+| T3 Assessment engine | Done | Unit tests on mocks pass | Real data: follow-up 2 |
+| T4/T5 Graph, routing, reopen plan | Done | NetworkX tests pass; Neo4j path skipped | V1; real data: follow-up 2 |
+| T6 Wayanad | Done | **No**: data never prefetched; test skipped | V2 |
+| T7 API shell | Done | Test client passes | V4; lead routers: follow-up 2 |
+| T8 Field page, QR, runbook | Done | **No**: never opened on a phone | V3 |
+| T11 Priorities | Done | Unit tests pass | Real data: follow-up 2 |
+| T12 Quality checks | Done | Unit tests pass | Real images: follow-up 2 |
+| T13 ML gate (BRISQUE) | Gate code done | **No**: never run (no labelled frames) | M1 |
+| T14 Spatial confidence | Not started | | Needs our orthophoto: follow-up 2 |
+| T15 Road-damage scores | Not started | | C3 groundwork; real run: follow-up 2 |
+| T16 Population | Not started | | C1 |
+| T17 Situation report + translation | Not started | | C2 |
+| Exports (new) | Not started | | E1–E6; real files: follow-up 2 |
 
 ## Contract changes made for this plan (logged in PLAN.md)
 `fire_truck / ambulance / jeep / foot` everywhere modes appear · `advisor_state` adds `reasons_by_mode`, `needs_verification` · `segments.geojson` `status_by_mode` now optional · new `priorities.json` · `image_quality.json` optional `coverage` block.
