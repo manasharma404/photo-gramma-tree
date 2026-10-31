@@ -285,13 +285,34 @@ def write_kmz(
     layers: dict[str, gpd.GeoDataFrame],
     kmz_path: Path,
     orthophoto_path: Path | None = None,
+    data_basis: str | None = None,
+    processed_time: str | None = None,
+    captured_time: str | None = None,
 ) -> dict[str, Any]:
     """Write vortex.kmz with styled vector layers (shape + colour) and optional GroundOverlay."""
     kmz_path.parent.mkdir(parents=True, exist_ok=True)
     ET.register_namespace("", KML_NS)
     kml_root = ET.Element("kml", xmlns=KML_NS)
     doc = ET.SubElement(kml_root, "Document")
-    ET.SubElement(doc, "name").text = f"Vortex — {project}"
+    ET.SubElement(doc, "name").text = f"Project Typhon: road access map: {project}"
+
+    roads_gdf = layers.get("roads_status")
+    has_measured = roads_gdf is not None and "measured" in roads_gdf.columns
+    inside_gdf = roads_gdf[roads_gdf["measured"] == True] if has_measured else roads_gdf
+    outside_gdf = roads_gdf[roads_gdf["measured"] == False] if has_measured else (roads_gdf.iloc[0:0] if roads_gdf is not None else None)
+    inside_unknown = inside_gdf["display_status"].value_counts().get("unknown", 0) if (inside_gdf is not None and len(inside_gdf)) else 0
+
+    desc_lines = [
+        f"Project: {project}",
+        f"Data basis: {data_basis or 'not stated'}",
+        f"Processed: {processed_time or 'not recorded'}",
+        f"Capture date: {captured_time or 'capture date: not recorded'}",
+        f"Road segments: {len(roads_gdf) if roads_gdf is not None else 0}",
+    ]
+    if has_measured and outside_gdf is not None and len(outside_gdf) > 0:
+        desc_lines.append(f"unknown inside mapped area: {inside_unknown}")
+        desc_lines.append(f"outside mapped area: {len(outside_gdf)}")
+    ET.SubElement(doc, "description").text = "\n".join(desc_lines)
 
     bundled_files: dict[str, bytes] = {}
 

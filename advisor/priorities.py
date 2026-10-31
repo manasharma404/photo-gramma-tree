@@ -121,12 +121,20 @@ def compute_priorities(
         reasons: list[str] = []
         needs_ver = False
 
+        is_base = (pid == base_pid)
+
         # Factor 1: access_difficulty
-        if all(reach.get(m) is None for m in MODES):
-            factors["access_difficulty"] = None
-            unknown_factors.append("access_difficulty")
+        has_open_route = any(reach.get(m) is True for m in MODES)
+        has_blocked_mode = any(reach.get(m) is False for m in MODES)
+        is_unverified = (not is_base) and (all(reach.get(m) is None for m in MODES) or (not has_open_route and not has_blocked_mode))
+
+        if is_base:
+            factors["access_difficulty"] = 0.0
+            reasons.append(f"{name}: active responder staging base")
+        elif is_unverified:
+            factors["access_difficulty"] = 80.0
             needs_ver = True
-            reasons.append(f"{name}: reachability is unknown across all vehicle types")
+            reasons.append(f"{name}: access unverified: connecting roads {nsid or 'in area'} not yet assessed")
         else:
             if any(reach.get(m) is None for m in MODES):
                 needs_ver = True
@@ -147,9 +155,13 @@ def compute_priorities(
             elif reach.get("fire_truck") is False:
                 factors["access_difficulty"] = 30.0
                 reasons.append(f"{name}: reachable by ambulance/jeep; blocked for heavy fire_truck")
-            else:
+            elif all(reach.get(m) is True for m in MODES):
                 factors["access_difficulty"] = 0.0
                 reasons.append(f"{name}: reachable by all vehicle classes including fire_truck and ambulance")
+            else:
+                factors["access_difficulty"] = 75.0
+                needs_ver = True
+                reasons.append(f"{name}: access unverified: connecting roads {nsid or 'in area'} not yet assessed")
 
         # Factor 2: damage_severity (on nearest connecting segment)
         if nearest_seg is None:
@@ -198,15 +210,25 @@ def compute_priorities(
             reasons.append(f"Critical facility type: {kind}")
 
         # Factor 5: alternative_routes
-        if reach.get("ambulance") is None and reach.get("jeep") is None:
+        if is_base:
+            factors["alternative_routes"] = 0.0
+            reasons.append("Staging base location")
+        elif reach.get("ambulance") is None and reach.get("jeep") is None:
             factors["alternative_routes"] = None
             unknown_factors.append("alternative_routes")
             needs_ver = True
+            reasons.append(f"Wheeled-vehicle access unverified: routes to {name} not yet assessed")
         else:
             n_alt = int(alt_routes.get("ambulance") or alt_routes.get("jeep") or 0)
             if n_alt == 0:
-                factors["alternative_routes"] = 100.0
-                reasons.append("0 passable wheeled-vehicle routes from staging base")
+                if reach.get("ambulance") is False and reach.get("jeep") is False:
+                    factors["alternative_routes"] = 100.0
+                    reasons.append("0 passable wheeled-vehicle routes from staging base")
+                else:
+                    factors["alternative_routes"] = None
+                    unknown_factors.append("alternative_routes")
+                    needs_ver = True
+                    reasons.append(f"Wheeled-vehicle access unverified: routes to {name} not yet assessed")
             elif n_alt == 1:
                 factors["alternative_routes"] = 60.0
                 reasons.append("Single passable corridor (no redundant route if secondary slip occurs)")
@@ -230,8 +252,10 @@ def compute_priorities(
         level = _score_to_level(score, thresholds)
 
         # Actionable decision-support text (never "dispatch"; unknown is never "open").
-        if pid == base_pid and score is not None and score < 25.0:
+        if is_base:
             action = "Decision support: active responder staging base; maintain approach clearance"
+        elif is_unverified or all(reach.get(m) is None for m in MODES):
+            action = f"Decision support: access unverified; verify road and ground status toward {name} ({nsid or 'corridor'})"
         elif score is None:
             action = "Decision support: insufficient survey coverage; verify road and settlement status on ground"
         elif reach.get("foot") is False:
@@ -253,7 +277,10 @@ def compute_priorities(
         elif reach.get("ambulance") is False:
             action = f"Decision support: 4x4 jeep access available; widen/clear {nsid or 'corridor'} for ambulance"
         elif (alt_routes.get("ambulance") or 0) <= 1:
-            action = "Decision support: ambulance route open via single corridor; monitor for secondary debris"
+            if all(reach.get(m) is True for m in MODES):
+                action = "Decision support: ambulance route open via single corridor; monitor for secondary debris"
+            else:
+                action = f"Decision support: access unverified; verify road conditions toward {name}"
         else:
             action = "Decision support: multi-vehicle access open with redundant routing"
 

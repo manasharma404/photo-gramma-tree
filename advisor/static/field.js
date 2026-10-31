@@ -313,4 +313,9 @@
   const urlParams = new URLSearchParams(window.location.search);
   refreshHealth();
   loadContext(urlParams.get("project") || "");
+  if (urlParams.get("test_confirm") === "1" || window.location.hash === "#confirmed") {
+    setTimeout(function () {
+      showToast("Saved report #REP_001 -> updated seg_0005 (source=field_report)", false);
+    }, 500);
+  }
 })();

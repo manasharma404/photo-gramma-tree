@@ -32,6 +32,8 @@ class ExportInputs:
     orthophoto_path: Path | None
     dsm_path: Path | None
     source_files: list[str] = field(default_factory=list)
+    captured: str | None = None
+    basis: str | None = None
 
 
 def _data_root(data_root: Path | None = None) -> Path:
@@ -77,6 +79,8 @@ def load_export_inputs(
     dsm_override: Path | None = None,
     accuracy_override: Path | None = None,
     measurements_dir_override: Path | None = None,
+    captured: str | None = None,
+    basis: str | None = None,
 ) -> ExportInputs:
     """Resolve and load all contract inputs for a project ('mock' or data/projects/<project>)."""
     root = _data_root(data_root)
@@ -266,6 +270,7 @@ def load_export_inputs(
         ortho_path = _first_existing(
             [
                 proj_dir / "orthophoto.tif",
+                proj_dir / "orthophoto_small.tif",
                 proj_dir / "ortho.tif",
                 proj_dir / "odm_orthophoto" / "odm_orthophoto.tif",
             ]
@@ -304,4 +309,6 @@ def load_export_inputs(
         orthophoto_path=ortho_path,
         dsm_path=dsm_path,
         source_files=dedup_sources,
+        captured=captured,
+        basis=basis,
     )

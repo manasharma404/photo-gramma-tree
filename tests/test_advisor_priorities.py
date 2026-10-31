@@ -119,3 +119,46 @@ def test_clearing_one_blocked_segment_changes_priority_ranking():
     assert score_after["place_MOCK_NORTH"] < score_before["place_MOCK_NORTH"]
     assert rank_after["place_MOCK_NORTH"] > rank_before["place_MOCK_NORTH"]
     assert rank_after["place_MOCK_WEST"] == 1
+
+def test_f1_honest_reasons_unknown_vs_cut_off():
+    from advisor.graph import build_topology, compute_access_report_networkx
+
+    # 1. Real sample data test: samples/southfork_f01_4
+    samples_dir = ROOT / "samples" / "southfork_f01_4"
+    if (samples_dir / "segments.geojson").is_file():
+        segs = json.loads((samples_dir / "segments.geojson").read_text(encoding="utf-8"))
+        places = json.loads((samples_dir / "places.geojson").read_text(encoding="utf-8"))
+        state = assess_collection(segs)
+        top = build_topology(segs, places, state)
+        acc = compute_access_report_networkx(top)
+        prio = compute_priorities(places, state, acc)
+
+        for item in prio["items"]:
+            # Assert no reason contains "cut off", "passable", or "reachable by all" for places whose roads are only unknown
+            for r in item["reasons"]:
+                assert "cut off" not in r.lower(), f"Unexpected 'cut off' in reason for {item['target_id']}: {r}"
+                assert "passable" not in r.lower(), f"Unexpected 'passable' in reason for {item['target_id']}: {r}"
+                assert "reachable by all" not in r.lower(), f"Unexpected 'reachable by all' in reason for {item['target_id']}: {r}"
+
+            if item["target_id"] == "osm_place_1":
+                assert any("access unverified" in r for r in item["reasons"])
+                assert any("not yet assessed" in r for r in item["reasons"])
+                assert "verify" in item["recommended_action"].lower()
+            elif item["target_id"] == "osm_place_0":
+                assert any("staging base" in r.lower() for r in item["reasons"])
+
+    # 2. Synthetic test with a truly blocked route must still say "cut off"
+    seg_fc, places_fc = _make_rich_mock_scenario()
+    state_mock = assess_collection(seg_fc)
+    acc_mock = compute_access_report(
+        segments_geojson=seg_fc,
+        places_geojson=places_fc,
+        advisor_state=state_mock,
+        project="test_truly_blocked",
+        base_place_id="place_MOCK_BASE",
+        backend="networkx",
+    )
+    prio_mock = compute_priorities(places_fc, state_mock, acc_mock)
+    north_item = next(it for it in prio_mock["items"] if it["target_id"] == "place_MOCK_NORTH")
+    assert any("cut off" in r.lower() for r in north_item["reasons"])
+
