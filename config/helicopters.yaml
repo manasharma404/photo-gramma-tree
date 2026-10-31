@@ -1,0 +1,12 @@
+# Helicopter dimensions for landing-zone checks (Goa DCA rules: touchdown >= 2B x 2B, FATO >= 1.5A x 1.5A,
+# A = overall length, B = undercarriage (wheel or skid) base).
+# ALL VALUES PLACEHOLDER until taken from the manufacturer's / operator's published data with a citation.
+helicopters:
+  light_utility:
+    label: "Light utility helicopter (PLACEHOLDER dimensions)"
+    overall_length_A_m: 16.0      # PLACEHOLDER
+    undercarriage_base_B_m: 3.0   # PLACEHOLDER
+  medium_lift:
+    label: "Medium-lift transport helicopter (PLACEHOLDER dimensions)"
+    overall_length_A_m: 25.5      # PLACEHOLDER
+    undercarriage_base_B_m: 4.5   # PLACEHOLDER

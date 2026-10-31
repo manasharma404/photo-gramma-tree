@@ -1,0 +1,20 @@
+# Measurement thresholds (measure/). Lead-owned. PLACEHOLDER = not yet sourced or field-checked.
+span:
+  sample_step_m: 0.10
+  bank_drop_min_m: 1.0          # PLACEHOLDER: a bank top must stand at least this high above the bed
+  bank_top_tolerance_m: 0.20    # PLACEHOLDER: points within this of the bank's highest point count as bank top
+working_space:
+  max_slope_deg: 5.0            # PLACEHOLDER
+  max_obstacle_m: 0.30          # PLACEHOLDER
+  required_width_m: 10.0        # PLACEHOLDER: e.g. bridge-launching / staging area, to confirm with engineers
+  required_length_m: 20.0       # PLACEHOLDER
+  search_radius_m: 60.0
+landing_zones:
+  grid_m: 0.5                   # analysis resolution (DTM/DSM resampled)
+  max_slope_deg: 7.0            # PLACEHOLDER: slope limit for touchdown/FATO, to source
+  max_obstacle_in_fato_m: 0.25  # PLACEHOLDER
+  safety_area_width_m: 10.0     # Goa DCA helicopter operations document (brief section 9)
+  max_obstacle_in_safety_m: 1.0 # Goa DCA helicopter operations document (brief section 9)
+  approach_gradient: 0.08       # Goa DCA: 8% approach climb surface (brief section 9)
+  approach_length_m: 245.0      # Goa DCA: for >= 245 m (brief section 9)
+  max_candidates: 5

@@ -1,0 +1,5 @@
+# Panel estimate for a gap crossing. PLACEHOLDER: confirm against Army bridging tables.
+# Context only (brief): Wayanad 2024 used 19 x 10-ft panels for a 190-ft Bailey bridge.
+panel_length_m: 3.048        # 10 ft Bailey panel bay (from the brief's Wayanad context; confirm)
+bank_seat_m: 3.0             # PLACEHOLDER: extra length per bank for bearing / seating
+rule: "count = ceil((span + 2 * bank_seat) / panel_length)  [PLACEHOLDER rule]"
