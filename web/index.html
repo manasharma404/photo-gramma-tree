@@ -3,19 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F8F6EF" />
   <title>Project Typhon</title>
 </head>
-<body class="landing">
-  <!-- Placeholder until the landing page step: the lead's hero image + overlays go here. -->
-  <main style="max-width:640px;margin:15vh auto;padding:0 24px;font-family:var(--font-ui)">
-    <p class="label-public">Project</p>
-    <h1 style="font-size:64px;letter-spacing:.06em">TYPHON</h1>
-    <p>We build immediate 2D and 3D maps for post-landslide relief efforts.</p>
-    <p><a href="/app/">Open the map →</a></p>
-  </main>
-  <script type="module">
-    import "./src/styles/tokens.css";
-    import "./src/styles/app.css";
-  </script>
+<!-- data-hero-has-heading="true" once the lead's hero image (which includes the heading) replaces the stand-in -->
+<body class="landing" data-hero-has-heading="false">
+  <section class="hero" style="--hero-image: url('/hero-standin.png')">
+    <nav class="lnav">
+      <a class="brand" href="/" aria-label="Project Typhon home"><span data-icon="mountain"></span><span class="brand__word">TYPHON</span></a>
+      <div class="lnav__links">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/app/">Map</a>
+        <a href="/field">Field reports</a>
+        <a href="#about">About</a>
+      </div>
+    </nav>
+
+    <aside class="hero__left">
+      <p class="caps">Drone mapping<br />for a safer<br />tomorrow</p>
+      <ol class="caps steps">
+        <li><span>01</span>Rapid mapping</li>
+        <li><span>02</span>Terrain analysis</li>
+        <li><span>03</span>Relief planning</li>
+      </ol>
+    </aside>
+
+    <header class="hero__title">
+      <p class="caps hero__kicker">Project</p>
+      <h1>TYPH<span class="o">O</span>N</h1>
+    </header>
+    <p class="caps hero__tagline">We build immediate 2D and 3D maps for post-landslide relief efforts.</p>
+
+    <aside class="hero__right">
+      <a class="mini" href="/app/#3d"><span class="caps">3D view</span><span class="mini__thumb" id="mini-3d"></span></a>
+      <a class="mini" href="/app/#roads"><span class="caps">Roads</span><span class="mini__thumb mini__thumb--icon" data-icon="roads"></span></a>
+      <a class="mini" href="/app/#accuracy"><span class="caps">Accuracy</span><span class="mini__thumb mini__thumb--stat" id="mini-acc">—</span></a>
+    </aside>
+
+    <a class="explore" href="#about"><span class="explore__circle" data-icon="chevron"></span><span class="caps">Explore<br />the terrain</span></a>
+    <a class="cta" href="/app/">Get started <span data-icon="arrow"></span></a>
+    <p class="credit" id="hero-credit">Stand-in image: a render of our own 3D map of the USGS South Fork debris flow (public data)</p>
+  </section>
+
+  <section class="about" id="about">
+    <div class="about__grid">
+      <div>
+        <p class="caps">About</p>
+        <h2>The first map after the landslide.</h2>
+      </div>
+      <div>
+        <p>A consumer drone flies over the damage. On one laptop, with no internet, Typhon turns the photos into a map and a 3D model,
+          checks which roads a fire truck, an ambulance, a jeep or a team on foot can still use, and measures what the relief
+          teams need: gap spans, debris volumes, landing zones and working space.</p>
+        <p>No ground control points are used to build the map. We measure its error against surveyed checkpoints and show that
+          number next to every measurement, instead of a beautiful map with unknown accuracy.</p>
+      </div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <p class="muted small">Validation data: USGS South Fork Campground debris-flow survey (public domain). Roads © OpenStreetMap contributors.</p>
+  </section>
+  <script type="module" src="/src/landing.js"></script>
 </body>
 </html>

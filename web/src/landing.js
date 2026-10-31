@@ -1,0 +1,28 @@
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-500.css";
+import "@fontsource/space-grotesk/latin-300.css";
+import "@fontsource/space-grotesk/latin-400.css";
+import "@fontsource/space-grotesk/latin-500.css";
+import "./styles/tokens.css";
+import "./styles/landing.css";
+import { api } from "./api.js";
+import { mountIcons } from "./icons.js";
+import { num } from "./format.js";
+
+mountIcons();
+
+// Facts come from the running app (spec.json); anything missing says so instead of guessing.
+(async () => {
+  const [active, spec] = await Promise.all([api.active(), api.spec()]);
+  if (active?.terrain?.thumb) document.getElementById("mini-3d").style.backgroundImage = `url(${active.terrain.url}${active.terrain.thumb})`;
+  const a = spec?.accuracy, t = spec?.timing;
+  document.getElementById("mini-acc").textContent = a ? `±${Math.round(a.horizontal.rmse_h_m)} m` : "—";
+  const fact = (value, label) => `<div class="fact"><b>${value}</b><span>${label}</span></div>`;
+  document.getElementById("facts").innerHTML =
+    fact("0", "internet connections needed at runtime")
+    + fact("0", "ground control points used to build the map")
+    + fact(t?.minutes_per_ha != null ? num(t.minutes_per_ha, "", 1) : "—",
+      t?.minutes_per_ha != null ? "minutes per hectare on one laptop (measured)" : "minutes per hectare: not measured yet")
+    + fact(a ? `±${num(a.horizontal.rmse_h_m, "", 1)} m` : "—",
+      a ? `horizontal error at ${a.n_checkpoints} surveyed checkpoints (latest run)` : "accuracy: not measured yet");
+})();
