@@ -89,7 +89,46 @@ def longest_run(mask):
     return best
 
 
-def measure_segment(line, width, dsm, dtm=None, cfg=CONFIG):
+def cross_slopes(zv, offs, obstruction_min):
+    """Sideways slope of the ground: fitted per station to the low cells, then one median value for
+    the whole segment (<= 50 m), so debris covering part of the width at a few stations can't tilt it."""
+    b = np.full(zv.shape[0], np.nan)
+    for i, row in enumerate(zv):
+        keep = np.isfinite(row)
+        if keep.sum() < 5:
+            continue
+        for _ in range(3):
+            coef = np.polyfit(offs[keep], row[keep], 1)
+            new = np.isfinite(row) & (row - np.polyval(coef, offs) <= obstruction_min / 2)
+            if new.sum() < 5 or (new == keep).all():
+                break
+            keep = new
+        b[i] = coef[0]
+    fitted = np.isfinite(b)
+    return np.full(zv.shape[0], float(np.median(b[fitted])) if fitted.any() else 0.0)
+
+
+def vegetation_mask(ortho, X, Y, exg_min):
+    """Green cells by the excess-green colour index (2g - r - b on chromatic coordinates).
+
+    A plain colour rule, not a model: green = vegetation, which we can't see through,
+    so it counts against coverage instead of as an obstruction.
+    """
+    rows, cols = rasterio.transform.rowcol(ortho.transform, X.ravel(), Y.ravel())
+    rows, cols = np.asarray(rows), np.asarray(cols)
+    ok = (rows >= 0) & (rows < ortho.height) & (cols >= 0) & (cols < ortho.width)
+    veg = np.zeros(rows.shape, bool)
+    if ok.any():
+        r0, r1, c0, c1 = rows[ok].min(), rows[ok].max() + 1, cols[ok].min(), cols[ok].max() + 1
+        rgb = ortho.read([1, 2, 3], window=((r0, r1), (c0, c1))).astype(float)
+        R, G, B = (rgb[k, rows[ok] - r0, cols[ok] - c0] for k in range(3))
+        s = R + G + B
+        s[s == 0] = 1
+        veg[ok] = (2 * G - R - B) / s > exg_min
+    return veg.reshape(X.shape)
+
+
+def measure_segment(line, width, dsm, dtm=None, ortho=None, cfg=CONFIG):
     step, across = cfg["station_step_m"], cfg["across_step_m"]
     n_st = max(2, int(line.length // step) + 1)
     dist = np.linspace(0, line.length, n_st)
@@ -111,7 +150,11 @@ def measure_segment(line, width, dsm, dtm=None, cfg=CONFIG):
         g = sample(dtm, X.ravel(), Y.ravel()).reshape(X.shape)
         canopy = np.isfinite(g) & ((z - g) > cfg["canopy_min_m"])
         visible &= ~canopy
+    if ortho is not None:
+        visible &= ~vegetation_mask(ortho, X, Y, cfg["vegetation_exg_min"])
     zv = np.where(visible, z, np.nan)
+    # remove each station's cross-slope (hillside paths tilt sideways), so the uphill edge isn't "debris"
+    zv = zv - cross_slopes(zv, offs, cfg["obstruction_min_m"])[:, None] * offs[None, :]
     coverage = float(visible.mean())
     result = {"coverage_fraction": round(coverage, 3)}
     if coverage == 0 or np.isfinite(zv).sum() < 3:
@@ -150,6 +193,7 @@ def main():
     ap.add_argument("--osm", type=Path, required=True)
     ap.add_argument("--dsm", type=Path, required=True)
     ap.add_argument("--dtm", type=Path, default=None)
+    ap.add_argument("--ortho", type=Path, default=None, help="orthophoto, to set aside vegetation by colour")
     ap.add_argument("--accuracy", type=Path, default=None, help="accuracy.json, for tolerances")
     ap.add_argument("--landing-zones", type=Path, default=None, help="measurement.json of type landing_zones")
     ap.add_argument("--out", type=Path, required=True)
@@ -162,6 +206,7 @@ def main():
 
     dsm = rasterio.open(args.dsm)
     dtm = rasterio.open(args.dtm) if args.dtm else None
+    ortho = rasterio.open(args.ortho) if args.ortho else None
     roads = gpd.read_file(args.osm, layer="roads").to_crs(dsm.crs)
     to_wgs = Transformer.from_crs(dsm.crs, 4326, always_xy=True).transform
 
@@ -172,7 +217,7 @@ def main():
         for part in explode(row.geometry):
             for seg in split_line(part, CONFIG["segment_max_m"]):
                 n += 1
-                m = measure_segment(seg, width, dsm, dtm)
+                m = measure_segment(seg, width, dsm, dtm, ortho)
                 area = m.pop("_obstructed_area_m2", None)
                 props = {
                     "mock": False,
@@ -195,6 +240,7 @@ def main():
                 "source": {"dsm": str(args.dsm).replace("\\", "/"), "dtm": str(args.dtm).replace("\\", "/") if args.dtm else None,
                            "osm": "© OpenStreetMap contributors (ODbL)", "config": "config/roads.yaml"},
                 "features": features}
+    segments = json.loads(json.dumps(segments))  # shapely gives tuples; the contract wants plain JSON arrays
     schema = json.loads((ROOT / "contracts/segments.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(segments, schema)
     (args.out / "segments.geojson").write_text(json.dumps(segments), encoding="utf-8")
@@ -237,7 +283,7 @@ def places_geojson(osm_path, landing_zones_path, segments):
                           "properties": {"mock": False, "place_id": f"lz_{j + 1}", "name": f"Landing zone candidate {j + 1}",
                                          "kind": "landing_zone", "source": "landing_zones", "population": None,
                                          "population_source": "not applicable", "nearest_segment_id": nearest(pt)}})
-    out = {"type": "FeatureCollection", "mock": False, "features": feats}
+    out = json.loads(json.dumps({"type": "FeatureCollection", "mock": False, "features": feats}))
     schema = json.loads((ROOT / "contracts/places.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(out, schema)
     return out

@@ -6,6 +6,7 @@ across_step_m: 0.10          # matches our DSM resolution (0.10 m)
 surface_percentile: 10       # PLACEHOLDER: low percentile of each cross-section = road surface estimate
 obstruction_min_m: 0.30      # PLACEHOLDER: height above fitted surface that counts as an obstruction
 canopy_min_m: 3.0            # PLACEHOLDER: DSM - DTM above this = vegetation canopy -> "not visible", not "blocked"
+vegetation_exg_min: 0.05     # PLACEHOLDER: excess-green colour index above this = vegetation -> "not visible"
 default_width_by_class_m:    # PLACEHOLDER: used only when OSM has no width tag
   primary: 7.0
   secondary: 6.0

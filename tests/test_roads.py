@@ -57,6 +57,29 @@ def test_canopy_is_not_visible_not_blocked():
     assert m["max_obstruction_m"] == 0.0
 
 
+def test_hillside_path_is_not_debris():
+    y, x = np.mgrid[0:SIZE, 0:SIZE]
+    z = 1000 + 0.02 * x * PX + 0.20 * (SIZE - y) * PX  # 20% sideways slope across the road
+    m = segments.measure_segment(road(), 5.0, raster(z), raster(z))
+    assert m["max_obstruction_m"] == 0.0
+    assert m["min_clear_width_m"] == pytest.approx(5.0, abs=0.15)
+
+
+def test_green_vegetation_is_not_visible_not_blocked():
+    z = ground()
+    z[175:225, 150:250] += 1.5  # a 1.5 m bush (below the 3 m canopy rule) ...
+    rgb = np.zeros((3, SIZE, SIZE), np.uint8)
+    rgb[:] = np.array([180, 170, 150])[:, None, None]  # bare soil
+    rgb[:, 175:225, 150:250] = np.array([60, 140, 50])[:, None, None]  # ... that is green in the orthophoto
+    mem = MemoryFile()
+    with mem.open(driver="GTiff", width=SIZE, height=SIZE, count=3, dtype="uint8", crs="EPSG:32611",
+                  transform=from_origin(0, SIZE * PX, PX, PX)) as ds:
+        ds.write(rgb)
+    m = segments.measure_segment(road(), 5.0, raster(z), raster(ground()), mem.open())
+    assert m["max_obstruction_m"] == 0.0
+    assert m["coverage_fraction"] < 0.9
+
+
 def test_no_data_gives_nulls():
     m = segments.measure_segment(road(), 5.0, raster(np.full((SIZE, SIZE), -9999.0)))
     assert m["coverage_fraction"] == 0.0
