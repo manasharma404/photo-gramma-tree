@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#050B18" />
+  <meta name="typhon-root" content="../" />
+  <title>About · Project Typhon</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <script type="module" crossorigin src="../assets/format-zSNVdzBx.js"></script>
+  <script type="module" crossorigin src="../assets/zine-DaKvTPj1.js"></script>
+  <link rel="stylesheet" crossorigin href="../assets/zine-CV8HmkUo.css">
+</head>
+<!-- Style: the lead's "field ticket" mockup. Copy and numbers: ours only (numbers load from spec.json).
+     Every picture is a halftone of our own data (web/scripts/halftone.py). -->
+<body class="zine">
+  <nav class="znav">
+    <a class="znav__brand" href="../">Project <span>Typhon</span></a>
+    <div class="znav__links">
+      <a href="../">Home</a>
+      <a href="../app/">Map</a>
+      <a href="./" aria-current="page">About</a>
+      <a href="../neo2/">Drone data</a>
+    </div>
+    <a class="znav__cta" href="../app/">Open the map →</a>
+  </nav>
+
+  <main class="zpage">
+
+    <!-- 01 cover -->
+    <section class="ticket" aria-labelledby="t1">
+      <div class="ticket__in fade-l" style="min-height: 520px">
+        <div class="bleed"><img class="halftone" src="../art/sf_ortho_wide.webp" alt="Halftone of our South Fork orthophoto: the debris-flow channel cuts diagonally through forest" /></div>
+        <div class="reticle" style="width: 300px; height: 300px; left: 58%; top: 18%"></div>
+        <span class="cross" style="left: 52%; top: 12%"></span><span class="cross" style="left: 88%; top: 74%"></span>
+        <div class="thead over"><span class="tnum">01 / 06</span><span class="tright">About</span></div>
+        <div class="over" style="max-width: 560px; padding-top: 18px">
+          <h1 class="zdisplay" id="t1">Project<br />Typhon</h1>
+          <div class="limebar"></div>
+          <p class="zcaps" style="line-height: 1.8">The first map<br />after the landslide</p>
+        </div>
+        <div class="over" style="position: absolute; right: 28px; bottom: 26px; text-align: right">
+          <div class="barcode-wrap"><div class="barcode"></div><small>PS T8.2 · VORTEX</small></div>
+        </div>
+        <p class="credit-strip over" style="position: absolute; left: 36px; bottom: 22px; margin: 0">Image: our orthophoto from USGS public survey photos (30 Apr 2024)</p>
+      </div>
+    </section>
+
+    <!-- 02 problem -->
+    <section class="ticket" aria-labelledby="t2">
+      <div class="ticket__in">
+        <span class="cross" style="right: 70px; top: 26px"></span><span class="cross" style="right: 40px; top: 26px"></span>
+        <div class="split">
+          <div>
+            <div class="thead"><span class="tnum">02 / 06</span><span id="t2">The problem</span></div>
+            <p class="zlead" style="margin-top: 36px">After a landslide, responders need a current map within hours. The next satellite pass can be days away.</p>
+            <div class="rule"></div>
+            <p class="zsmall" style="max-width: 46ch">Roads, bridges and slopes have moved. The maps on hand show where things <em>were</em>.
+              Teams need to know which road a fire truck can still take, how wide a gap is, and where a helicopter can land, and they need it before the internet comes back.</p>
+          </div>
+          <div style="position: relative; min-height: 340px">
+            <figure class="photo torn" style="position: absolute; left: 0; top: 10px; width: 62%; height: 72%; margin: 0; transform: rotate(-1.5deg)">
+              <img class="halftone" src="../art/sf_debris.webp" alt="Halftone close-up of the debris channel" />
+            </figure>
+            <span class="tape" style="left: -18px; top: 26%; transform: rotate(-78deg)"></span>
+            <div style="position: absolute; right: 0; top: 0; width: 46%; height: 64%; border: 1px solid var(--z-line); overflow: hidden; background: var(--z-navy-2)">
+              <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden="true" fill="none" stroke="rgba(235,226,204,.55)" stroke-width=".6">
+                <path d="M0 40h200M0 80h200M0 120h200M0 160h200M40 0v200M80 0v200M120 0v200M160 0v200" stroke="rgba(235,226,204,.14)" />
+                <path d="M100 30c40 2 66 30 66 68s-30 70-68 68-64-30-64-70 26-68 66-66z" />
+                <path d="M102 50c28 2 46 22 46 48s-20 50-48 48-46-22-46-50 20-48 48-46z" />
+                <path d="M100 68c18 0 30 14 30 30s-14 32-30 32-30-14-30-32 14-30 30-30z" />
+                <path d="M100 84c8 0 14 6 14 14s-6 16-14 16-14-8-14-16 6-14 14-14z" />
+                <circle cx="100" cy="98" r="5" stroke="#B5D334" stroke-width="2.5" />
+              </svg>
+            </div>
+            <figure class="photo" style="position: absolute; right: 4%; bottom: 0; width: 56%; height: 44%; margin: 0; transform: rotate(1.2deg)">
+              <img class="halftone" src="../art/terrain_relief.webp" alt="Halftone shaded relief from our height model" />
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 what it does -->
+    <section class="ticket" aria-labelledby="t3">
+      <div class="ticket__in fade-l" style="min-height: 460px">
+        <div class="bleed"><img class="halftone" src="../art/terrain_relief.webp" alt="" style="object-position: 70% 40%" /></div>
+        <span class="cross" style="left: 46%; top: 30%"></span><span class="cross" style="left: 6%; bottom: 40px"></span>
+        <div class="split over">
+          <div>
+            <div class="thead"><span class="tnum">03 / 06</span><span id="t3">What Typhon does</span></div>
+            <p class="zlead" style="margin-top: 36px; max-width: 26ch">Photos from a consumer drone become a map, on one laptop, with no internet, and the map says how far off it is.</p>
+          </div>
+          <div class="opts" style="align-self: center; max-width: 430px; justify-self: end; width: 100%">
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M4 8l8-3 8 3 8-3v19l-8 3-8-3-8 3z M12 5v19 M20 8v19" /></svg>
+              <div><b>Map</b><span>Orthophoto and 3D terrain from the drone's own photos and GPS</span></div></div>
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M4 24L24 4l4 4L8 28z M9 19l2 2 M13 15l2 2 M17 11l2 2" /></svg>
+              <div><b>Measure</b><span>Gap spans, debris volume, landing zones, working space</span></div></div>
+            <div class="opt"><svg viewBox="0 0 32 32"><path d="M16 4v6 M16 22v6 M4 16h6 M22 16h6" /><circle cx="16" cy="16" r="7" /><circle cx="16" cy="16" r="1.5" /></svg>
+              <div><b>Decide</b><span>Road status for a fire truck, ambulance, jeep or a team on foot</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 how it works -->
+    <section class="ticket" aria-labelledby="t4">
+      <div class="ticket__in">
+        <div class="contours"></div>
+        <div class="thead over"><span class="tnum">04 / 06</span><span id="t4">How it works</span></div>
+        <div class="steps over" style="margin-top: 26px">
+          <div class="step">
+            <div class="step__frame"><img src="../art/neo2_frame_round.webp" alt="Halftone of a frame from our Neo 2 video" /></div>
+            <h3><span>01</span><span>Fly</span></h3>
+            <p>Photos or a video from a consumer drone. Its GPS places every frame; no ground control is laid.</p>
+          </div>
+          <div class="step__arrow" aria-hidden="true">→</div>
+          <div class="step">
+            <div class="step__frame"><img src="../art/sf_ortho_round.webp" alt="Halftone of our South Fork orthophoto" /></div>
+            <h3><span>02</span><span>Process</span></h3>
+            <p>OpenDroneMap runs on the laptop's own GPU and builds the map and terrain. Nothing goes online.</p>
+          </div>
+          <div class="step__arrow" aria-hidden="true">→</div>
+          <div class="step">
+            <div class="step__frame"><img src="../art/terrain_relief.webp" alt="Halftone shaded relief from our height model" /></div>
+            <h3><span>03</span><span>Deliver</span></h3>
+            <p>Road status per vehicle, measurements with their error, and files for print and GIS: PDF, KMZ, GeoPackage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 numbers -->
+    <section class="ticket" aria-labelledby="t5">
+      <div class="ticket__in" style="padding: 0">
+        <div class="split" style="gap: 0">
+          <div style="position: relative; min-height: 420px">
+            <img class="halftone" src="../art/sf_debris.webp" alt="Halftone of the South Fork debris channel" style="position: absolute; inset: 0" />
+            <div class="thead over chip" style="margin: 28px 0 0 28px"><span class="tnum">05 / 06</span><span id="t5">The numbers</span></div>
+            <span class="tape" style="left: 8%; bottom: 18px; transform: rotate(-6deg)"></span>
+          </div>
+          <div style="background: var(--z-paper); color: var(--z-ink); padding: 26px clamp(20px, 3vw, 40px)">
+            <div class="stats">
+              <div class="stat"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" /><path d="M16 2v8 M16 22v8 M2 16h8 M22 16h8" /></svg>
+                <div><b data-fact="rmse_h">not measured</b><span>Horizontal error at <span data-fact="n_checkpoints">—</span> surveyed checkpoints, with no ground control</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" /><path d="M16 17V10 M16 17l5 3 M13 3h6" /></svg>
+                <div><b><span data-fact="min_per_ha">not measured</span> min / ha</b><span>On this laptop: <span data-fact="area_ha">—</span> ha in <span data-fact="total_min">—</span> min</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><path d="M2 26l8-10 6 6 6-12 8 16z" /></svg>
+                <div><b data-fact="rel_v">not measured</b><span>Heights relative to nearby ground (absolute heights are off; we say so)</span></div></div>
+              <div class="stat"><svg viewBox="0 0 32 32"><path d="M6 12a14 14 0 0120 0 M10 16a8 8 0 0112 0" /><circle cx="16" cy="21" r="1.5" /><path d="M4 4l24 24" /></svg>
+                <div><b>0</b><span>Internet connections needed while it runs</span></div></div>
+            </div>
+            <p class="zsmall" style="margin-top: 10px">Measured on USGS public survey photos (South Fork, California, 30 Apr 2024), not our footage.
+              The standard asks for at least 30 checkpoints; this site gave us 3, so treat the error as a first estimate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 next -->
+    <section class="ticket" aria-labelledby="t6">
+      <div class="ticket__in" style="min-height: 460px">
+        <div class="contours"></div>
+        <div class="reticle" style="width: 380px; height: 380px; right: -110px; bottom: -150px; border-color: rgba(181,211,52,.5)"></div>
+        <img src="../art/sf_ortho_round.webp" alt="" style="position: absolute; right: -110px; bottom: -150px; width: 380px; height: 380px; object-fit: cover; border-radius: 50%; opacity: .9" />
+        <div class="thead over"><span class="tnum">06 / 06</span><span id="t6">What's next</span></div>
+        <div class="road over">
+          <svg class="path" viewBox="0 0 1000 330" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M70 290 C 220 270, 250 230, 330 220 S 520 160, 590 150 S 760 110, 860 100" fill="none" stroke="#EBE2CC" stroke-width="2.5" stroke-dasharray="9 9" />
+          </svg>
+          <span class="pin" style="left: 7%; top: 88%"></span>
+          <span class="pin" style="left: 33%; top: 66.6%"></span>
+          <span class="pin" style="left: 59%; top: 45.5%"></span>
+          <span class="pin" style="left: 86%; top: 30.3%"></span>
+          <div class="tag" style="left: 9%; top: 88%"><b>Now</b>Working prototype on public survey data</div>
+          <div class="tag" style="left: 33%; top: 66.6%"><b>Before 21 Nov</b>Our own survey flight, our own checkpoints</div>
+          <div class="tag" style="left: 59%; top: 45.5%"><b>Then</b>Tool vs tape on a real gap and debris pile</div>
+          <div class="tag" style="left: 82%; top: 30.3%"><b>Goal</b>30 checkpoints, so the error figure meets the standard</div>
+        </div>
+        <p class="credit-strip over" style="margin-top: 8px">Our planned survey flights on 29–30 Oct were cancelled by rain.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="zfoot">
+    <span>Project Typhon · Team Vortex · hackFront India 2026 · PS T8.2</span>
+    <span>Imagery: USGS (public domain), processed by us · Roads © OpenStreetMap contributors · <a href="https://github.com/manasharma404/photo-gramma-tree">Source on GitHub</a></span>
+  </footer>
+</body>
+</html>
