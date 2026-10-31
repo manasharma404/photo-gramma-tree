@@ -243,3 +243,92 @@ def test_field_reports_override_and_set_source():
     assert seg["status_by_mode"]["fire_truck"] == "blocked"
     assert seg["status_by_mode"]["ambulance"] == "blocked"
     assert seg["status_by_mode"]["jeep"] == "open"
+
+
+def test_c3_crasar_road_damage_cli_crops_and_fusion_rules(tmp_path):
+    import subprocess
+    import sys
+    import cv2
+    import numpy as np
+    from ml.road_damage import (
+        CRASAR_MODEL_ID,
+        load_crops_directory,
+        predict_crops_to_ml_scores,
+        prepare_masked_unet_crop,
+    )
+
+    ml_schema = json.loads((CONTRACTS / "ml_scores.schema.json").read_text(encoding="utf-8"))
+    crops_dir = tmp_path / "crops"
+    crops_dir.mkdir(parents=True)
+
+    # Create two RGB road crop images (seg_A dark gray asphalt, seg_B bright orange/brown debris)
+    img_a = np.full((128, 128, 3), 50, dtype=np.uint8)
+    img_b = np.full((128, 128, 3), 210, dtype=np.uint8)
+    cv2.imwrite(str(crops_dir / "seg_A.png"), img_a)
+    cv2.imwrite(str(crops_dir / "seg_B.png"), img_b)
+
+    tensor = prepare_masked_unet_crop(img_a, target_size=128)
+    assert tensor.shape == (4, 128, 128)
+    assert tensor.dtype == np.float32
+    assert float(tensor[3, 64, 64]) == 1.0
+
+    # 1. Offline CLI without 977 MB CRASAR PyTorch Lightning weights -> honest null probabilities
+    out_null = tmp_path / "ml_scores_null.json"
+    proc = subprocess.run(
+        [sys.executable, "-m", "ml.road_damage", "--crops-dir", str(crops_dir), "--out", str(out_null)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    null_doc = json.loads(out_null.read_text(encoding="utf-8"))
+    jsonschema.validate(null_doc, ml_schema, cls=jsonschema.Draft202012Validator)
+    assert [s["segment_id"] for s in null_doc["scores"]] == ["seg_A", "seg_B"]
+    assert all(s["p_blocked"] is None and s["model"] == CRASAR_MODEL_ID for s in null_doc["scores"])
+
+    # 2. Local predictor forward pass -> normalized [clear, partial, blocked] + fusion check
+    def _mock_unet_probs(chw: np.ndarray) -> np.ndarray:
+        # img_a road stripe has low red (70/255=0.27); img_b background/circle has higher red (>0.45)
+        mean_r = float(np.mean(chw[0][chw[3] > 0.5]))
+        if mean_r < 0.40:
+            return np.broadcast_to(np.array([0.85, 0.10, 0.05], dtype=np.float32)[:, None, None], (3, 128, 128))
+        return np.broadcast_to(np.array([0.05, 0.10, 0.85], dtype=np.float32)[:, None, None], (3, 128, 128))
+
+    scored_doc = predict_crops_to_ml_scores(
+        load_crops_directory(crops_dir),
+        predictor_fn=_mock_unet_probs,
+        target_size=128,
+        mock=True,
+    )
+    jsonschema.validate(scored_doc, ml_schema, cls=jsonschema.Draft202012Validator)
+    by_seg = {s["segment_id"]: s for s in scored_doc["scores"]}
+    assert by_seg["seg_A"]["p_blocked"] < 0.15
+    assert by_seg["seg_B"]["p_blocked"] > 0.75
+
+    # Fuse into advisor.assess: seg_A is geometrically blocked (must NOT flip to open!);
+    # seg_B is geometrically open (disagreement with high p_blocked -> needs_verification=True)
+    seg_fc = {
+        "type": "FeatureCollection",
+        "mock": True,
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[0, 0], [0.001, 0]]},
+                "properties": _make_props(segment_id="seg_A", min_clear_width_m=1.1, max_obstruction_m=1.6),
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": [[0.001, 0], [0.002, 0]]},
+                "properties": _make_props(segment_id="seg_B", min_clear_width_m=5.2, max_obstruction_m=0.02),
+            },
+        ],
+    }
+    fused = assess_collection(seg_fc, ml_scores=scored_doc)
+    jsonschema.validate(fused, ADVISOR_STATE_SCHEMA, cls=jsonschema.Draft202012Validator)
+    st_map = {s["segment_id"]: s for s in fused["segments"]}
+    assert all(v == "blocked" for v in st_map["seg_A"]["status_by_mode"].values())
+    assert st_map["seg_A"]["needs_verification"] is True
+    assert all(v == "open" for v in st_map["seg_B"]["status_by_mode"].values())
+    assert st_map["seg_B"]["needs_verification"] is True
+
