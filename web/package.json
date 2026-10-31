@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "5.1.0",
+    "@fontsource/space-grotesk": "5.1.0",
     "maplibre-gl": "4.7.1",
     "three": "0.169.0"
   },

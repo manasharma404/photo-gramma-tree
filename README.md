@@ -1,4 +1,6 @@
-# Vortex
+# Project Typhon
+
+*We build immediate 2D and 3D maps for post-landslide relief efforts.*
 
 hackFront IIITD, team Vortex (repo: photo-gramma-tree). hackFront India 2026, **PS T8.2 "The First Map After The Landslide"**: turn consumer drone footage into a georeferenced map, measurements and road status per vehicle, **offline on a laptop**, and state the positional error honestly.
 

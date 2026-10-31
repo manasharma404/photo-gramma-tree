@@ -130,6 +130,10 @@ def span(s, line_wgs):
               "bank_a_height_m": round(float(z[i_a]), 2), "bank_b_height_m": round(float(z[i_b]), 2),
               "bed_elevation_m": round(bed, 2), "profile_png": png,
               "panel_estimate": {"count": panels, "rule": "config/bridging.yaml"},
+              # light copy of the profile for charts in the UI (<= 120 points)
+              "profile": {"distance_m": [round(float(v), 2) for v in d[:: max(1, len(d) // 120)]],
+                          "height_m": [None if not np.isfinite(v) else round(float(v), 2) for v in z[:: max(1, len(d) // 120)]],
+                          "bank_a_m": round(float(d[i_a]), 2), "bank_b_m": round(float(d[i_b]), 2)},
               "note": None if ok else f"no bank pair standing >= {cfg['bank_drop_min_m']} m above the bed"}
     tol = round(math.sqrt(2) * s.rmse_h, 2) if (s.rmse_h and span_m) else None
     return _result("span", s, shape(line_wgs), result, tol, "m",

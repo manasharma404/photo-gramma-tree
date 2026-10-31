@@ -3,7 +3,7 @@
 import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 
-const url = process.argv[2] || "http://127.0.0.1:8000/";
+const url = process.argv[2] || "http://127.0.0.1:8000/app/";
 const out = process.argv[3] || "../data/screenshots";
 mkdirSync(out, { recursive: true });
 
@@ -19,15 +19,15 @@ await page.waitForTimeout(3000);
 await page.screenshot({ path: `${out}/01_map_act.png` });
 
 for (const tab of ["roads", "accuracy"]) {
-  await page.click(`.tabs [data-tab="${tab}"]`);
+  await page.click(`[role=tab][data-tab="${tab}"]`);
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${out}/02_${tab}.png` });
 }
 const first = await page.$("#tab-roads [data-seg]");
-await page.click('.tabs [data-tab="roads"]');
+await page.click('[role=tab][data-tab="roads"]');
 if (first) { await first.click(); await page.waitForTimeout(500); await page.screenshot({ path: `${out}/03_segment.png` }); }
 
-const btn3d = await page.$("#toggle-3d:not([disabled])");
+const btn3d = await page.$("#btn-3d:not([disabled])");
 if (btn3d) {
   await btn3d.click();
   await page.waitForTimeout(8000);

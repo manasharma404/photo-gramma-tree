@@ -64,6 +64,21 @@ def main():
                   resampling=Resampling.bilinear, dst_nodata=0)
     Image.fromarray(np.moveaxis(rgb, 0, -1)).save(out / "texture.jpg", quality=85)
 
+    # Small transparent thumbnail for UI cards: alpha from the orthophoto, cropped to the photographed area.
+    with rasterio.open(args.ortho) as ortho:
+        alpha = np.zeros((th, tw), np.uint8)
+        reproject(source=rasterio.band(ortho, ortho.count if ortho.count >= 4 else 1), destination=alpha,
+                  dst_transform=from_bounds(b.left, b.bottom, b.right, b.top, tw, th), dst_crs=crs,
+                  resampling=Resampling.nearest, dst_nodata=0)
+    alpha = np.where(alpha >= 128, 255, 0).astype(np.uint8)  # GDAL nudges valid 0s to 1 (see above)
+    rows, cols = np.nonzero(alpha)
+    if rows.size:
+        r0, r1, c0, c1 = rows.min(), rows.max() + 1, cols.min(), cols.max() + 1
+        rgba = np.dstack([np.moveaxis(rgb, 0, -1), alpha])[r0:r1, c0:c1]
+        thumb = Image.fromarray(rgba, "RGBA")
+        thumb.thumbnail((640, 640))
+        thumb.save(out / "thumb.png")
+
     finite = z[np.isfinite(z)]
     meta = {
         "width": w, "height": h, "cell_m": [round(span_x / w, 4), round(span_y / h, 4)],
@@ -72,6 +87,7 @@ def main():
         "z_min": round(float(finite.min()), 2), "z_max": round(float(finite.max()), 2),
         "no_data_fraction": round(float(1 - finite.size / z.size), 3),
         "texture": {"file": "texture.jpg", "width": tw, "height": th},
+        "thumb": "thumb.png" if (out / "thumb.png").exists() else None,
         "height_file": "height.f32", "dtype": "float32-le", "row_order": "north_first",
         "source": {"dsm": str(args.dsm).replace("\\", "/"), "ortho": str(args.ortho).replace("\\", "/")},
         "url": f"/tiles/{args.project}/terrain/",

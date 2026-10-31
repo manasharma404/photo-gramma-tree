@@ -3,11 +3,13 @@ import { api } from "./api.js";
 import { setData } from "./map.js";
 import { renderMeasureResult, showTab } from "./panel.js";
 
-export function initTools(map, onStatus) {
+export function initTools(map, { onStatus, onResult }) {
   let tool = null;
   let pts = [];
   const results = [];
   const buttons = document.querySelectorAll("#tools [data-tool]");
+  const HINT = { span: "Click across the gap, double-click to finish", volume: "Click around the debris, double-click to finish",
+    "working-space": "Click where you need space" };
 
   const drawPreview = () => {
     const feats = pts.map((p) => ({ type: "Feature", geometry: { type: "Point", coordinates: p } }));
@@ -15,41 +17,42 @@ export function initTools(map, onStatus) {
     setData(map, "drawing", { type: "FeatureCollection", features: feats });
   };
   const select = (name) => {
-    tool = tool === name ? null : name;
+    tool = name && name !== "select" ? name : null;
     pts = [];
     drawPreview();
-    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === tool)));
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === (tool || "select"))));
     map.doubleClickZoom[tool ? "disable" : "enable"]();
-    onStatus(tool ? `Tool: ${tool}` : "");
+    map.getCanvas().style.cursor = tool ? "crosshair" : "";
+    onStatus(tool ? HINT[tool] || "" : "");
   };
 
   const run = async (kind, body, resultGeoms) => {
-    onStatus(`Measuring ${kind}…`);
+    onStatus("Measuring…");
     try {
       const m = await api.measure(kind, body);
-      renderMeasureResult(m);
       showTab("measure");
+      renderMeasureResult(m);
       results.push(...resultGeoms(m));
       setData(map, "results", { type: "FeatureCollection", features: results });
-      onStatus("");
+      onResult?.(m);
+      select(null);
     } catch (e) {
+      select(null);
       onStatus(`Could not measure: ${e.message}`);
     }
-    select(null);
   };
 
   buttons.forEach((b) => b.addEventListener("click", async () => {
     if (b.dataset.tool === "clear") {
       results.length = 0;
       setData(map, "results", null);
-      select(null);
-      return;
+      return select(null);
     }
     if (b.dataset.tool === "landing-zones") {
       const helis = await api.helicopters();
       const names = Object.keys(helis || {});
       if (!names.length) return onStatus("No helicopter types configured");
-      const choice = window.prompt(`Helicopter type: ${names.join(", ")}`, names[0]);
+      const choice = names.length === 1 ? names[0] : window.prompt(`Helicopter type: ${names.join(", ")}`, names[0]);
       if (!choice) return;
       return run("landing-zones", { helicopter: choice },
         (m) => m.result.candidates.map((c) => ({ type: "Feature", geometry: c.polygon, properties: {} })));

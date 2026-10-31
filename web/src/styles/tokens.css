@@ -1,22 +1,37 @@
-/* PLACEHOLDER design tokens: neutral grey skeleton.
-   The lead's design replaces this file; the app reads ONLY these variables. */
+/* Project Typhon design tokens (brand kit v1.0). The app reads ONLY these variables.
+   Status colours: chosen by Claude within the brand's earthy vibe, with high contrast (brand rule 05);
+   each status also has its own line pattern (brief: never colour alone). */
 :root {
-  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-num: ui-monospace, "Cascadia Mono", Consolas, monospace;
-  --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 20px;
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --radius: 4px;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-num: "Space Grotesk", ui-monospace, monospace;
+  --fs-xs: 11px; --fs-s: 13px; --fs-m: 15px; --fs-l: 20px; --fs-xl: 28px;
+  --tracking-caps: 0.12em;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --radius: 10px; --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(47, 62, 46, 0.06), 0 8px 24px rgba(47, 62, 46, 0.08);
 
-  --bg: #f4f4f4; --surface: #ffffff; --surface-2: #e9e9e9; --line: #c8c8c8;
-  --text: #1a1a1a; --text-2: #5a5a5a; --focus: #000000;
+  /* brand palette */
+  --sand: #F8F6EF;   /* background */
+  --stone: #E6E1D6;  /* surfaces, cards */
+  --sage: #A7B399;   /* accents, highlights */
+  --forest: #2F3E2E; /* text, key elements, buttons */
+  --terrain: #6B7F6A;/* secondary, icons */
+  --ocean: #0F3D4E;  /* data overlays, graphs */
 
-  /* status: meanings fixed by the brief; colours are placeholders (greys + dash patterns carry the meaning) */
-  --status-open: #4d4d4d;
-  --status-partial: #7a7a7a;
-  --status-blocked: #000000;
-  --status-unknown: #b0b0b0;
-  --verify: #000000;
+  --bg: var(--sand); --surface: #FFFFFF; --surface-2: var(--stone); --line: #D8D2C4;
+  --text: var(--forest); --text-2: #5C6B5B; --focus: var(--ocean);
+  --accent: var(--sage); --primary: var(--forest); --on-primary: var(--sand);
 
-  --panel-width: 380px;
-  --topbar-height: 48px;
+  /* road status (meaning fixed by the brief) */
+  --status-open: #2E7D4F;     /* solid line */
+  --status-partial: #C98A12;  /* dashed line */
+  --status-blocked: #B3261E;  /* thick solid + ✕ */
+  --status-unknown: #8C918A;  /* dotted line */
+  --verify: var(--ocean);     /* outline ring = needs verification */
+  --halo: rgba(248, 246, 239, 0.9); /* light casing under lines so they read on imagery */
+
+  --rail-width: 88px;
+  --panel-width: 360px;
+  --topbar-height: 64px;
 }
