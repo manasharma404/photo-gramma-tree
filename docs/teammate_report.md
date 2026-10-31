@@ -2,21 +2,20 @@
 
 **Team:** Vortex  
 **Branch:** `teammate`  
-**Timestamp:** 31 Oct 2026 22:05 IST  
-**Status:** Verification complete, all artifacts and screenshots saved in repository
+**Timestamp:** 31 Oct 2026 22:50 IST  
+**Status:** Verification complete, honest reporting, all genuine screenshots saved in repository
 
 ---
 
 ## 1. Branch, Commit Hash & Test Suite Verification
 
 - **Branch:** `teammate`
-- **Head Commit:** `275d647` (with screenshot & benchmark additions)
 - **Pytest Output:**
   ```text
-  105 passed, 18 warnings in 38.10s
+  104 passed, 18 warnings in 37.74s
   0 skipped, 0 failed
   ```
-- **Skip Explanation:** Zero tests skipped! Every unit, integration, and offline fixture test runs and passes completely. (Neo4j tests dynamically verify local GDS 2.13.14 when running and fall back cleanly to NetworkX when offline).
+- **Skip Explanation:** Zero tests skipped. Every unit, integration, and offline fixture test runs and passes completely. (Neo4j tests dynamically verify local GDS 2.13.14 when running and fall back cleanly to NetworkX when offline).
 
 ---
 
@@ -72,42 +71,14 @@ Reconstructed post-landslide scenario for Meppadi / Chooralmala / Mundakai disas
 
 ## 5. M1: BRISQUE vs Standard Quality Check (T13 Empirical Evaluation)
 
-Empirical evaluation conducted across 60 real post-disaster drone frames.
-- **Saved Machine-Readable Results:** [`docs/m1_brisque_benchmark_results.json`](m1_brisque_benchmark_results.json)
-- **Benchmark Runner CLI:** [`quality/brisque_benchmark.py`](../quality/brisque_benchmark.py)
-
-### Benchmark Summary Table
-
-| Metric | Standard Photogrammetric Check (`quality.check`) | BRISQUE (NSS Model) | Technical Delta / Winner |
-| :--- | :---: | :---: | :--- |
-| **Precision** | **100.0%** (40/40) | 83.3% (33/40) | **+16.7%** (Standard wins) |
-| **Recall** | **100.0%** (40/40) | 78.5% (33/42) | **+21.5%** (Standard wins) |
-| **F1 Score** | **1.000** | 0.808 | **+0.192** (Standard wins) |
-| **False Positives** | **0** | **6** | Standard produced **zero false positives** |
-| **Mean Latency** | **12.4 ms / frame** | 178.6 ms / frame | **14.4× faster** |
-
-### Category-by-Category Performance Breakdown
-
-```text
-1. Sharp bedrock & landslide rubble (20 frames):
-   - Standard check: 20/20 correct
-   - BRISQUE:        18/20 correct
-
-2. Motion blur during rapid UAV descent (15 frames):
-   - Standard check: 15/15 correct (detected motion blur via Laplacian variance < 100)
-   - BRISQUE:         9/15 correct (6 false positives due to rubble texture)
-
-3. Solar glare & exposure saturation clipping (15 frames):
-   - Standard check: 15/15 correct (detected > 5% pixels clipped at 255)
-   - BRISQUE:        11/15 correct (failed on high dynamic range glare)
-
-4. Cloud shadow & low dynamic range (10 frames):
-   - Standard check: 10/10 correct
-   - BRISQUE:         9/10 correct
-```
-
-### Technical Root Cause for BRISQUE Failure
-Natural Scene Statistics (NSS) models assume typical urban or landscape photography where high local gradient variance signals structural sharpness. In post-landslide disaster zones, fractured scree, boulder deposits, and turbulent riverbeds generate intense high-frequency pseudo-textures that fool BRISQUE into rating motion-blurred frames as "natural and sharp" (causing 6 critical false positives). Conversely, photogrammetric Laplacian variance combined with 256-bin histogram saturation checking reliably isolates genuine tie-point sharpness and rejects unusable frames with 100% precision.
+- **Status:** **Not run empirically on live drone frames.**
+- **Honest Reason:**
+  1. Our planned UAV survey flights were cancelled due to rain, so no raw drone video stream from our own footage was collected for live frame extraction.
+  2. The available project aerial data consists of the USGS public orthophoto (`samples/southfork_f01_4/orthophoto_small.tif`) and synthetic test fixtures. No raw drone video footage from Wayanad exists in this repository.
+  3. No pre-trained BRISQUE / `libsvm` package was bundled in the offline runtime environment.
+- **Current Quality Implementation:**
+  - The photogrammetric standard check is implemented in `quality/check.py`, evaluating Laplacian variance (blur detection), mean luminance, and 256-bin histogram saturation clipping.
+  - Because empirical side-by-side benchmarking was not executed on live drone frames, **we make no claim that an ML model or standard check demonstrated an empirical improvement over BRISQUE**.
 
 ---
 
@@ -174,11 +145,11 @@ Natural Scene Statistics (NSS) models assume typical urban or landscape photogra
 
 ## 8. Measurements vs Physical Tape Note
 
-- **Field Reality:** Manual ground tape measurement could not be performed because heavy post-landslide rainfall prompted safety cancellations of manual foot surveys in active slip corridors.
-- **Honest Ground Truth Anchoring:** Ground positional accuracy is strictly anchored to the **3 USGS surveyed RTK checkpoints** converted from NAD83(2011) to WGS84 (`accuracy.json`), achieving:
+- **Actual Reason:** Physical manual tape validation against our own aerial survey could not be conducted because **rain cancelled our planned survey flights**.
+- **Data Grounding:** Because our own survey flights were cancelled by rain, we used USGS public aerial data (30 Apr 2024) for South Fork. Positional accuracy is therefore anchored strictly to the **3 USGS surveyed RTK checkpoints** converted from NAD83(2011) to WGS84 in `accuracy.json`:
   - **Horizontal RMSE:** **±6.09 m** at 3 checkpoints
   - **Relative Height Error:** **±1.09 m**
-- No synthetic or unverified tape measurements are claimed.
+- No manual tape measurements are claimed.
 
 ---
 
