@@ -46,6 +46,13 @@ def test_wrong_geometry_is_422(client):
     assert r.status_code == 422
 
 
+def test_active_and_layers(client):
+    a = client.get("/accuracy/active").json()
+    assert a["project"] == "synthetic" and a["has_roads"] is False and a["tiles"] is None
+    assert client.get("/accuracy/layers/segments").status_code == 404  # not produced yet
+    assert client.get("/accuracy/layers/nonsense").status_code == 404
+
+
 def test_accuracy_missing_is_404_and_spec_has_nulls(client):
     assert client.get("/accuracy/report").status_code == 404
     spec = client.get("/accuracy/spec").json()
