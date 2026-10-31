@@ -107,3 +107,23 @@ a { color: inherit; text-decoration: none; }
   .credit { top: auto; bottom: 12px; right: 16px; transform: none; }
   .about__grid, .facts { grid-template-columns: 1fr; gap: 24px; }
 }
+
+/* ---- colour & depth pass: sage gradients, contour lines at the edges, dark About band ---- */
+.hero { background:
+  radial-gradient(ellipse 60% 55% at 50% 46%, rgba(242, 242, 236, 0) 0%, rgba(242, 242, 236, 0) 55%, rgba(226, 231, 216, 0.9) 100%),
+  linear-gradient(180deg, #F3F3EC 0%, #E9ECE0 100%); }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: url("/contours.svg") center / 1400px auto repeat;
+  -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 46%, transparent 45%, #000 85%);
+  mask-image: radial-gradient(ellipse 70% 62% at 50% 46%, transparent 45%, #000 85%); }
+.hero::after { background: linear-gradient(transparent, var(--forest)); height: 6vh; opacity: .9; }
+.features img, .view3d { box-shadow: 0 8px 22px rgba(47, 62, 46, 0.28); }
+.pill-cta { background: var(--forest); color: var(--sand); }
+.pill-cta:hover { background: var(--forest-2, #3A4C39); }
+
+.about-band { background: linear-gradient(180deg, var(--forest) 0%, #26332A 100%); color: var(--sand); }
+.about-band .caps, .about-band .muted { color: rgba(248, 246, 239, 0.7); }
+.about-band h2 { color: var(--sand); }
+.about-band .fact { background: rgba(248, 246, 239, 0.07); border-color: rgba(248, 246, 239, 0.14); }
+.about-band .fact b { color: var(--sage); }
+.about-band .fact span { color: rgba(248, 246, 239, 0.72); }

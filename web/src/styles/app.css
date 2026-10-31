@@ -188,3 +188,47 @@ body.app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-r
 .stage::before, .stage::after { content: "+"; position: absolute; z-index: 1; font: 300 18px var(--font-display); color: rgba(47, 62, 46, 0.35); pointer-events: none; }
 .stage::before { left: 14px; bottom: 74px; }
 .stage::after { right: 74px; top: 360px; }
+
+/* ---- colour & depth pass (lead: "too white"): dark forest anchors, layered warm surfaces, sage gradients, contours ---- */
+:root { --sage-tint: #E4E8DB; --stone-2: #EDE9E0; --forest-2: #3A4C39; }
+body.app { background: linear-gradient(180deg, #F4F2EB 0%, #E8E5DA 100%); }
+.topbar { background: linear-gradient(90deg, #FFFFFF 0%, #F6F4EE 55%, var(--sage-tint) 100%); }
+
+/* rail: the dark anchor of the layout */
+.rail { background: linear-gradient(180deg, var(--forest) 0%, var(--forest-2) 100%); border-right: 0; }
+.rail button { color: rgba(248, 246, 239, 0.62); }
+.rail button:hover { color: var(--sand); }
+.rail button[aria-selected="true"] { background: rgba(248, 246, 239, 0.12); color: var(--sand); box-shadow: inset 3px 0 0 var(--sage); }
+
+/* panel: warm stone surface, white cards float on it */
+.panel { background: linear-gradient(180deg, #FAF8F3 0%, var(--stone-2) 100%); }
+.insight, .item { background: #FFFFFF; }
+.insight__icon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--sage-tint); color: var(--forest); }
+.alert { background: linear-gradient(135deg, color-mix(in srgb, var(--status-blocked) 12%, #fff) 0%, #FFFFFF 100%);
+  border: 1px solid color-mix(in srgb, var(--status-blocked) 22%, transparent); }
+
+/* map stage: paper with topographic contours (decorative), visible around our map */
+.stage { background: url("/contours.svg") center / 1200px auto repeat, radial-gradient(ellipse at 30% 20%, #F7F6F0 0%, #ECEADF 70%); }
+
+/* floating map controls: frosted */
+.layers, .toolcol, .viewswitch, .legend { background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(8px); }
+.toolcol button[aria-pressed="true"], .segmented button[aria-checked="true"] { background: var(--forest); }
+
+/* bottom strip: sage gradient band; accuracy is the dark feature card */
+.strip { background: linear-gradient(90deg, var(--sage-tint) 0%, #EFEDE5 50%, var(--sage-tint) 100%); }
+#card-accuracy { background: linear-gradient(145deg, var(--forest) 0%, var(--forest-2) 100%); color: var(--sand); border: 0; }
+#card-accuracy header, #card-accuracy .muted { color: rgba(248, 246, 239, 0.72); }
+#card-accuracy .big { color: var(--sand); }
+#card-3d .thumb { background-color: var(--forest); filter: none; }
+#card-overview { background: linear-gradient(160deg, #FFFFFF 0%, #F4F2EA 100%); }
+
+@media (max-width: 760px) {
+  .rail { background: var(--forest); box-shadow: 0 -6px 18px rgba(47, 62, 46, 0.18); }
+  .rail button[aria-selected="true"] { box-shadow: inset 0 3px 0 var(--sage); }
+  .topbar { background: linear-gradient(180deg, #FFFFFF 0%, var(--sage-tint) 100%); }
+  .panel { background: linear-gradient(180deg, #FFFFFF 0%, var(--stone-2) 100%); }
+  .grabber { background: var(--sage); }
+}
+
+.hide-sm { display: inline; }
+@media (max-width: 760px) { .hide-sm { display: none; } .rail button { text-transform: uppercase; } }

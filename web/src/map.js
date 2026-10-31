@@ -43,7 +43,7 @@ export function createMap(container, active, onSegmentClick) {
                  attribution: "Imagery: USGS (public domain), processed by Project Typhon · Roads © OpenStreetMap contributors" },
       } : {},
       layers: [
-        { id: "bg", type: "background", paint: { "background-color": css("--paper") || "#F2F2EC" } },
+        { id: "bg", type: "background", paint: { "background-color": "#F2F2EC", "background-opacity": 0 } }, // transparent: the stage contours show through
         ...(tiles ? [{ id: "ortho", type: "raster", source: "ortho" }] : []),
       ],
     },
