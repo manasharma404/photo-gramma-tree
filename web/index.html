@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vortex</title>
+</head>
+<body>
+  <!-- Grey skeleton: structure follows docs/ui_layout_brief.md; the look comes from the lead's design (src/styles/tokens.css). -->
+  <header class="topbar" id="topbar">
+    <div class="topbar__site">
+      <label class="sr-only" for="site">Site</label>
+      <select id="site"></select>
+      <span class="data-label" id="data-label">—</span>
+    </div>
+    <div class="topbar__vehicle" id="vehicle" role="radiogroup" aria-label="Vehicle"></div>
+    <div class="topbar__meta">
+      <span id="freshness">—</span>
+      <span class="badge" id="offline">checking…</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <div id="map" class="view"></div>
+      <div id="three" class="view" hidden></div>
+      <div class="tools" id="tools">
+        <button data-tool="span" title="Draw a line across a gap">Span</button>
+        <button data-tool="volume" title="Draw a polygon around debris">Volume</button>
+        <button data-tool="working-space" title="Click a point">Work area</button>
+        <button data-tool="landing-zones" title="Search landing zones">Landing</button>
+        <button data-tool="clear" title="Clear drawing">Clear</button>
+        <span class="tools__sep"></span>
+        <button id="toggle-3d" aria-pressed="false">3D</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="exaggeration" id="exaggeration" hidden>
+        <label>Height ×<span id="exag-value">1.5</span>
+          <input type="range" id="exag" min="1" max="3" step="0.5" value="1.5" />
+        </label>
+      </div>
+      <div class="statusline" id="statusline"></div>
+    </section>
+
+    <aside class="panel">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="act" aria-selected="true">Act now</button>
+        <button role="tab" data-tab="roads">Roads</button>
+        <button role="tab" data-tab="measure">Measure</button>
+        <button role="tab" data-tab="accuracy">Accuracy</button>
+        <button role="tab" data-tab="reports">Field reports</button>
+      </nav>
+      <div class="tabpanel" id="tab-act"></div>
+      <div class="tabpanel" id="tab-roads" hidden></div>
+      <div class="tabpanel" id="tab-measure" hidden></div>
+      <div class="tabpanel" id="tab-accuracy" hidden></div>
+      <div class="tabpanel" id="tab-reports" hidden></div>
+    </aside>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

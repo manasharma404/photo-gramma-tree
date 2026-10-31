@@ -48,7 +48,8 @@ def main():
         import rasterio
         dsm = rasterio.open(args.dsm)
 
-    per_point, dxs, dys, dzs, horiz, precisions = [], [], [], [], [], []
+    to_wgs = Transformer.from_crs(conf["map_epsg"], 4326, always_xy=True).transform
+    per_point, dxs, dys, dzs, horiz, precisions, arrows = [], [], [], [], [], [], []
     for p in conf["points"]:
         r = rtk[p["id"]]
         sx, sy = to_map.transform(float(r["longitude"]), float(r["latitude"]))
@@ -66,6 +67,14 @@ def main():
             precisions.append(float(r["horiz_precision_m"]))
         per_point.append({"id": p["id"], "dx_m": round(dx, 3), "dy_m": round(dy, 3), "dz_m": dz,
                           "found_by": p["found_by"]})
+        arrows.append({"type": "Feature",
+                       "geometry": {"type": "LineString",
+                                    "coordinates": [[float(r["longitude"]), float(r["latitude"])],
+                                                    list(to_wgs(p["x"], p["y"]))]},
+                       "properties": {"id": p["id"], "code": r["code"], "error_h_m": round(math.hypot(dx, dy), 2),
+                                      "dx_m": round(dx, 2), "dy_m": round(dy, 2), "dz_m": dz,
+                                      "found_by": p["found_by"],
+                                      "note": "from = surveyed (RTK), to = where our map put the target"}})
 
     rx, ry = rms(dxs), rms(dys)
     acc = {
@@ -87,6 +96,8 @@ def main():
     schema = json.loads((ROOT / "contracts/accuracy.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(acc, schema)
     args.out.write_text(json.dumps(acc, indent=2), encoding="utf-8")
+    args.out.with_name("checkpoints.geojson").write_text(
+        json.dumps({"type": "FeatureCollection", "features": arrows}), encoding="utf-8")
     print(json.dumps({k: acc[k] for k in ("n_checkpoints", "horizontal", "vertical")}, indent=2))
 
 

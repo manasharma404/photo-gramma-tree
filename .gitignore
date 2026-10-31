@@ -19,5 +19,9 @@ neo4j/data/
 neo4j/plugins/
 neo4j/logs/
 
+# Tool caches and local tooling
+/cache/
+/.claude/
+
 # Secrets
 .env

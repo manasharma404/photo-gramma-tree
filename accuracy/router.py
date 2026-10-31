@@ -55,3 +55,39 @@ def build_spec(active):
 @router.get("/spec")
 def spec():
     return build_spec(load_active())
+
+
+# --- data the web app needs about the active run (read-only; files written by pipeline/ and roads/) ---
+def _project_dir(active):
+    return ROOT / "data" / "projects" / active["project"]
+
+
+@router.get("/active")
+def active():
+    """The active run, plus what's available for it: tiles, terrain, roads, checkpoints."""
+    a = load_active()
+    if not a:
+        raise HTTPException(404, "no run is active yet (python -m pipeline.activate)")
+    p = _project_dir(a)
+    return {**a,
+            "tiles": _read(p.relative_to(ROOT) / "tiles/ortho/meta.json"),
+            "terrain": _read(p.relative_to(ROOT) / "tiles/terrain/meta.json"),
+            "has_roads": (p / "roads/segments.geojson").exists(),
+            "has_checkpoints": bool(a.get("accuracy")) and (ROOT / a["accuracy"]).with_name("checkpoints.geojson").exists()}
+
+
+@router.get("/layers/{name}")
+def layer(name: str):
+    """GeoJSON layers of the active project: segments, places, checkpoints."""
+    a = load_active()
+    if not a:
+        raise HTTPException(404, "no run is active yet")
+    files = {"segments": _project_dir(a) / "roads/segments.geojson",
+             "places": _project_dir(a) / "roads/places.geojson",
+             "checkpoints": (ROOT / a["accuracy"]).with_name("checkpoints.geojson") if a.get("accuracy") else None}
+    if name not in files:
+        raise HTTPException(404, f"unknown layer; choose from {sorted(files)}")
+    f = files[name]
+    if not f or not f.exists():
+        raise HTTPException(404, f"{name} not produced yet for {a['project']}")
+    return json.loads(f.read_text(encoding="utf-8"))
