@@ -94,5 +94,19 @@ Stage times: feature matching + reconstruction 46.6 min, meshing 19.0 min, every
 2. Capture guidance for responders: camera pointing straight down, steady height, overlapping parallel passes; open ground maps well, built-up areas need more height and overlap.
 3. The video path works end to end (telemetry → geotagged frames → map in ~68 min on this laptop) and the tool shows its failure plainly instead of hiding it.
 
+## Run 4: USGS South Fork, flight F02 part 2 (one long line), a search for more checkpoints (3 Nov)
+
+**Why:** the block (Run 2) rests on 3 checkpoints; USGS surveyed 18 panel targets and 5 chalk marks. The other F01-4 candidates do not qualify (SF15, SF19, SF20 are chalk marks not identifiable at 5 cm; SF14 lies at the map edge with one weak candidate 27 m away), so we processed the one remaining flight we hold, `F02-2`.
+
+**Data:** 61 images (Ricoh GR II), one line about 990 m long and about 100 m wide, flown from 1,466 m down to 1,242 m above sea level. Processed exactly like the others: quick tier, no ground control.
+
+| Tier | Run id | Time | Peak memory | Orthophoto | Checkpoints confirmed |
+|---|---|---|---|---|---|
+| quick | `2026-11-03_0206_southfork_f02_2_quick` | **43.6 min** | 5.26 GiB | 4.85 ha at 5 cm, in **two disconnected patches** at the two ends of the line; nothing in the ~700 m between | **0** |
+
+**What came out:** all 61 images were placed in one reconstruction, but the orthophoto exists only at the two ends. The north-west patch stops just short of target SF09, so that patch is displaced by tens of metres (not measured: no target inside it). The south-east patch contains only chalk marks SF21–SF23; the detector's candidates there are rocks and debris, not marks, so none was confirmed. **No new checkpoint, no accuracy figure for this run.**
+
+**What it means:** a second, independent single-line flight fails the same way Run 1 did, which supports the rule from Run 1: never map from one straight line. The block figure stays **±6.1 m at 3 checkpoints**; with the public flights we hold, that is the limit, and it stays labelled as a prototype measurement (the standard asks for at least 30).
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
