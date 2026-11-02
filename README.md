@@ -8,6 +8,8 @@ hackFront IIITD, team Vortex (repo: photo-gramma-tree). hackFront India 2026, **
 
 **Try it:** [manasharma404.github.io/photo-gramma-tree](https://manasharma404.github.io/photo-gramma-tree/) is a read-only copy of the app (South Fork block): map, 3D view, panels, the guided tour, About and Drone data. Measuring and field reports run on the Typhon laptop (`uv run python -m api.main`).
 
+**Watch it:** [docs/demo/typhon_demo.mp4](docs/demo/typhon_demo.mp4) (1 min 41 s): the real laptop app, recorded headlessly by `web/scripts/demo_video.mjs`: home, the guided tour, vehicles, measuring a span across the debris channel (59.40 ± 8.62 m), accuracy, 3D view, the field page. Captions describe what is on screen; frames are captured about 1.5 per second, so scrolling looks stepped.
+
 ## What it does
 ```
 drone photos or video (+GPS) ──► ODM (Docker, GPU) ──► orthophoto, height models (DSM/DTM)
