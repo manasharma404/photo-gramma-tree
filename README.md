@@ -86,7 +86,7 @@ uv run python -m pipeline.terrain --dsm <dsm.tif> --ortho <odm_orthophoto.tif> -
 uv run python -m pipeline.activate --run <quick_run_id> --full <full_run_id> --accuracy data/runs/<run_id>/accuracy.json
 uv run python -m api.main
 ```
-Then open `http://localhost:8000` (laptop) or `http://<laptop-ip>:8000` (phone on the hotspot). Field reports: `/field`. Advisor setup (Neo4j, Wayanad): [docs/runbook_advisor.md](docs/runbook_advisor.md).
+Then open `http://localhost:8000` (laptop) or `http://<laptop-ip>:8000` (phone on the hotspot). Field reports: `/field`. An open dashboard picks up a new report within about 3 seconds: the road recolours, the cut-off count updates and a notice says what changed (checked end to end by `web/scripts/report_loop_test.mjs`). Advisor setup (Neo4j, Wayanad): [docs/runbook_advisor.md](docs/runbook_advisor.md).
 
 ## Repo map
 | Folder | What |

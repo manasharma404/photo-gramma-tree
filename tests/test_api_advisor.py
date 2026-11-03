@@ -267,3 +267,19 @@ def test_full_http_asgi_stack_via_testclient(tmp_path: Path, monkeypatch: pytest
         assert t_ok.status_code == 200
         assert t_ok.content == b"\x89PNG\r\n\x1a\nmocktile"
         assert tile_client.get("/tiles/demo/15/10/99.png").status_code == 404
+
+
+def test_field_reports_default_to_the_dashboard_project(tmp_path, monkeypatch):
+    """With no project given, /field must report on the map the dashboard shows (data/active.json), not the mock."""
+    from advisor.routes import resolve_project
+
+    monkeypatch.delenv("VORTEX_DEFAULT_PROJECT", raising=False)
+    monkeypatch.delenv("VORTEX_ACTIVE", raising=False)
+    for name in ("site_a", "site_b"):
+        seg = tmp_path / "data" / "projects" / name / "roads" / "segments.geojson"
+        seg.parent.mkdir(parents=True)
+        seg.write_text('{"type": "FeatureCollection", "features": []}', encoding="utf-8")
+    assert resolve_project(None, data_root=tmp_path) == "mock"
+    (tmp_path / "data" / "active.json").write_text('{"project": "site_b"}', encoding="utf-8")
+    assert resolve_project(None, data_root=tmp_path) == "site_b"
+    assert resolve_project("site_a", data_root=tmp_path) == "site_a"

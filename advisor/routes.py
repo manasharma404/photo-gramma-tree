@@ -63,6 +63,14 @@ def resolve_project(project: str | None = None, data_root: Path | None = None) -
     if env_proj:
         return env_proj
     projs = available_projects(data_root=data_root)
+    # the map the dashboard shows (pipeline.activate), so /field reports land on the same project by default
+    active_file = Path(os.environ.get("VORTEX_ACTIVE", "") or (data_root or _data_root()) / "data" / "active.json")
+    try:
+        active_proj = json.loads(active_file.read_text(encoding="utf-8")).get("project")
+    except (OSError, ValueError, AttributeError):
+        active_proj = None
+    if active_proj in projs:
+        return active_proj
     for preferred in ("southfork", "wayanad"):
         if preferred in projs:
             return preferred

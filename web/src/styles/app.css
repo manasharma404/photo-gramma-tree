@@ -261,3 +261,12 @@ body.app { background: linear-gradient(180deg, #F5F1E6 0%, #E9E5DA 100%); }
 .home-btn:hover { border-color: var(--blue); color: var(--blue); }
 .home-btn__arrow { display: inline-flex; transform: scaleX(-1); }
 .home-btn__arrow svg { width: 15px; height: 15px; }
+
+/* live field-report notice (dashboard watches /advisor/reports) */
+.report-toast { position: fixed; top: calc(var(--topbar-height) + 14px); left: 50%; z-index: 50; transform: translate(-50%, -12px);
+  display: grid; gap: 2px; max-width: min(560px, calc(100vw - 32px)); padding: 12px 18px; border-radius: 12px;
+  border-left: 4px solid var(--status-blocked); background: var(--navy); color: var(--sand, #F5F1E6);
+  box-shadow: 0 12px 32px rgba(15, 30, 61, .28); opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; }
+.report-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.report-toast strong { font: 500 15px var(--font-display); }
+.report-toast span { font-size: 13px; opacity: .85; }

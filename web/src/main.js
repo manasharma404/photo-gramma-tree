@@ -4,7 +4,7 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
-import { api } from "./api.js";
+import { SNAPSHOT, api } from "./api.js";
 import { VEHICLES, esc } from "./format.js";
 import { mountIcons } from "./icons.js";
 import { LAYER_GROUPS, createMap, legendHTML, segmentsForVehicle, setData, setGroupVisible } from "./map.js";
@@ -81,6 +81,7 @@ async function boot() {
   $("accuracy-mini").innerHTML = accuracyMiniHTML(spec);
   renderOverview(active);
   await loadAdvisor();
+  if (!SNAPSHOT) setTimeout(watchReports, 3000);
   initTour(() => app.spec);
 
   const fillMap = () => {
@@ -105,8 +106,54 @@ async function loadAdvisor() {
   const [state, priorities, access, reports] = await Promise.all([
     api.state(app.project), api.priorities(app.project), api.access(app.project), api.reports(app.project)]);
   Object.assign(app, { state, priorities, access });
+  app.lastReportId = reports?.reports?.at(-1)?.id ?? 0;
   renderReports(reports);
   refresh();
+}
+
+// Field reports arrive from phones on /field. Check every few seconds; when a new one lands, re-run the
+// advisor so the road recolours and the cut-off counts update, then say what changed. Live server only.
+const KIND_TEXT = { dead_end: "dead end", new_debris: "new debris", cleared: "cleared", other: "note" };
+const cutCount = (access, v) => (access?.places || []).filter((p) => p.reachable?.[v] === false).length;
+
+async function watchReports() {
+  const r = await api.reports(app.project);
+  const latest = r?.reports?.at(-1);
+  if (latest && latest.id > (app.lastReportId ?? 0)) {
+    const before = cutCount(app.access, app.vehicle);
+    await loadAdvisor();
+    const after = cutCount(app.access, app.vehicle);
+    const seg = app.fc?.features.find((f) => f.properties.segment_id === latest.segment_id);
+    const name = seg ? `road ${latest.segment_id}${seg.properties.highway ? ` (${seg.properties.highway})` : ""}` : latest.place_id || "a road";
+    const status = seg ? seg.properties.status : null;
+    showReportToast(`Field report: ${KIND_TEXT[latest.kind] || latest.kind} on ${name}`,
+      (status ? `Now ${status} for ${vehicleLabel().toLowerCase()}. ` : "")
+      + `Places cut off: ${before} → ${after}. Plan recomputed.`);
+    if (seg && app.mapReady) {
+      const cs = seg.geometry.type === "MultiLineString" ? seg.geometry.coordinates.flat() : seg.geometry.coordinates;
+      const lng = cs.map((c) => c[0]), lat = cs.map((c) => c[1]);
+      app.map.fitBounds([[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]],
+        { padding: 220, maxZoom: 18, duration: 1200 });
+    }
+  }
+  setTimeout(watchReports, 3000);
+}
+
+function showReportToast(title, body) {
+  let el = document.getElementById("report-toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "report-toast";
+    el.className = "report-toast";
+    el.setAttribute("role", "status");
+    document.body.append(el);
+  }
+  el.innerHTML = `<strong>${esc(title)}</strong><span>${esc(body)}</span>`;
+  el.classList.remove("is-on");
+  void el.offsetWidth;
+  el.classList.add("is-on");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("is-on"), 9000);
 }
 
 function refresh() {

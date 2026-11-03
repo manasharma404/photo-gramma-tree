@@ -65,8 +65,8 @@ Times are mm:ss in the final video. "Snippet" times refer to `typhon_demo.mp4`. 
 | # | Time | Visual and motion | On-screen text | Transition out |
 |---|---|---|---|---|
 | 16 | 01:06–01:12 | A phone frame rises from the bottom, playing snippet **01:32–01:38** (field report page) | Caption: "Field teams report from a phone on the laptop's **hotspot**." | Phone slides right |
-| 17 | 01:12–01:16 | **OPTION A, only if the report loop is built and recorded:** phone taps "Blocked"; beside it the dashboard road turns red and a **✕ BLOCKED** stamp drops. **OPTION B (default):** the printable PDF map (`map_a3_preview.png`) slides out of the laptop like paper from a printer | A: "One tap. The road turns **red**. The plan updates." · B: "Print it, or open it in **QGIS and Google Earth**." | Everything fades except a Wi-Fi glyph |
-| 18 | 01:16–01:20 | The Wi-Fi glyph gets a slash; a navy **OFFLINE** stamp drops; counter rolls "95 requests · **0** left the laptop" | "No signal in the valley? **Nothing changes.**" · mono: "OFFLINE CHECK, 3 NOV · 95 REQUESTS, 0 OUTSIDE THE LAPTOP" | Three cards enter |
+| 17 | 01:12–01:16 | **OPTION A (recorded 3 Nov, use it):** phone frame with `report_loop/phone.mp4` 4–8 s (report typed, Submit tapped at ~6 s) beside a laptop frame with `report_loop/dash.mp4` 15–19 s (road turns red, notice "Places cut off: 0 → 1. Plan recomputed." at ~16 s); a **✕ BLOCKED** stamp drops on the red road. **OPTION B (default):** the printable PDF map (`map_a3_preview.png`) slides out of the laptop like paper from a printer | A: "One tap. The road turns **red**. The plan updates." · B: "Print it, or open it in **QGIS and Google Earth**." | Everything fades except a Wi-Fi glyph |
+| 18 | 01:16–01:20 | The Wi-Fi glyph gets a slash; a navy **OFFLINE** stamp drops; counter rolls "**0** requests left the laptop" | "No signal in the valley? **Nothing changes.**" · mono: "OFFLINE CHECK, 3 NOV · 99 REQUESTS, ALL TO THE LAPTOP ITSELF" | Three cards enter |
 
 ### Act 5: close
 | # | Time | Visual and motion | On-screen text | Transition out |
@@ -84,7 +84,7 @@ Times are mm:ss in the final video. "Snippet" times refer to `typhon_demo.mp4`. 
 | ±1.1 m heights | std 1.09 m vs 326 surveyed ground points, relative heights | debris piles and banks are measured against nearby ground, where this holds | Run 2, vertical |
 | 16 trails, 5–43% visible, 70% needed | trails under canopy all marked unknown | the tool refuses to guess | Run 2, roads |
 | 880 → 220 frames, 68 min | 67.7 min, our DJI Neo 2 clip | our own footage works end to end | Run 3 |
-| 95 requests, 0 outside | offline check, 3 Nov | it truly runs with no internet | `web/scripts/offline_check.mjs` |
+| 0 requests left the laptop (99 made) | offline check, 3 Nov, after the report loop was added | it truly runs with no internet | `web/scripts/offline_check.mjs` |
 
 **Never on screen:** "AI", "real-time", "instant", "survey-grade", "certified", "accurate to 6 m everywhere", any number not in this table, stock disaster footage presented as ours, Wayanad shown as drone-measured. Absolute heights are +43 m off; never show an absolute height.
 
@@ -101,7 +101,7 @@ Paste everything between the lines.
 2. Every mono source label in the script appears for at least 1.5 s.
 3. Do not use the words in "Never on screen".
 4. Colours and fonts only from section 2.
-5. Beat 17: use Option B unless you were given a recording of Option A.
+5. Beat 17: use Option A (the `phone.mp4` and `dash.mp4` clips); Option B only if those clips are missing.
 6. Ask before downloading anything other than npm packages and Google Fonts. Music only if you are given a licensed track; note its licence in `typhon_video/CREDITS.md`.
 
 **Steps.**
