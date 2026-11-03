@@ -43,6 +43,7 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 | USGS F01-5 strip, full tier | 109 | 66.6 min (incremental) | 7.01 GiB | 9.07 ha | DSM/DTM at 0.10 m |
 | USGS F01-4 block (5 parallel lines), quick tier | 248 | 145.6 min | 8.61 GiB | 12.94 ha | ~11.2 min/ha; GPU feature extraction |
 | USGS F01-4 block, full tier (height models) | 248 | 171.4 min (incremental) | 11.0 GiB | 13.19 ha | DSM/DTM at 0.10 m |
+| USGS F01-4 block, **first-look tier** | 248 | **50.3 min** | not recorded | 10.63 ha | 10 cm pixels; ±8.4 m at 2 checkpoints and slightly warped: for seeing, not measuring ([validation Run 5](docs/validation.md)) |
 | Our DJI Neo 2 video (220 frames), quick tier | 220 | 67.7 min | 8.24 GiB | 4.32 ha extent | 7 pieces joined by GPS; open ground clean, buildings smeared, so usable area is smaller (not measured); no checkpoints |
 
 **Accuracy without ground control (USGS RTK checkpoints):**
@@ -67,7 +68,7 @@ cd web && npm install && npm run build && cd ..
 uv run python -m pipeline.subset --images <photo folder> --rtk <checkpoints.csv> --out-dir <dir>
 uv run python -m pipeline.video_frames --video <clip.mp4> --project <name>
 ```
-**2. Map.** Quick tier first (orthophoto), full tier later (adds DSM/DTM). Each run is logged in `data/runs/<run_id>/` with time and peak memory. Ground control is refused on purpose: checkpoints only measure error.
+**2. Map.** Optionally a `first` tier for a rough look in about a third of the time (`--tier first`, 10 cm, not for measuring); then the quick tier (orthophoto), and the full tier later (adds DSM/DTM). Each run is logged in `data/runs/<run_id>/` with time and peak memory. Ground control is refused on purpose: checkpoints only measure error.
 ```
 uv run python -m pipeline.run_odm --project <name> --tier quick --images-list <list.txt> --extra --feature-type sift
 uv run python -m pipeline.run_odm --project <name> --tier full  --images-list <list.txt> --extra --feature-type sift

@@ -84,6 +84,7 @@ Times are mm:ss in the final video. "Snippet" times refer to `typhon_demo.mp4`. 
 | ±1.1 m heights | std 1.09 m vs 326 surveyed ground points, relative heights | debris piles and banks are measured against nearby ground, where this holds | Run 2, vertical |
 | 16 trails, 5–43% visible, 70% needed | trails under canopy all marked unknown | the tool refuses to guess | Run 2, roads |
 | 880 → 220 frames, 68 min | 67.7 min, our DJI Neo 2 clip | our own footage works end to end | Run 3 |
+| *Optional, beat 9:* "First look in 50 min. Full map in 2 h 26 min." | 50.3 min first-look tier vs 145.6 min quick tier, same 248 photos | a rough picture for responders in under an hour; it is for seeing, not measuring (±8.4 m at 2 checkpoints), so never pair it with an accuracy figure | Run 5 |
 | 0 requests left the laptop (99 made) | offline check, 3 Nov, after the report loop was added | it truly runs with no internet | `web/scripts/offline_check.mjs` |
 
 **Never on screen:** "AI", "real-time", "instant", "survey-grade", "certified", "accurate to 6 m everywhere", any number not in this table, stock disaster footage presented as ours, Wayanad shown as drone-measured. Absolute heights are +43 m off; never show an absolute height.

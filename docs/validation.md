@@ -108,5 +108,27 @@ Stage times: feature matching + reconstruction 46.6 min, meshing 19.0 min, every
 
 **What it means:** a second, independent single-line flight fails the same way Run 1 did, which supports the rule from Run 1: never map from one straight line. The block figure stays **±6.1 m at 3 checkpoints**; with the public flights we hold, that is the limit, and it stays labelled as a prototype measurement (the standard asks for at least 30).
 
+## Run 5: a "first look" tier on the same block (3 Nov)
+
+**Why:** after a landslide a rough picture now beats a precise one later. We added a `first` tier to `pipeline/run_odm.py`: the same 248 F01-4 photos as Run 2, but features from downscaled images (`--feature-quality low`), fewer match pairs (`--matcher-neighbors 8`), 10 cm pixels and no report. Still no ground control.
+
+| Tier | Run id | Time | Peak memory | Orthophoto | Checkpoints |
+|---|---|---|---|---|---|
+| first | `2026-11-03_2121_southfork_f01_4_first_first` | **50.3 min** (vs 145.6 min for the quick tier, 2.9× faster) | not recorded (see note) | 10.63 ha at 10 cm (vs 12.94 ha at 5 cm) | 2 (SF16, SF18) |
+
+Stage times: feature matching and reconstruction 37.9 min (109.7 min in Run 2), texturing 4.3 min (27.9 min), orthophoto 3.5 min.
+
+### Horizontal (orthophoto vs RTK targets, after the datum conversion)
+| Checkpoints | RMSE_x | RMSE_y | RMSE_H | Max |
+|---|---|---|---|---|
+| 2 (SF16, SF18) | 8.19 m | 1.85 m | **8.40 m** | 10.30 m |
+
+- Both points are clear panel targets in the crops. **Their shifts point in opposite east–west directions** (SF16 5.5 m west, SF18 10.2 m east), whereas in the quick tier all three agreed. So the first-look map is not only offset but slightly warped, and the two IDs could not be cross-checked by a consistent shift. SF17 shows no panel at this resolution.
+- N = 2: indicative only.
+
+**What it means:** the first look gives responders a picture of the whole block in under an hour, but positions are rougher and less consistent (±8.4 m at 2 points vs ±6.1 m at 3) and there is no height model. **Use it to see, not to measure;** measurements wait for the quick and full tiers.
+
+**Note on the record:** the run finished normally, but its `run.json` failed the schema check (the new tier name was not yet in `contracts/run.schema.json`) before it was written, so the in-memory peak-memory samples were lost. Stage times and the total were rebuilt from the run's own `odm.log` timestamps. `run_odm.py` now writes the record before checking it.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).

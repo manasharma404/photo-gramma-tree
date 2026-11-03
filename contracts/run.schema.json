@@ -18,7 +18,7 @@
         "quality_filter": {"type": ["string", "null"], "description": "standard_check | image_quality.json path | null"}
       }
     },
-    "tier": {"enum": ["quick", "full", "video"]},
+    "tier": {"enum": ["quick", "first", "full", "video"]},
     "odm_image": {"type": "string"},
     "odm_options": {"type": "array", "items": {"type": "string"}},
     "machine_file": {"type": "string"},

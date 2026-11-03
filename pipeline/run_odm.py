@@ -31,6 +31,9 @@ ODM_IMAGE = "opendronemap/odm:gpu@sha256:c6ecdec7764094732248517c51d6430fbc9dad6
 TIERS = {
     "quick": ["--fast-orthophoto", "--skip-3dmodel", "--feature-quality", "high", "--max-concurrency", "4",
               "--orthophoto-resolution", "5"],
+    # first look: same photos, features from downscaled images, fewer match pairs, 10 cm pixels, no report
+    "first": ["--fast-orthophoto", "--skip-3dmodel", "--feature-quality", "low", "--matcher-neighbors", "8",
+              "--max-concurrency", "4", "--orthophoto-resolution", "10", "--skip-report"],
     "full": ["--dsm", "--dtm", "--skip-3dmodel", "--pc-quality", "medium", "--feature-quality", "high",
              "--dem-resolution", "10", "--orthophoto-resolution", "5", "--max-concurrency", "4", "--cog"],
 }
@@ -186,9 +189,10 @@ def main():
         run["area_ha"], run["gsd_cm"] = stats["area_ha"], stats["gsd_cm"]
         (run_dir / "orthophoto_stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
 
+    # write first, then check: a record that fails the schema is still kept (its timings can't be measured again)
+    (run_dir / "run.json").write_text(json.dumps(run, indent=2), encoding="utf-8")
     schema = json.loads((ROOT / "contracts/run.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(run, schema)
-    (run_dir / "run.json").write_text(json.dumps(run, indent=2), encoding="utf-8")
     print(f"{run['status']} in {total / 60:.1f} min, peak {run['peak_memory_gb']} GiB "
           f"({sampler.samples} samples), area {run['area_ha']} ha, GSD {run['gsd_cm']} cm -> {run_dir / 'run.json'}")
     raise SystemExit(code)
