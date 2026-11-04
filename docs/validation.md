@@ -130,5 +130,23 @@ Stage times: feature matching and reconstruction 37.9 min (109.7 min in Run 2), 
 
 **Note on the record:** the run finished normally, but its `run.json` failed the schema check (the new tier name was not yet in `contracts/run.schema.json`) before it was written, so the in-memory peak-memory samples were lost. Stage times and the total were rebuilt from the run's own `odm.log` timestamps. `run_odm.py` now writes the record before checking it.
 
+## Run 6: a "middle" tier on the same block (4 Nov)
+
+**Why:** the first look (Run 5) is fast but warped; the quick tier (Run 2) is accurate but takes 2 h 26 min. We tested a setting in between: the same 248 F01-4 photos, features from medium-size images (`--feature-quality medium`), each photo matched with its 12 nearest neighbours (`--matcher-neighbors 12`), full 5 cm pixels, no report. Still no ground control.
+
+| Tier | Run id | Time | Peak memory | Orthophoto | Checkpoints | RMSE_H | Max |
+|---|---|---|---|---|---|---|---|
+| quick (Run 2) | `2026-10-31_0546_southfork_f01_4_quick` | 145.6 min | 8.61 GiB | 12.94 ha at 5 cm | 3 | 6.09 m | 7.65 m |
+| **middle** | `2026-11-04_2243_southfork_f01_4_middle_middle` | **80.2 min** (1.8× faster) | 8.77 GiB | 13.14 ha at 5 cm | 3 | **6.06 m** | 7.72 m |
+| first (Run 5) | `2026-11-03_2121_southfork_f01_4_first_first` | 50.3 min | not recorded | 10.63 ha at 10 cm | 2 | 8.40 m | 10.30 m |
+
+Stage times: feature matching and reconstruction 57.7 min (109.7 min in Run 2), texturing 16.8 min (27.9 min), orthophoto 2.5 min (3.8 min).
+
+- The same three panel targets (SF16, SF17, SF18) were found, and each one's shift agrees with its quick-run shift to within 0.4 m (all about 1 m west and 5–8 m north before the datum conversion). So the middle map is offset the same way as the quick map, not warped like the first look.
+- After the datum conversion: SF16 dx 0.12 / dy 4.47 m, SF17 0.09 / 5.54 m, SF18 0.97 / 7.66 m. Almost all of the error is a north shift, as in Run 2.
+- N = 3, as before: a prototype measurement (the standard asks for at least 30), and one block at one site.
+
+**What it means:** on this block the middle tier gave the same horizontal accuracy as the quick tier in a little over half the time, at the same pixel size. **It is the better default for the first measurable map;** the first look stays for "see it in under an hour". Whether this holds on other terrain is untested (one block, 3 checkpoints). No height models were made in this run; heights still need the full tier.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
