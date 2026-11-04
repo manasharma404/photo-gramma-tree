@@ -94,6 +94,18 @@ Stage times: feature matching + reconstruction 46.6 min, meshing 19.0 min, every
 2. Capture guidance for responders: camera pointing straight down, steady height, overlapping parallel passes; open ground maps well, built-up areas need more height and overlap.
 3. The video path works end to end (telemetry → geotagged frames → map in ~68 min on this laptop) and the tool shows its failure plainly instead of hiding it.
 
+### Run 3 with the first-look tier (5 Nov)
+| Tier | Run id | Time | Peak memory | Orthophoto | Frames placed |
+|---|---|---|---|---|---|
+| quick (above) | `2026-10-31_1111_neo2_0149_quick` | 67.7 min | 8.24 GiB | 4.32 ha at 5 cm | 214 of 220, in 7 pieces (largest 97) |
+| first | `2026-11-05_0053_neo2_0149_first_first` | **26.7 min** | 11.0 GiB | 2.06 ha at 10 cm | 201 of 220, in **15 pieces** (largest 52) |
+
+- The open playing field is recognisable in 27 minutes; buildings are smeared as in the quick tier.
+- Fewer match pairs break the video into more, smaller pieces, joined by GPS only. Where pieces overlap, part of the field appears twice, offset (seen in the orthophoto). Peak memory was higher than the quick tier's, which we have not explained.
+- No checkpoints, so no accuracy figure.
+
+**What it means:** for a casual video clip the first look gives a picture of open ground in under half an hour, but it is more fragmented than the quick tier and can show the same ground twice. Use it only to see where open ground is, then wait for the quick map.
+
 ## Run 4: USGS South Fork, flight F02 part 2 (one long line), a search for more checkpoints (3 Nov)
 
 **Why:** the block (Run 2) rests on 3 checkpoints; USGS surveyed 18 panel targets and 5 chalk marks. The other F01-4 candidates do not qualify (SF15, SF19, SF20 are chalk marks not identifiable at 5 cm; SF14 lies at the map edge with one weak candidate 27 m away), so we processed the one remaining flight we hold, `F02-2`.
