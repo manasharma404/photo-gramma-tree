@@ -1,12 +1,20 @@
 # Helicopter dimensions for landing-zone checks (Goa DCA rules: touchdown >= 2B x 2B, FATO >= 1.5A x 1.5A,
 # A = overall length, B = undercarriage (wheel or skid) base).
-# ALL VALUES PLACEHOLDER until taken from the manufacturer's / operator's published data with a citation.
+# PLACEHOLDER = not yet taken from the manufacturer's / regulator's published data with a citation.
 helicopters:
   light_utility:
-    label: "Light utility helicopter (PLACEHOLDER dimensions)"
-    overall_length_A_m: 16.0      # PLACEHOLDER
-    undercarriage_base_B_m: 3.0   # PLACEHOLDER
+    label: "Light utility helicopter (HAL Dhruv class; length sourced, gear base PLACEHOLDER)"
+    # HAL Dhruv product page (hal-india.co.in, read 4 Nov 2026): "Length: 15.87 meters". HAL does not say
+    # "rotors turning", but it exceeds the 13.43 m fuselage-only length in EASA TCDS EASA.IM.R.504 Issue 1
+    # (29 June 2023) section 4.1, so it includes the rotors.
+    overall_length_A_m: 15.87
+    # PLACEHOLDER: EASA TCDS EASA.IM.R.504 section 4.1 gives track gauge 2.60 m (skids) / 2.80 m (wheels),
+    # measured between gear centre lines; the outer width is not published there, so 3.0 m is kept as a
+    # conservative stand-in (a smaller B would shrink the touchdown square).
+    undercarriage_base_B_m: 3.0
   medium_lift:
     label: "Medium-lift transport helicopter (PLACEHOLDER dimensions)"
-    overall_length_A_m: 25.5      # PLACEHOLDER
+    # PLACEHOLDER: Mi-17 family figures found (about 25.4 m rotors turning) come from secondary sites only,
+    # not the manufacturer; kept until a primary source is found.
+    overall_length_A_m: 25.5
     undercarriage_base_B_m: 4.5   # PLACEHOLDER
