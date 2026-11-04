@@ -9,7 +9,7 @@ const P = JSON.parse(readFileSync(new URL("./tools_test_points.json", import.met
 const out = "../data/screenshots/demo";
 mkdirSync(out, { recursive: true });
 const size = { width: 1440, height: 900 };
-const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const ctx = await browser.newContext({ viewport: size });
 const page = await ctx.newPage();
 // frames come from the browser's own screencast feed (no extra download); ffmpeg on the laptop joins them

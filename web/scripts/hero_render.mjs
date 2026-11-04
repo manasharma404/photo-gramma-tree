@@ -2,7 +2,7 @@
 // Usage: node scripts/hero_render.mjs  (API on :8000; writes public/hero-standin.png)
 import { chromium } from "playwright-core";
 
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 1800, height: 1100 }, deviceScaleFactor: 1 });
 await page.goto("http://127.0.0.1:8000/app/", { waitUntil: "networkidle" });
 await page.waitForTimeout(2000);

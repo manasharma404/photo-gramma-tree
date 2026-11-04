@@ -10,7 +10,7 @@ mkdirSync(out, { recursive: true });
 const pages = [["home", "/"], ["app", "/app/"]];
 const sizes = [["desktop", { width: 1440, height: 900 }], ["phone", { width: 390, height: 844 }]];
 
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const report = [];
 for (const [sname, viewport] of sizes) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });

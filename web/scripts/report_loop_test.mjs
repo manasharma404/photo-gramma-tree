@@ -8,7 +8,7 @@ import { mkdirSync } from "node:fs";
 const base = (process.argv[2] || "http://127.0.0.1:8000").replace(/\/$/, "");
 const out = "../data/screenshots/report_loop";
 mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));

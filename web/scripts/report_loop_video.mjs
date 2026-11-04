@@ -7,7 +7,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 
 const base = (process.argv[2] || "http://127.0.0.1:8000").replace(/\/$/, "");
 const out = "../data/screenshots/report_loop";
-const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 
 async function recorded(name, options) {
   const ctx = await browser.newContext(options);

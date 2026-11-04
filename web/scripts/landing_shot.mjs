@@ -2,7 +2,7 @@
 import { chromium } from "playwright-core";
 
 const out = process.argv[2] || "../data/screenshots";
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const errors = [];
 for (const [name, vp, mobile] of [["l1_landing", { width: 1440, height: 900 }, false], ["l2_landing_phone", { width: 390, height: 844 }, true]]) {
   const page = await browser.newPage({ viewport: vp, isMobile: mobile, deviceScaleFactor: mobile ? 2 : 1 });

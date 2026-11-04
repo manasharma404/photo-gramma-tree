@@ -6,7 +6,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 const out = process.argv[2] || "../data/screenshots/deck";
 mkdirSync(out, { recursive: true });
 const P = JSON.parse(readFileSync(new URL("./tools_test_points.json", import.meta.url)));
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2 });
 const errors = [];
 const page = await ctx.newPage();

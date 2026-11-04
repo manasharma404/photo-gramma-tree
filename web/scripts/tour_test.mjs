@@ -7,7 +7,7 @@ const base = (process.argv[2] || "http://localhost:8000").replace(/\/$/, "");
 const width = Number(process.argv[3] || 1440), height = Number(process.argv[4] || 900);
 const out = `../data/screenshots/tour/${width}`;
 mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const page = await browser.newPage({ viewport: { width, height } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));

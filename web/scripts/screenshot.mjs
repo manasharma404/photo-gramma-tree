@@ -8,7 +8,7 @@ const out = process.argv[3] || "../data/screenshots";
 mkdirSync(out, { recursive: true });
 
 // Default headless Edge uses the laptop GPU (checked with scripts/webgl_probe.mjs); software WebGL is too slow for 3D.
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));

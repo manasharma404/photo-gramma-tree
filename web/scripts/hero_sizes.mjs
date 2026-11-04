@@ -7,7 +7,7 @@ const base = (process.argv[2] || "http://localhost:8000").replace(/\/$/, "");
 const out = "../data/screenshots/hero";
 mkdirSync(out, { recursive: true });
 const sizes = [[1280, 680], [1366, 768], [1440, 900], [1536, 864], [1920, 1080], [1024, 700]];
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const report = {};
 for (const [w, h] of sizes) {
   const page = await browser.newPage({ viewport: { width: w, height: h } });

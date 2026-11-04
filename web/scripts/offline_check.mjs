@@ -6,7 +6,7 @@ import { chromium } from "playwright-core";
 const base = (process.argv[2] || "http://127.0.0.1:8000").replace(/\/$/, "");
 const local = (u) => /^(data:|blob:)/.test(u) || new URL(u).origin === new URL(base).origin;
 
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const outside = new Set(), failed = [], errors = [];
 let requests = 0;
 
