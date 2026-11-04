@@ -34,6 +34,9 @@ TIERS = {
     # first look: same photos, features from downscaled images, fewer match pairs, 10 cm pixels, no report
     "first": ["--fast-orthophoto", "--skip-3dmodel", "--feature-quality", "low", "--matcher-neighbors", "8",
               "--max-concurrency", "4", "--orthophoto-resolution", "10", "--skip-report"],
+    # between first and quick: medium features, fewer match pairs, full 5 cm pixels
+    "middle": ["--fast-orthophoto", "--skip-3dmodel", "--feature-quality", "medium", "--matcher-neighbors", "12",
+               "--max-concurrency", "4", "--orthophoto-resolution", "5", "--skip-report"],
     "full": ["--dsm", "--dtm", "--skip-3dmodel", "--pc-quality", "medium", "--feature-quality", "high",
              "--dem-resolution", "10", "--orthophoto-resolution", "5", "--max-concurrency", "4", "--cog"],
 }
