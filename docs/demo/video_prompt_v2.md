@@ -46,16 +46,16 @@ You made version 1 (`VID-20261105-WA0000.mp4`, 90.0 s, 1920x1080). Its look, col
 
 **Step 2. Restructure into 6 parts that follow the voiceover in step 3.** Drop the QGIS/print beat to a 2-second mention, and drop the 3D beat into a 3-second cutaway inside part 4. The **hero** is part 5: the phone report changing the dashboard. It is the easiest thing to understand and it is real.
 
-**Step 3. Record the voiceover** (calm, documentary pace, about 130 words per minute; a short pause after part 2). It runs about 195 words, which fits 90 s at that pace. Use exactly these words:
+**Step 3. Record the voiceover** (calm, documentary pace, about 130 words per minute; a short pause after part 2). It runs about 170 words: about 78 s at that pace, leaving room for pauses. Do not speed it up to fit. Use exactly these words:
 
 | Time | Part | Voiceover | On screen |
 |---|---|---|---|
-| 0:00–0:10 | 1. Stakes | "When a landslide cuts off a mountain village, the old map is suddenly wrong. Rescuers need to know which roads can still take an ambulance. Today." | Keep v1's navy opening, road line breaking, BLOCKED stamp |
-| 0:10–0:20 | 2. Problem | "A new satellite image can take days. Sending a survey crew onto unstable slopes is risky. But a small drone is often already in the rescue jeep." | Keep v1's satellite vs drone split |
-| 0:20–0:32 | 3. Typhon | "Project Typhon turns that drone's photos or video into a map, on one ordinary laptop. No internet. No cloud. No markers to lay out on the ground first." | Logo wipe, then the FLY → MAP cards, then the fixed 80-min clock |
-| 0:32–0:50 | 4. Decide | "On this USGS test site, the first map you can measure from took about eighty minutes. Each road is checked for each vehicle: fire truck, ambulance, four-by-four, or on foot. Where trees hide the road, Typhon says unknown instead of guessing." | Zoom into one road on the dashboard; vehicle picker; "UNKNOWN" stamp under trees; 3-s 3D cutaway |
-| 0:50–1:05 | 5. Proof, then hero | "Every measurement carries its error. Flown as one straight line, the map was off by thirty-four metres. Five parallel lines brought that down to six. And teams on the ground can report back from their phones, over the laptop's own hotspot." | "34 m → 6 m" card (counter fixed), then phone.mp4 beside dash.mp4: tap Submit, the road recolours, the notice appears |
-| 1:05–1:18 | 6a. Field | "The dashboard picks up the report within seconds, and the plan is recomputed. Our own drone video works too, and the map opens in QGIS and Google Earth." | Hold on the dashboard notice; Neo 2 beat (fixed numbers); 2-s QGIS flash |
+| 0:00–0:09 | 1. Stakes | "A landslide cuts off a mountain village, and the old map is suddenly wrong. Which roads can still take an ambulance?" | Keep v1's navy opening, road line breaking, BLOCKED stamp |
+| 0:09–0:20 | 2. Problem | "A new satellite image can take days. A survey crew is at risk on unstable slopes. But a small drone is often already in the jeep." | Keep v1's satellite vs drone split |
+| 0:20–0:32 | 3. Typhon | "Project Typhon turns that drone's photos or video into a map on one ordinary laptop. No internet. No cloud. No ground markers." | Logo wipe, then the FLY → MAP cards, then the fixed 80-min clock |
+| 0:32–0:50 | 4. Decide | "On this USGS test site, the first measurable map took about eighty minutes. Each road is checked for each vehicle: fire truck, ambulance, four-by-four, foot. Where trees hide the road, Typhon says unknown." | Zoom into one road on the dashboard; vehicle picker; "UNKNOWN" stamp under trees; 3-s 3D cutaway |
+| 0:50–1:05 | 5. Proof, then hero | "Every measurement carries its error. One straight flight line: thirty-four metres off. Five parallel lines: six. And ground teams report back by phone, over the laptop's hotspot." | "34 m → 6 m" card (counter fixed), then phone.mp4 beside dash.mp4: tap Submit, the road recolours, the notice appears |
+| 1:05–1:18 | 6a. Field | "The dashboard picks up each report within seconds. Our own drone video works too, and maps open in QGIS and Google Earth." | Hold on the dashboard notice; Neo 2 beat (fixed numbers); 2-s QGIS flash |
 | 1:18–1:30 | 6b. Close | "No signal in the valley? Nothing changes. Fly. Map. Decide. Project Typhon: the first map after the landslide." | Offline beat (99 requests), Fly / Map / Decide cards (fixed text), end card |
 
 **Step 4. Audio mix.** Voice at about −16 LUFS; music (if any) about 18 dB under the voice and licence-free. No sound effects louder than the voice. Version 1's audio track was completely silent, so this step is new.
