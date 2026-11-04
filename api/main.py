@@ -10,6 +10,7 @@ from __future__ import annotations
 import importlib
 import logging
 import os
+import secrets
 import socket
 from pathlib import Path
 from typing import Any
@@ -154,6 +155,11 @@ app = create_app()
 def main() -> None:
     host = os.environ.get("VORTEX_HOST", "0.0.0.0")
     port = int(os.environ.get("VORTEX_PORT", "8000"))
+    # field reports from phones need a PIN; a new one each start unless set (VORTEX_FIELD_PIN=off disables)
+    if not os.environ.get("VORTEX_FIELD_PIN", "").strip():
+        os.environ["VORTEX_FIELD_PIN"] = f"{secrets.randbelow(10 ** 6):06d}"
+    pin = os.environ["VORTEX_FIELD_PIN"]
+    print(f"Field page PIN for phones: {pin}" if pin.lower() != "off" else "Field page PIN: off")
     uvicorn.run("api.main:app", host=host, port=port, reload=False)
 
 
