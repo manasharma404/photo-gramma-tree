@@ -44,7 +44,7 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 | USGS F01-4 block (5 parallel lines), quick tier | 248 | 145.6 min | 8.61 GiB | 12.94 ha | ~11.2 min/ha; GPU feature extraction |
 | USGS F01-4 block, full tier (height models) | 248 | 171.4 min (incremental) | 11.0 GiB | 13.19 ha | DSM/DTM at 0.10 m |
 | USGS F01-4 block, **middle tier** | 248 | **80.2 min** | 8.77 GiB | 13.14 ha | 5 cm; **±6.06 m at the same 3 checkpoints** (quick: ±6.09 m), 1.8× faster ([validation Run 6](docs/validation.md)) |
-| USGS F01-4 block, **first-look tier** | 248 | **50.3 min** | not recorded | 10.63 ha | 10 cm pixels; ±8.4 m at 2 checkpoints and slightly warped: for seeing, not measuring ([validation Run 5](docs/validation.md)) |
+| USGS F01-4 block, **first-look tier** (2 runs) | 248 | **50.3 / 49.2 min** | 6.92 GiB (2nd run) | 10.63 / 11.73 ha | 10 cm pixels; ±8.4 m and ±11.4 m at 2 checkpoints, warped differently each run: for seeing, not measuring ([validation Run 5](docs/validation.md)) |
 | Our DJI Neo 2 video (220 frames), quick tier | 220 | 67.7 min | 8.24 GiB | 4.32 ha extent | 7 pieces joined by GPS; open ground clean, buildings smeared, so usable area is smaller (not measured); no checkpoints |
 
 **Accuracy without ground control (USGS RTK checkpoints):**

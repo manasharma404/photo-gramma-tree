@@ -130,6 +130,17 @@ Stage times: feature matching and reconstruction 37.9 min (109.7 min in Run 2), 
 
 **Note on the record:** the run finished normally, but its `run.json` failed the schema check (the new tier name was not yet in `contracts/run.schema.json`) before it was written, so the in-memory peak-memory samples were lost. Stage times and the total were rebuilt from the run's own `odm.log` timestamps. `run_odm.py` now writes the record before checking it.
 
+### Run 5 repeated (4–5 Nov): same photos, same settings
+| Run id | Time | Peak memory | Orthophoto | Checkpoints | RMSE_H | Max |
+|---|---|---|---|---|---|---|
+| `2026-11-05_0004_southfork_f01_4_first2_first` | **49.2 min** | **6.92 GiB** | 11.73 ha at 10 cm | 2 (SF16, SF18) | **11.41 m** | 13.91 m |
+
+- Time is close to the first run (49.2 vs 50.3 min), and peak memory is now recorded: 6.92 GiB, the lowest of any block run.
+- **The errors are not repeatable.** SF16 moved from (5.5 m W, 2.2 m N) to (5.7 m W, 5.8 m N); SF18 from (10.2 m E, 1.4 m N) to (1.8 m W, 13.8 m N). Same photos and settings gave a differently warped map, because the reconstruction's sampling choices differ between runs.
+- Only one panel was found near SF17 and SF18; we assigned it to SF18 because its shift is northward like SF18 in every other run. SF17 was not found. N = 2: indicative only.
+
+**What it means:** the first look takes about 50 minutes every time, but how far off it is changes from run to run (±8.4 m and ±11.4 m so far). This confirms the rule: **the first look is for seeing, never for measuring.**
+
 ## Run 6: a "middle" tier on the same block (4 Nov)
 
 **Why:** the first look (Run 5) is fast but warped; the quick tier (Run 2) is accurate but takes 2 h 26 min. We tested a setting in between: the same 248 F01-4 photos, features from medium-size images (`--feature-quality medium`), each photo matched with its 12 nearest neighbours (`--matcher-neighbors 12`), full 5 cm pixels, no report. Still no ground control.
