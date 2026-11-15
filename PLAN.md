@@ -23,7 +23,7 @@ A responder flies a consumer drone over a landslide. Within about a minute the l
 | Question | Finding | How checked |
 |---|---|---|
 | Do our photos record camera direction (needed to place a photo on the ground at once)? | **No.** USGS photos (Ricoh GR II) carry GPS, altitude and field of view only. Our Neo 2 telemetry decodes to position, altitude and ISO only | `exiftool` on a block image; `pipeline/dji_telemetry.py` FIELDS |
-| So how does F1 work? | **Not by placing photos one by one: tested 16 Nov and failed** (photo centres a median 43.5 m off; the camera tilts forward and the ground is a steep slope). Next test: the mapping engine on every fourth photo, **PENDING** | `docs/validation.md`, Test 7 |
+| So how does F1 work? | **Not by placing photos one by one: tested 16 Nov and failed** (photo centres a median 43.5 m off; the camera tilts forward and the ground is a steep slope). Second test, the mapping engine on every fourth photo: **11.6 min, right place (3.05 m median from our measured map), but only 2.58 of 13.14 ha, with holes.** So "a rough map in about a minute" is **not achievable by either method tested; F1 below needs the lead's decision** | `docs/validation.md`, Test 7 |
 | Is there detailed terrain from before the slide at South Fork? | **Yes, 1 m:** `USGS 1 Meter 11 x34y403 CA_SierraNevada_B22`, 310 MB, **downloaded 16 Nov**. Lidar flown 3 Nov 2021 to 23 Sep 2022; the debris flow was on 9 Jan 2023, so it is from before the slide. It covers our whole map with no gaps | Tile metadata file; USGS data release text; read with rasterio |
 | Is there drone landslide training data? | **Yes:** CAS Landslide Dataset (Xu et al., Scientific Data 2024), 20,865 images from satellites and drones, 9.2 GB on Zenodo, CC BY-NC 4.0, with different terms on some subsets (check each one used) | Zenodo record 10294997 and the paper |
 | Is CRASAR-U-DROIDs worth downloading? | **No.** CC BY 4.0, but 219 GB and no landslides (hurricanes, tornado, eruption, wildfire, collapse). Keep its published road model as the comparison only | Hugging Face dataset page |
@@ -32,7 +32,7 @@ A responder flies a consumer drone over a landslide. Within about a minute the l
 | When | Task | Owner | Done when |
 |---|---|---|---|
 | Tue 17 | Ask the organisers in writing: is the push before 2 pm Saturday the baseline, and may we bring trained weights, datasets and design specs? | Lead | Reply saved in this file |
-| Tue 17 | F1 test, second method: the mapping engine on every fourth photo; time it and measure its error at SF16/17/18 (first method failed, Test 7a) | Claude | Time and error written to `docs/validation.md`; go or no-go for F1 |
+| ~~Tue 17~~ done 16 Nov | F1 tests, two methods | Claude | Done: both in `docs/validation.md`, Test 7. Verdict: **no-go for "one minute"**; about 12 minutes for a partial map is what the tests support |
 | ~~Tue 17~~ done 16 Nov | Download the 1 m pre-event terrain and confirm its flight date | Claude | Done: file in `data/prefetch/usgs_1m/`, date and licence in `data/LICENSES.md` |
 | Tue 17 – Thu 19 | One model, one job: find debris on roads in drone maps. Train on the CAS drone subsets; hold out one whole region for testing | Teammate | Weights file, and a score on the held-out region written to `docs/validation.md` (PENDING until run) |
 | Wed 18 | Hand-label about 50 South Fork road crops (debris / clear) as our own test set | Lead + teammate | Labels in `data/eval/`; the model's score on them recorded |

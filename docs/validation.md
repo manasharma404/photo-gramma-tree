@@ -190,7 +190,24 @@ The question behind finale feature F1. Same 248 photos as Runs 2, 5 and 6. Throw
 **What it means:** on a slope, a tilted consumer camera cannot be placed photo by photo. A fast map has to solve the camera positions together, which is what the mapping engine does. Hence 7b.
 
 ### 7b. The mapping engine on every fourth photo
-PENDING: run `2026-11-16_0324_southfork_f01_4_sparse4_first` (62 photos, first-look settings) started 16 Nov 03:24. Time, area and error at the checkpoints go here when it finishes.
+Run `2026-11-16_0324_southfork_f01_4_sparse4_first`: 62 of the 248 photos (every fourth), first-look settings, GPU features.
+
+| | Every fourth photo (this run) | All 248, first look (Run 5) | All 248, middle (Run 6) |
+|---|---|---|---|
+| Time | **11.6 min** | 50.3 / 49.2 min | 80.2 min |
+| Peak memory | 3.26 GiB | 6.92 GiB | 8.77 GiB |
+| Photos used | 48 of 62, in one piece | 248 | 248 |
+| Area mapped | **2.58 ha, with holes** | 10.63 / 11.73 ha | 13.14 ha |
+| Pixel size | 10 cm | 10 cm | 5 cm |
+
+**Position:** 223 ground features matched between this map and the middle-tier map sit a median **3.05 m** apart (90% within 3.62 m, worst 4.03 m), a steady shift of about 2.3 m east and 1.8 m north. Around SF16, SF17 and SF18 the shift is 3.4, 3.5 and 3.4 m. This is a comparison with our own measured map (itself ±6.06 m at those checkpoints), **not a separate measurement against the surveyed points**: the targets were not picked out in this map.
+
+Where the time went: 7.9 of the 11.6 minutes were finding and matching features and solving camera positions; 3.3 minutes were building the picture.
+
+**What it means:**
+- A map in the right place is possible in about 12 minutes, but it covered a fifth of the area, with holes, because every fourth photo leaves too little overlap between flight lines on this slope.
+- **Neither method gives a map in about a minute.** "A rough map in a minute" is not a claim we can make from these tests.
+- Untested: every second or third photo (more area, more time), and any other site.
 
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
