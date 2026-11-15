@@ -171,5 +171,26 @@ Stage times: feature matching and reconstruction 57.7 min (109.7 min in Run 2), 
 
 **What it means:** on this block the middle tier gave the same horizontal accuracy as the quick tier in a little over half the time, at the same pixel size. **It is the better default for the first measurable map;** the first look stays for "see it in under an hour". Whether this holds on other terrain is untested (one block, 3 checkpoints). No height models were made in this run; heights still need the full tier.
 
+## Test 7: can we show a rough map in about a minute? (16 Nov)
+The question behind finale feature F1. Same 248 photos as Runs 2, 5 and 6. Throwaway test code, not in the repo.
+
+### 7a. Place each photo from its own GPS: **failed**
+**Method:** each photo's centre goes at its GPS position; its direction and size come from matching it to its neighbours along the flight path (the photos record no camera direction). It assumes the camera looks straight down at flat ground.
+
+| | |
+|---|---|
+| Time, 248 photos | 120.5 s (91.6 s of it reading the 16-megapixel photos) |
+| Photos placed | 248 of 248 |
+| Photo centre against our measured map (middle tier, itself ±6.06 m), 223 photos compared | median 43.5 m off, 90% within 66.6 m, worst 95.7 m |
+| At checkpoints SF16 / SF17 / SF18, through every photo that sees them (69 / 92 / 80 photos) | median 66.6 / 75.6 / 66.5 m off |
+| Photo size on the ground | wrong: the method gave 0.4 cm per pixel; the true figure is 2–5 cm |
+
+**Why it failed:** a second check, matching seven single photos to the measured map, showed five of the six that matched look 30–60 m **ahead** of the drone, more at higher speed. So the camera tilts forward as the drone flies, and the ground is a steep forested slope: "straight down at flat ground" is wrong on both counts. The picture it produced is a patchwork that no one could navigate by.
+
+**What it means:** on a slope, a tilted consumer camera cannot be placed photo by photo. A fast map has to solve the camera positions together, which is what the mapping engine does. Hence 7b.
+
+### 7b. The mapping engine on every fourth photo
+PENDING: run `2026-11-16_0324_southfork_f01_4_sparse4_first` (62 photos, first-look settings) started 16 Nov 03:24. Time, area and error at the checkpoints go here when it finishes.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
