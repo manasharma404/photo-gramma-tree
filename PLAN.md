@@ -2,6 +2,67 @@
 
 **Status: APPROVED by the lead, 31 Oct 00:30 IST.** Single source of truth for owners, timeline, bugs and decisions. Brief: `CLAUDE.md` (Update 2 overrides Update 1 overrides the rest).
 
+## Finale plan (21–22 Nov, IIIT Delhi). DRAFT, 16 Nov: the lead approves or edits
+
+Everything below this section is the round 1 record. This section is the plan for the finale.
+
+### Core journey (one line)
+A responder flies a consumer drone over a landslide. Within about a minute the laptop shows a rough map; when the measured map is ready, the debris is found without anyone drawing it, and each vehicle is told where it can go and which blockage to clear first. One laptop, no internet.
+
+### Why this plan (audit of 16 Nov)
+| Flaw | What fixes it |
+|---|---|
+| The drone → map → road status chain has never given a real answer: all 498 South Fork segments read "unknown" | F2 and F3 below |
+| "Immediate" is not true: the fastest usable map takes 50–80 min | F1 |
+| No intelligence of our own: the road model is borrowed and writes empty scores without its weights; priorities are hand-set weights | F3, F4 |
+| No before and after; debris outlines are drawn by hand | F2 |
+| The output is a five-tab dashboard, not an answer | F4, F5 |
+| Effort went to the edges (`export/` about 2,000 lines, `roads/` 296) | Cut list |
+
+### Checked on 16 Nov
+| Question | Finding | How checked |
+|---|---|---|
+| Do our photos record camera direction (needed to place a photo on the ground at once)? | **No.** USGS photos (Ricoh GR II) carry GPS, altitude and field of view only. Our Neo 2 telemetry decodes to position, altitude and ISO only | `exiftool` on a block image; `pipeline/dji_telemetry.py` FIELDS |
+| So how does F1 work? | Direction from the flight track (line between neighbouring GPS points), then neighbouring photos are matched to each other. **Unproven until the spike on 17 Nov** | not run yet |
+| Is there detailed terrain from before the slide at South Fork? | **Yes, 1 m:** `USGS 1 Meter 11 x34y403 CA_SierraNevada_B22`, 310 MB, published 15 May 2025. The lidar project is named 2022; **its flight date against the debris-flow date is not confirmed yet** | USGS National Map catalogue query for the site's bounding box |
+| Is there drone landslide training data? | **Yes:** CAS Landslide Dataset (Xu et al., Scientific Data 2024), 20,865 images from satellites and drones, 9.2 GB on Zenodo, CC BY-NC 4.0, with different terms on some subsets (check each one used) | Zenodo record 10294997 and the paper |
+| Is CRASAR-U-DROIDs worth downloading? | **No.** CC BY 4.0, but 219 GB and no landslides (hurricanes, tornado, eruption, wildfire, collapse). Keep its published road model as the comparison only | Hugging Face dataset page |
+
+### Before the finale (groundwork: data, models, design, knowledge)
+| When | Task | Owner | Done when |
+|---|---|---|---|
+| Tue 17 | Ask the organisers in writing: is the push before 2 pm Saturday the baseline, and may we bring trained weights, datasets and design specs? | Lead | Reply saved in this file |
+| Tue 17 | F1 spike (throwaway code): rough map of the 248-image block from GPS and the flight track; time it and measure its error at SF16/17/18 | Claude | Time and error written to `docs/validation.md`; go or no-go for F1 |
+| Tue 17 | Download the 1 m pre-event terrain (310 MB, needs the lead's OK); confirm the lidar flight date from the project report | Claude | File in `data/prefetch/`, date and licence in `data/LICENSES.md` |
+| Tue 17 – Thu 19 | One model, one job: find debris on roads in drone maps. Train on the CAS drone subsets; hold out one whole region for testing | Teammate | Weights file, and a score on the held-out region written to `docs/validation.md` (PENDING until run) |
+| Wed 18 | Hand-label about 50 South Fork road crops (debris / clear) as our own test set | Lead + teammate | Labels in `data/eval/`; the model's score on them recorded |
+| Wed 18 | Wayanad pack: OpenStreetMap roads and the Copernicus terrain model, tiles built for offline use | Claude | Opens with Wi-Fi off |
+| Wed 18 – Fri 20 | Home page 3D object and the design spec | Lead | Spec file in `docs/`; model file ready to load |
+| Thu 19 | Our own survey flight with checkpoints, weather allowing; process it overnight | Lead | Run logged in `data/runs/` |
+| Thu 19 | Show the app to one working responder (NDRF, SDRF or fire service) and ask what they'd need in the first hour | Lead | Their words, with permission, in `docs/`; nothing invented if nobody answers |
+| Fri 20 | Runbook, pitch rehearsal, hotspot and phone check, laptop prepared; baseline pushed and checked from a fresh clone | All | Fresh clone builds and passes its tests |
+
+### The 22 hours (Sat 14:00 → Sun 12:00), built fresh
+| # | Feature | Owner | Window | Done when |
+|---|---|---|---|---|
+| — | Set up, check the baseline, create the Neo4j AuraDB instance | All | 14:00–15:00 | App runs; advisor reads from AuraDB |
+| F1 | **Rough map in about a minute:** photos placed as they arrive, visibly filling the map; labelled "rough, not for measuring" | Lead + Claude | 15:00–20:00 | Runs on a photo set chosen on the day; time shown on screen |
+| F3 | **Debris on roads:** the trained model scores every road segment; fused with the height check; statuses stop being "unknown" where there is evidence | Teammate | 15:00–23:00 | South Fork shows real statuses, each with its evidence crop |
+| F2 | **The slide finds itself:** our height model minus the pre-event terrain, matched on stable ground, gives deposit and scar areas and a volume with a tolerance | Lead + Claude | 20:00–01:00 | Deposit outline and volume appear with no drawing |
+| F4 | **The answer and the plan in Neo4j:** per vehicle, the route or "cut off", and which single blockage reconnects the most people | Teammate | 23:00–04:00 | One sentence per settlement; plan computed in Neo4j, NetworkX as the fallback |
+| F5 | **Judges break it:** tap a road to block it or pick a vehicle; the plan redraws in seconds | Lead + Claude | 01:00–04:00 | Works on the phone and the laptop |
+| F6 | Home page 3D object and the design pass from the spec | Lead | in gaps | Matches the spec |
+| — | Join everything, run every demo action end to end, failure cases, sleep in turns | All | 04:00–08:00 | Runbook passes twice |
+| — | **Code freeze 08:00.** Demo video 08:00–10:00, deck and rehearsal 10:00–11:30, **submit by 11:30** | All | 08:00–11:30 | Repo, video and deck submitted |
+
+**If we slip:** F5 shrinks to "pick a vehicle" only; F2 falls back to South Fork only; F6 keeps the round 1 home page. F1, F3 and F4 are the product and are not cut. A fix that lands after 08:00 does not ship.
+
+### Cut list (no more work before or during the finale)
+Exports (PDF, KMZ, COG), the situation report, new processing tiers, the guided tour, more datasets (SpaceNet 8, FloodNet), more scenarios (Sikkim, Himachal, Kedarnath). They stay in the repo and go on the roadmap slide.
+
+### Rules that stay
+Numbers on screen and on slides come from runs we can show. Hand-set weights are not called AI. The rough map is labelled rough. The model's score is the one measured on images it never saw.
+
 ## Facts checked on 31 Oct, 00:15 IST
 | Item | Value | How checked |
 |---|---|---|
