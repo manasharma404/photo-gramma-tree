@@ -226,7 +226,8 @@ Where the time went: 7.9 of the 11.6 minutes were finding and matching features 
 **What it means:**
 - The picture ([rough_map_test7c.jpg](screenshots/rough_map_test7c.jpg)) is usable for seeing: the debris channel reads as one continuous line across the block, with visible seams and some doubled trees.
 - The honest claim is **"the map grows while the drone flies; each photo lands about a second after it arrives; rough, about 10 to 20 m, not for measuring"**. It is not "a map in one minute": a four-minute flight gives a four-minute map.
-- **Not tested:** a live link from a drone (the photos were replayed from disk in order); our Neo 2 video frames; any other site or flatter ground; a more flexible placement per photo (a run was started and had not finished when this was written).
+- **Not tested:** a live link from a drone (the photos were replayed from disk in order); our Neo 2 video frames; any other site or flatter ground.
+- **A more flexible placement per photo (also allowing stretch and skew) was tried and is not worth it:** against the measured map it was slightly worse (median 13.6 m, 90% within 23.1 m), at the checkpoints slightly better (6.5 / 12.2 / 15.2 m), and re-solving 248 photos took 18.5 s against 4.9 s. Its other timings are not comparable (the laptop was busy during that run). We keep the simpler placement.
 - One block, one site, three checkpoints: a prototype measurement.
 
 ## Tool vs tape (span, pile, staged block)
