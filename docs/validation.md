@@ -206,8 +206,28 @@ Where the time went: 7.9 of the 11.6 minutes were finding and matching features 
 
 **What it means:**
 - A map in the right place is possible in about 12 minutes, but it covered a fifth of the area, with holes, because every fourth photo leaves too little overlap between flight lines on this slope.
-- **Neither method gives a map in about a minute.** "A rough map in a minute" is not a claim we can make from these tests.
+- Neither 7a nor 7b gives a map in about a minute.
 - Untested: every second or third photo (more area, more time), and any other site.
+
+### 7c. Solve all the photos together, as they arrive: **works as a rough map**
+**Method:** each photo gets its own flat placement on the ground (shift, turn, size). All placements are solved together, from points matched between a photo and earlier photos (the two before it, and up to three from neighbouring flight lines) plus every photo's GPS position. Photos are handled strictly in time order, using only earlier photos, as a live feed would deliver them. The solve also works out how far ahead of the drone the camera looks.
+
+| | |
+|---|---|
+| Photos placed | 248 of 248, all linked; 695 of 1,215 photo pairs matched well enough to use (492 along the flight path, 203 across flight lines) |
+| Time per photo | **1.02 s** (254.1 s for 248 photos: reading and finding features 123.2 s, matching 101.5 s, the rest re-solving) |
+| The flight itself | 247 s, one photo a second (21:05:01 to 21:09:08). **So on this laptop the map keeps pace with the flight** |
+| Re-solving the whole map as it grows | 0.07 s at 20 photos, 0.7 s at 80, 4.9 s at 248 (done every 20 photos in this test) |
+| Drawing the full picture | 37.1 s in one go at 25 cm pixels (test code; a product would draw each photo as it lands) |
+| Against our measured map (middle tier, itself ±6.06 m), 210 photos compared | a typical point in a photo is a median **11.8 m** off; 90% of photos within 19.0 m; worst photo 42.0 m |
+| At the surveyed checkpoints SF16 / SF17 / SF18, through every photo that sees them (67 / 81 / 72 photos) | median **9.8 / 14.3 / 17.6 m** off; worst single photo 88.6 / 56.2 / 66.2 m |
+| What the solve found | the camera looks about 38 m ahead of the drone; overall size corrected by 7% |
+
+**What it means:**
+- The picture ([rough_map_test7c.jpg](screenshots/rough_map_test7c.jpg)) is usable for seeing: the debris channel reads as one continuous line across the block, with visible seams and some doubled trees.
+- The honest claim is **"the map grows while the drone flies; each photo lands about a second after it arrives; rough, about 10 to 20 m, not for measuring"**. It is not "a map in one minute": a four-minute flight gives a four-minute map.
+- **Not tested:** a live link from a drone (the photos were replayed from disk in order); our Neo 2 video frames; any other site or flatter ground; a more flexible placement per photo (a run was started and had not finished when this was written).
+- One block, one site, three checkpoints: a prototype measurement.
 
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
