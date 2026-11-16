@@ -230,5 +230,18 @@ Where the time went: 7.9 of the 11.6 minutes were finding and matching features 
 - **A more flexible placement per photo (also allowing stretch and skew) was tried and is not worth it:** against the measured map it was slightly worse (median 13.6 m, 90% within 23.1 m), at the checkpoints slightly better (6.5 / 12.2 / 15.2 m), and re-solving 248 photos took 18.5 s against 4.9 s. Its other timings are not comparable (the laptop was busy during that run). We keep the simpler placement.
 - One block, one site, three checkpoints: a prototype measurement.
 
+### 7d. The same method on our own Neo 2 video: **fails, because of how the video was shot**
+220 frames from clip 0149 (the frames of Run 3), about 0.67 s apart, method 7c unchanged.
+
+| | |
+|---|---|
+| Time per frame | 0.63 s (138.3 s for 220 frames), so it keeps pace with the video |
+| Frames placed | 204 of 220 (7 matched no other frame; 9 more could not be given a size, for example while the drone hovered) |
+| Photo pairs used | 424 of 986 |
+| Picture | **not a map** ([rough_map_test7d_neo2.jpg](screenshots/rough_map_test7d_neo2.jpg)): the camera looks out across the field at buildings and floodlights, so frames show the horizon and cannot be laid flat |
+| Accuracy | not measured: only 5 frames could be matched to our Run 3 map, too few to state a number |
+
+**What it means:** the growing map needs the camera pointing straight down, in daylight, flown in overlapping parallel lines. That is a capture rule, like "never one straight line" from Run 1. It is **not yet shown on any footage of our own**: a daylight test flight with the camera pointing down is needed before the finale, and it decides whether the campus flight can be part of the demo.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).

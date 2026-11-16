@@ -7,7 +7,9 @@
 Everything below this section is the round 1 record. This section is the plan for the finale.
 
 ### Core journey (one line)
-A responder flies a consumer drone over a landslide. Within about a minute the laptop shows a rough map; when the measured map is ready, the debris is found without anyone drawing it, and each vehicle is told where it can go and which blockage to clear first. One laptop, no internet.
+A responder flies a consumer drone over a landslide. A rough map grows on the laptop while the drone is still flying; Typhon then says where each vehicle can go, which blockage to clear first, and **where to fly next**. One laptop, no internet.
+
+**It is one loop, not a list of features:** see (the growing map) → suspect (debris found by the model and by the change in the ground) → decide (the road graph answers "clear first" and "fly next") → fly again. Every finale feature is one step of that loop.
 
 ### Why this plan (audit of 16 Nov)
 | Flaw | What fixes it |
@@ -33,7 +35,9 @@ A responder flies a consumer drone over a landslide. Within about a minute the l
 |---|---|---|---|
 | Tue 17 | Ask the organisers in writing: is the push before 2 pm Saturday the baseline, and may we bring trained weights, datasets and design specs? | Lead | Reply saved in this file |
 | ~~Tue 17~~ done 16 Nov | F1 tests, three methods | Claude | Done: all in `docs/validation.md`, Test 7. Verdict: **go for "the map grows while the drone flies"** (method 7c); no-go for "a map in one minute" |
-| Tue 17 – Wed 18 | F1, what is still untested: our Neo 2 video frames; a second site; how photos reach the laptop during a flight | Claude + lead | Each one written up as works / fails with numbers |
+| ~~Tue 17~~ done 16 Nov | F1 on our Neo 2 night video | Claude | Done: **fails** (Test 7d). The camera looked across the field, not down; frames cannot be laid flat |
+| Tue 17 – Thu 19 | **F1 test flight of our own:** daylight, camera pointing straight down, at least three overlapping parallel lines over open ground with a few things we can measure on the ground. Then run method 7c on it | Lead flies, Claude processes | Works / fails with numbers in `docs/validation.md`. **This decides whether a campus flight is in the demo** |
+| Tue 17 – Wed 18 | F1, still open: how photos reach the laptop during a flight (or straight after landing) | Claude + lead | Written up as what we will actually do on the day |
 | ~~Tue 17~~ done 16 Nov | Download the 1 m pre-event terrain and confirm its flight date | Claude | Done: file in `data/prefetch/usgs_1m/`, date and licence in `data/LICENSES.md` |
 | Tue 17 – Thu 19 | One model, one job: find debris on roads in drone maps. Train on the CAS drone subsets; hold out one whole region for testing | Teammate | Weights file, and a score on the held-out region written to `docs/validation.md` (PENDING until run) |
 | Wed 18 | Hand-label about 50 South Fork road crops (debris / clear) as our own test set | Lead + teammate | Labels in `data/eval/`; the model's score on them recorded |
@@ -46,23 +50,79 @@ A responder flies a consumer drone over a landslide. Within about a minute the l
 ### The 22 hours (Sat 14:00 → Sun 12:00), built fresh
 | # | Feature | Owner | Window | Done when |
 |---|---|---|---|---|
-| — | Set up, check the baseline, create the Neo4j AuraDB instance | All | 14:00–15:00 | App runs; advisor reads from AuraDB |
+| — | Set up, check the baseline, collect the Neo4j AuraDB access at the partner desk (from 14:30) | All | 14:00–15:00 | App runs; advisor reads from AuraDB |
+| — | Campus flight, if the organisers allow it and the test flight worked | Lead | 15:00–16:30, daylight | Photos on the laptop |
 | F1 | **The map grows while the drone flies:** each photo lands on the map about a second after it arrives; labelled "rough, about 10 to 20 m, not for measuring"; the measured map replaces it when ready | Lead + Claude | 15:00–20:00 | Runs on a photo set chosen on the day, replayed at flight speed; seconds per photo shown on screen |
 | F3 | **Debris on roads:** the trained model scores every road segment; fused with the height check; statuses stop being "unknown" where there is evidence | Teammate | 15:00–23:00 | South Fork shows real statuses, each with its evidence crop |
 | F2 | **The slide finds itself:** our height model minus the pre-event terrain, matched on stable ground, gives deposit and scar areas and a volume with a tolerance | Lead + Claude | 20:00–01:00 | Deposit outline and volume appear with no drawing |
-| F4 | **The answer and the plan in Neo4j:** per vehicle, the route or "cut off", and which single blockage reconnects the most people | Teammate | 23:00–04:00 | One sentence per settlement; plan computed in Neo4j, NetworkX as the fallback |
-| F5 | **Judges break it:** tap a road to block it or pick a vehicle; the plan redraws in seconds | Lead + Claude | 01:00–04:00 | Works on the phone and the laptop |
+| — | **Mentor Round 1 (40 marks)** at our table. The F1 skeleton is already on screen | All | 20:00–21:00 | Round 1 sheet handed over; three promises stated |
+| F4 | **The answer and the plan in Neo4j (the headline):** per vehicle, the route or "cut off"; **clear first** (which single blockage reconnects the most people); **fly next** (which unchecked road, once surveyed, settles the route for the most people), drawn as a flight path | Teammate, then lead + Claude on the map | 23:00–04:00 | One sentence per settlement; both answers computed in Neo4j, NetworkX as the fallback |
+| F5 | **Judges break it:** tap a road to block it or pick a vehicle; the plan and the next flight redraw in seconds | Lead + Claude | 01:00–04:00 | Works on the phone and the laptop |
 | F6 | Home page 3D object and the design pass from the spec | Lead | in gaps | Matches the spec |
-| — | Join everything, run every demo action end to end, failure cases, sleep in turns | All | 04:00–08:00 | Runbook passes twice |
-| — | **Code freeze 08:00.** Demo video 08:00–10:00, deck and rehearsal 10:00–11:30, **submit by 11:30** | All | 08:00–11:30 | Repo, video and deck submitted |
+| — | Join everything, run every demo action end to end, failure cases, sleep in turns | All | 04:00–07:00 | Runbook passes twice |
+| — | Progress update on Discord (required by 07:30) | Pitch owner | 07:00–07:30 | Posted |
+| — | **Our code freeze 08:00** (the guide says no new features after 09:00). Demo video and deck finished **before 10:00**, because Round 2 and the track reviews fill 10:00–11:45 | All | 08:00–09:45 | Video and deck files ready; backup video of the demo saved |
+| — | **Mentor Round 2 (60 marks)** and the Neo4j track review, product running live at the table | All | 10:00–11:45 | — |
+| — | **Submit by 11:30** (the portal locks at 12:00 sharp); last push from the phone hotspot if the venue Wi-Fi is slow | Pitch owner | 11:00–11:30 | Repo link, video and deck submitted |
+| — | If we are in the Top 12: stage tech check at 12:15, six minutes on stage from 12:30 | All | 12:15 onwards | — |
 
 **If we slip:** F5 shrinks to "pick a vehicle" only; F2 falls back to South Fork only; F6 keeps the round 1 home page. F1, F3 and F4 are the product and are not cut. A fix that lands after 08:00 does not ship.
 
 ### Cut list (no more work before or during the finale)
-Exports (PDF, KMZ, COG), the situation report, new processing tiers, the guided tour, more datasets (SpaceNet 8, FloodNet), more scenarios (Sikkim, Himachal, Kedarnath). They stay in the repo and go on the roadmap slide.
+Exports (PDF, KMZ, COG), the situation report, new processing tiers, the guided tour, more datasets (SpaceNet 8, FloodNet), more scenarios (Sikkim, Himachal). They stay in the repo and go on the roadmap slide. Kedarnath joins as a scenario built from cited reports (teammate brief, T4).
 
 ### Rules that stay
 Numbers on screen and on slides come from runs we can show. Hand-set weights are not called AI. The rough map is labelled rough. The model's score is the one measured on images it never saw.
+
+### How we are scored, and how we play each round (from the Participant Guide)
+100 teams. Only the two mentor rounds decide the Top 12; only the Top 12 meet the jury.
+
+| Round | Marks | What carries the most | How we play it |
+|---|---|---|---|
+| **Mentor Round 1**, Sat 20:00, at the table | 40 | Problem understanding 10; originality and edge 10; architecture 8; fit to the problem statement 6; plan for the night 6 | One printed page: the root cause in one sentence, what exists and why ours is better, the loop as a diagram, and **three promises for the night: F1, F3, F4**. Round 2 marks us against these promises, so we promise only what our tests already support. Show the growing map already running |
+| **Mentor Round 2**, Sun 10:00, at the table | 60 | Working product live 16; technical depth 14; progress since Round 1 10; reliability on the mentor's input 10; pitch and questions 10 | Product already running at 09:55, with a "reset demo" action. Open with the three promises and tick them against the commit list. Hand the mentor the input menu below. A recording or mock-up scores nothing here |
+| **Jury**, Top 12, six minutes on stage including the demo | 100 | Innovation 30 (the idea is ours **and runs live**); technical depth and finale build 25; live demo 14 plus reliability on the jury's input 11; problem 15; pitch and path 10 | Start the growing map in the first ten seconds so it fills in while we talk. Timing: problem and user 0:40; the loop live 3:00; a judge taps a road 0:50; what is underneath and what we built in 22 hours 0:45; first adopter, payer, next milestone 0:45 |
+
+**The input menu (so "your own input" costs a judge five seconds):** pick one of three photo sets (the South Fork block; a single straight line, which Typhon warns about, our 34 m lesson; our own flight); tap any road to block it; pick a vehicle; send a field report from their own phone with the PIN.
+
+**Failure cases we rehearse:** Wi-Fi off (still works); Neo4j stopped (falls back, and says so on screen); photos with no GPS or too blurred (refused with the reason); a wrong PIN; a road tapped where nothing is known (stays "unknown", and becomes a "fly next" candidate).
+
+**Habits that score:**
+- One person owns the demo and the pitch from 14:00 and writes no feature code after 04:00.
+- Commit small and often with clear messages; the commit list is the evidence for 10 + 7 marks. Tag the starting point before 14:00 on Saturday.
+- Every member can explain every layer: the guide says judges will question the architecture and the code, and it allows AI tools only on that condition.
+- Sleep in turns.
+- Know the one-minute story by heart: who the user is, who pays, what we built, what it does. **Who pays is still our assumption** until a responder or official confirms it.
+
+**Tracks:** the Neo4j track (INR 25,000 plus credits) is reviewed separately on Sunday 10:00–11:45 and needs Neo4j in the working build: F4 is that. The Women Track is also reviewed then; if the team is eligible, ask the organisers how to be considered. The Sarvam (Indian-language AI) track would mean a spoken briefing or voice reports, but it needs the internet, which works against "one laptop, no internet": **not planned**, unless the lead wants it as a clearly labelled online extra.
+
+### Innovation sweep (16 Nov): what is ours, in order of strength
+| # | Idea | Why it is new and grounded | State |
+|---|---|---|---|
+| 1 | **Fly next** | Mapping tools wait for the pilot to finish. In the first hours the scarce thing is battery, so the question is which road to look at next. Ranked by how many people's routes depend on each unchecked road | Not built; queries to be tested by the teammate (T3) |
+| 2 | **The map grows while the drone flies** | A rough map during the flight, replaced by the measured one | Works on survey photos looking straight down (Test 7c); **fails on our oblique night video (7d); needs our own test flight** |
+| 3 | **The slide finds itself** | Our height model minus the terrain from before the event; no hand drawing | Pre-event terrain in hand for South Fork; not built. For an Indian site only the 30 m Copernicus model exists, which is far coarser: say so |
+| 4 | **Every answer carries how far it can be trusted** | The rough map (10 to 20 m) may only raise a suspicion and a "fly next"; only the measured map (±6 m at 3 checkpoints) may set a road to blocked | A rule to build into F3/F4; it is what makes the loop honest |
+| 5 | **Clear first** | One blockage whose removal reconnects the most people, from the graph | Not built; teammate T3 |
+
+Anything outside these five is polish. If time runs short, polish goes first.
+
+### The pitch deck
+**Is one required? Yes.** The final submission is the repository link, a demo video and a pitch deck, before 12:00 on Sunday. The guide does not name a file format; the steps come on Discord before the finale. We export a PDF and keep the editable deck, so either can be submitted.
+
+- **Two uses, one file:** on stage there is time for three or four slides around the live demo; the submitted file is read without us, so it carries the evidence.
+- **At most eight slides:**
+  1. The one-line journey and the loop diagram.
+  2. The root cause: responders lack knowing which roads to trust and where to look next, with one cited fact.
+  3. What exists and where it stops, against ours.
+  4. "Live demo" (a title only; we switch to the app).
+  5. What is underneath: the layers, and where Neo4j sits in the code.
+  6. Evidence: each number with how many points it rests on and which run it came from.
+  7. Built in the 22 hours: the starting point against the end, with the commit list.
+  8. The path: first adopter, payer, deployment, next milestone, and the limits.
+- **Rules:** maximum contrast, nothing under about 30 px, one idea per slide, the honest details in the speaker notes, anything unmeasured shown as PENDING.
+- **Prepare before the finale:** the skeleton with PENDING slots. **Fill at the finale:** numbers, screenshots, the commit list. It must be finished before 10:00 on Sunday.
+- **Demo video:** the updated product, with the team briefly on camera and a teammate's own voice; recorded 08:00–09:30 on Sunday from the frozen build. Keep a second, shorter copy as the stage backup.
 
 ## Facts checked on 31 Oct, 00:15 IST
 | Item | Value | How checked |
