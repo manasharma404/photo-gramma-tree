@@ -36,7 +36,7 @@
 
   /* S1 / S6: the road */
   #road path { fill: none; stroke-linecap: round; }
-  #h1b { top: 232px; font-weight: 300; font-size: 46px; }
+  #h1b { top: 292px; font-weight: 300; font-size: 46px; }
   #n1 { bottom: 118px; }
   #h6 { left: 0; right: 0; top: 236px; text-align: center; font-size: 70px; }
 
@@ -93,22 +93,22 @@
     <svg class="layer" id="road" viewBox="0 0 1920 1080">
       <defs><radialGradient id="glowg"><stop offset="0" stop-color="#C8EB5A" stop-opacity="0.9" /><stop offset="0.35" stop-color="#B5D334" stop-opacity="0.28" /><stop offset="1" stop-color="#B5D334" stop-opacity="0" /></radialGradient></defs>
       <path id="rd" d="M -20 668 C 260 656, 380 596, 640 614 S 980 566, 1180 544 S 1640 474, 1940 446" stroke="#F5F1E6" stroke-width="6" pathLength="1" />
-      <g id="people"></g>
+      <g id="cuts"></g>
       <g id="debris"></g>
       <circle id="pulse" fill="none" stroke="#B5D334" stroke-width="3" />
       <path id="fl" d="M -20 668 C 260 656, 380 596, 640 614 S 980 566, 1180 544 S 1640 474, 1940 446" stroke="#B5D334" stroke-width="3" pathLength="1" transform="translate(0,-74)" />
       <g id="drone6"><circle r="70" fill="url(#glowg)" /><circle r="20" fill="none" stroke="#B5D334" stroke-width="3" /><circle r="8" fill="#E9F6A0" /></g>
     </svg>
-    <p class="head" id="h1a"><span>19 May 2026. Landslides cut the road to <i>Kedarnath</i>.</span></p>
-    <p class="head" id="h1b"><span>Rescue teams had to bring more than 10,000<br />stranded pilgrims across the debris.</span></p>
-    <p class="bignum" id="n1"><small>Pilgrims stranded by one blocked road</small><span id="pc">0</span></p>
+    <p class="head" id="h1a"><span>26 August 2026. A glacier collapse and a landslide<br />send a flash flood into <i>Nepal</i>.</span></p>
+    <p class="head" id="h1b"><span>About 40 km of road damaged. Roads were passable<br />only as far as Nuwakot.</span></p>
+    <p class="bignum" id="n1"><small>Bridges destroyed or damaged</small><span id="pc">0</span></p>
     <p class="head" id="h6"><span>When the next road is cut, the first map<br />should take <i>minutes</i>.</span></p>
   </div>
 
   <!-- S2 the problem -->
   <div class="layer" id="S2">
     <div class="layer" id="rows"></div>
-    <p class="plate" id="p2a" style="top: 424px"><span>Every map they carry shows the valley before the slide.</span></p>
+    <p class="plate" id="p2a" style="top: 424px"><span>The UN said the biggest obstacle to the response was access.</span></p>
     <p class="plate" id="p2b" style="top: 548px"><span>Which roads still hold? <i>Unknown.</i></span></p>
     <div id="scan"></div>
   </div>
@@ -208,6 +208,8 @@ function rise(el, t, t0, t1, dy = 34) {
   el.style.transform = `translateY(${lerp(dy, 0, p)}px)`;
 }
 
+const BRIDGES = 41;  // destroyed or damaged, Nepal Department of Roads (source in storyboard.md)
+
 const D = await (await fetch("data/terrain.json")).json();
 $("logo").innerHTML = await (await fetch("/assets/logo-lockup.svg")).text();
 
@@ -220,18 +222,18 @@ const ROWS = 7;
 $("rows").innerHTML = Array.from({ length: ROWS }, () => `<div class="row">${Array.from({ length: 9 }, () => `<span>UNKNOWN</span>`).join("")}</div>`).join("");
 const rows = [...document.querySelectorAll(".row")];
 
-// ---------- S1 / S6: the road, the slide, the people ----------
+// ---------- S1 / S6: the road and where it was cut ----------
 const rd = $("rd"), fl = $("fl"), RL = rd.getTotalLength();
 const GAP = 0.6, GW = 0.024;                       // where the slide lands on the road, and half the gap, as shares of its length
 const at = (u) => rd.getPointAtLength(clamp(u) * RL);
 const gp = at(GAP);
 const r1 = rng(21);
-const people = Array.from({ length: 84 }, () => {
-  const u = GAP - GW - 0.006 - 0.25 * Math.pow(r1(), 1.6), p = at(u), q = at(u + 0.002);
-  const nx = -(q.y - p.y), ny = q.x - p.x, nl = Math.hypot(nx, ny) || 1, off = (r1() - 0.5) * 44;
-  return { u, el: svg("circle", { cx: p.x + (nx / nl) * off, cy: p.y + (ny / nl) * off, r: 5.5, fill: "#F5F1E6" }, $("people")) };
-}).sort((a, b) => b.u - a.u);
-people.forEach((p, i) => { p.t0 = 2.9 + (i / people.length) * 1.9; });
+// more breaks along the same road: the flood cut it in many places, not one
+const cuts = [0.27, 0.86, 0.12, 0.43, 0.74].map((u, i) => {
+  const p = at(u), g = svg("g", {}, $("cuts"));
+  svg("circle", { r: 24, fill: "#060B18" }, g); svg("path", { d: "M-12 -12 L12 12 M12 -12 L-12 12", stroke: "#F5F1E6", "stroke-width": 5 }, g);
+  return { g, x: p.x, y: p.y, t0: 2.95 + i * 0.36 };
+});
 const debris = Array.from({ length: 18 }, (_, i) => {
   const s = 14 + r1() * 20, ox = (r1() - 0.5) * 2 * (GW * RL + 8), oy = -r1() * 26 + 8;
   return { s, ox, oy, sx: ox + 190 + r1() * 120, sy: -330 - r1() * 160, rot: r1() * 90, t0: 1.38 + r1() * 0.3,
@@ -250,7 +252,7 @@ function road(t1, t6) {          // t1 = seconds into S1 (or null), t6 = seconds
   const pu = t6 != null ? 1 : prog(t1, 1.76, 2.6);
   $("pulse").setAttribute("cx", gp.x); $("pulse").setAttribute("cy", gp.y);
   $("pulse").setAttribute("r", lerp(12, 190, outExpo(pu))); $("pulse").setAttribute("opacity", pu > 0 && pu < 1 ? 0.9 * (1 - pu) : 0);
-  people.forEach((p) => { const s = t6 != null ? 0 : outBack(prog(t1, p.t0, p.t0 + 0.3)); p.el.setAttribute("r", Math.max(0, 5.5 * s)); });
+  cuts.forEach((k) => { const s = t6 != null ? 1 : outBack(prog(t1, k.t0, k.t0 + 0.35)); k.g.setAttribute("transform", `translate(${k.x} ${k.y}) scale(${Math.max(0.001, s)})`); k.g.setAttribute("opacity", s > 0 ? 1 : 0); });
   // S6: the drone flies the valley, its track drawn behind it
   const f6 = t6 == null ? 0 : inOutSine(prog(t6, 0.35, 3.1));
   fl.setAttribute("stroke-dasharray", `${f6} 1`); fl.setAttribute("opacity", t6 != null && f6 > 0 ? 1 : 0);
@@ -395,8 +397,8 @@ function grain(frame) {
 }
 
 const HUD = [
-  [T.S1, "Kedarnath route, Uttarakhand<br />Sonprayag to Gaurikund", "Source: SDRF figures reported by ANI, 20 May 2026"],
-  [T.S2, "", ""],
+  [T.S1, "Rasuwa, Nuwakot and Dhading, Nepal<br />26 August 2026", "Sources: Nepal Department of Roads via Kathmandu Post, 29 Aug 2026 · UN News, 31 Aug 2026"],
+  [T.S2, "", "Source: UN News, 31 August 2026"],
   [T.S4, "South Fork, California<br />36.3451° N · 118.7578° W", "Measured on a replay of a USGS survey flight · not our footage"],
   [T.S5, "How Typhon decides", "Illustration of the method · not a screen from the app"],
   [T.S6, "", ""],
@@ -417,8 +419,7 @@ window.renderAt = (t) => {
       sentence($("h1a"), a, 0.35, null);
       sentence($("h1b"), a, 2.5, null);
       rise($("n1"), a, 2.8, null, 40);
-      const n = Math.round(10000 * inOutSine(prog(a, 2.9, 4.8)));
-      $("pc").textContent = n.toLocaleString("en-US") + (n >= 10000 ? "+" : "");
+      $("pc").textContent = Math.round(BRIDGES * inOutSine(prog(a, 2.9, 4.8)));
     } else sentence($("h6"), z, 0.3, null);
   }
 

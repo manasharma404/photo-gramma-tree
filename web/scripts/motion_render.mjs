@@ -54,9 +54,10 @@ if (stills) {
 } else {
   const frames = path.join(path.dirname(out), "frames");
   await rm(frames, { recursive: true, force: true }); await mkdir(frames, { recursive: true });
-  const n = Math.round(DURATION * FPS), t0 = Date.now();
+  // MOTION_FROM / MOTION_TO (seconds) render only part of the timeline, to redo one scene without redoing all of it
+  const first = Math.round(Number(process.env.MOTION_FROM || 0) * FPS), n = Math.round(Number(process.env.MOTION_TO || DURATION) * FPS) - first, t0 = Date.now();
   for (let f = 0; f < n; f++) {
-    await page.evaluate((s) => window.renderAt(s), f / FPS);
+    await page.evaluate((s) => window.renderAt(s), (first + f) / FPS);
     await stage.screenshot({ path: path.join(frames, `f${String(f).padStart(5, "0")}.png`) });
   }
   console.log(`${n} frames in ${((Date.now() - t0) / 1000).toFixed(1)} s`, errors.length ? "errors: " + errors.join(" | ") : "no page errors");
