@@ -15,8 +15,9 @@ const motion = path.resolve(web, "..", "docs", "demo", "motion");
 const out = path.resolve(process.argv[2] || path.join(motion, "out", "proof.mp4"));
 const stills = process.argv[3] ? process.argv[3].split(",").map(Number) : null;
 
-const roots = [["/three/", path.join(web, "node_modules", "three")], ["/fonts/", path.join(web, "node_modules", "@fontsource")], ["/", motion]];
-const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".woff2": "font/woff2", ".css": "text/css" };
+const sceneFile = process.env.MOTION_SCENE || "scene.html";  // which page in docs/demo/motion to render
+const roots = [["/three/", path.join(web, "node_modules", "three")], ["/fonts/", path.join(web, "node_modules", "@fontsource")], ["/assets/", path.join(web, "src", "assets")], ["/", motion]];
+const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".woff2": "font/woff2", ".css": "text/css", ".svg": "image/svg+xml" };
 const server = createServer(async (req, res) => {
   const url = decodeURIComponent(new URL(req.url, "http://x").pathname);
   const [prefix, root] = roots.find(([p]) => url.startsWith(p));
@@ -35,7 +36,7 @@ const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, de
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
-await page.goto(`${base}/scene.html`);
+await page.goto(`${base}/${sceneFile}`);
 await page.waitForFunction("window.ready === true", null, { timeout: 60000 }).catch(() => {});
 if (errors.length || !(await page.evaluate("window.ready === true"))) {
   console.error("page did not get ready:", errors.join(" | ")); await browser.close(); server.close(); process.exit(1);
