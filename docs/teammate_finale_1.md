@@ -4,6 +4,8 @@
 
 **Send back by Thu 19 Nov, 22:00 IST:** the list in section 6.
 
+**Update, 17 Nov (one change, in T4):** the Kedarnath scenario is now the **19 May 2026 landslides on the Sonprayag to Gaurikund road**, not the 2013 flood. The lead's video opens with that event, so the pitch, the video and your pack must use the same event and the same cited figures. T1, T2 and T3 are unchanged.
+
 ---
 
 ## 1. Context
@@ -67,10 +69,12 @@ At the finale we get a hosted Neo4j (AuraDB). Our access report uses the Graph D
 
 ### T4. Kedarnath scenario pack (Wed–Thu, 3 hours)
 The lead wants Kedarnath in the pitch. It joins as a **scenario reconstructed from reports**, the same kind as Wayanad, never as something our drone measured.
-1. Copy the approach of `scripts/prefetch_wayanad.py` into a new `scripts/prefetch_kedarnath.py`: OpenStreetMap roads and footpaths for the Sonprayag – Gaurikund – Kedarnath corridor, plus settlements and facilities.
-2. Road and path states come only from cited reports, each with a specific URL and date in `docs/sources_teammate.md`. No report, no state: it stays unknown.
-3. Population figures are real cited numbers or `null`. Never zero, never guessed.
-4. Write the limits in the report: today's OpenStreetMap is not the 2013 network; we have no drone imagery of it; nothing here is a measurement.
+1. **The event is the 19 May 2026 landslides** on the Sonprayag to Gaurikund road (reports name the Munkatiya area and three slide points; more than 10,000 pilgrims were brought across, per SDRF figures reported by ANI). The lead's side found this in The Watchers, 20 May 2026 (URL in `docs/demo/motion/storyboard.md`). **Find and cite the primary reports yourself** (SDRF, the district administration, ANI or PTI): do not rely on that one page. The 2013 flood may be mentioned as background in the pitch, with its own citation; it is not the scenario.
+2. Copy the approach of `scripts/prefetch_wayanad.py` into a new `scripts/prefetch_kedarnath.py`: OpenStreetMap roads and footpaths for the Sonprayag – Gaurikund – Kedarnath corridor, plus settlements and facilities.
+3. Road and path states come only from cited reports, each with a specific URL and date in `docs/sources_teammate.md`. No report, no state: it stays unknown.
+4. Population figures are real cited numbers or `null`. Never zero, never guessed. The number of pilgrims on the route that day is a cited figure, not a settlement population: keep the two apart.
+5. Write the limits in the report: today's OpenStreetMap may not match the road as it was on 19 May 2026; we have no drone imagery of it; nothing here is a measurement.
+6. If your reports give a different figure from "more than 10,000", tell the lead at once: the video shows that number.
 
 **Why it is worth doing:** the corridor is close to a single path, so one blockage cuts off everyone above it. That is the clearest case for the "clear first" and "fly next" questions in T3.
 
