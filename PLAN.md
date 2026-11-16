@@ -69,7 +69,7 @@ A responder flies a consumer drone over a landslide. A rough map grows on the la
 **If we slip:** F5 shrinks to "pick a vehicle" only; F2 falls back to South Fork only; F6 keeps the round 1 home page. F1, F3 and F4 are the product and are not cut. A fix that lands after 08:00 does not ship.
 
 ### Cut list (no more work before or during the finale)
-Exports (PDF, KMZ, COG), the situation report, new processing tiers, the guided tour, more datasets (SpaceNet 8, FloodNet), more scenarios (Sikkim, Himachal). They stay in the repo and go on the roadmap slide. Kedarnath joins as a scenario built from cited reports (teammate brief, T4).
+Exports (PDF, KMZ, COG), the situation report, new processing tiers, the guided tour, more datasets (SpaceNet 8, FloodNet), more scenarios (Sikkim, Himachal). They stay in the repo and go on the roadmap slide. Nepal's 26 August 2026 flash flood is the case study for the pitch and the video (lead's decision, 17 Nov; it replaces Kedarnath) and joins as a scenario built from cited reports (teammate brief, T4).
 
 ### Rules that stay
 Numbers on screen and on slides come from runs we can show. Hand-set weights are not called AI. The rough map is labelled rough. The model's score is the one measured on images it never saw.

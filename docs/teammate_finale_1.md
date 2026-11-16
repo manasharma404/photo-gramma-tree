@@ -4,7 +4,7 @@
 
 **Send back by Thu 19 Nov, 22:00 IST:** the list in section 6.
 
-**Update, 17 Nov (one change, in T4):** the Kedarnath scenario is now the **19 May 2026 landslides on the Sonprayag to Gaurikund road**, not the 2013 flood. The lead's video opens with that event, so the pitch, the video and your pack must use the same event and the same cited figures. T1, T2 and T3 are unchanged.
+**Update, 17 Nov (one change, in T4):** the case study is now **Nepal, the flash flood of 26 August 2026** (Rasuwa, Nuwakot and Dhading), not Kedarnath. The lead decided this on 17 Nov. The video opens with that event, so the pitch, the video and your pack must use the same event and the same cited figures. T1, T2 and T3 are unchanged.
 
 ---
 
@@ -67,22 +67,28 @@ At the finale we get a hosted Neo4j (AuraDB). Our access report uses the Graph D
 
 **Done when:** the report says what works on a free instance, and has three tested queries with their results next to the NetworkX results.
 
-### T4. Kedarnath scenario pack (Wed–Thu, 3 hours)
-The lead wants Kedarnath in the pitch. It joins as a **scenario reconstructed from reports**, the same kind as Wayanad, never as something our drone measured.
-1. **The event is the 19 May 2026 landslides** on the Sonprayag to Gaurikund road (reports name the Munkatiya area and three slide points; more than 10,000 pilgrims were brought across, per SDRF figures reported by ANI). The lead's side found this in The Watchers, 20 May 2026 (URL in `docs/demo/motion/storyboard.md`). **Find and cite the primary reports yourself** (SDRF, the district administration, ANI or PTI): do not rely on that one page. The 2013 flood may be mentioned as background in the pitch, with its own citation; it is not the scenario.
-2. Copy the approach of `scripts/prefetch_wayanad.py` into a new `scripts/prefetch_kedarnath.py`: OpenStreetMap roads and footpaths for the Sonprayag – Gaurikund – Kedarnath corridor, plus settlements and facilities.
-3. Road and path states come only from cited reports, each with a specific URL and date in `docs/sources_teammate.md`. No report, no state: it stays unknown.
-4. Population figures are real cited numbers or `null`. Never zero, never guessed. The number of pilgrims on the route that day is a cited figure, not a settlement population: keep the two apart.
-5. Write the limits in the report: today's OpenStreetMap may not match the road as it was on 19 May 2026; we have no drone imagery of it; nothing here is a measurement.
-6. If your reports give a different figure from "more than 10,000", tell the lead at once: the video shows that number.
+### T4. Nepal scenario pack (Wed–Thu, 3 hours)
+The case study for the pitch and the video is the **flash flood of 26 August 2026 in Nepal**, set off by a glacier collapse and a landslide on the Nepal–China border. It joins as a **scenario reconstructed from reports**, the same kind as Wayanad, never as something our drone measured.
 
-**Why it is worth doing:** the corridor is close to a single path, so one blockage cuts off everyone above it. That is the clearest case for the "clear first" and "fly next" questions in T3.
+**What the lead's side read on 17 Nov** (leads to check, not facts to copy: open each article and cite it yourself):
+- Kathmandu Post, 29 Aug 2026, citing the Department of Roads: about 40 km of road damaged between Rasuwagadhi and Malekhu; 41 bridges destroyed or damaged. https://kathmandupost.com/national/2026/08/29/washed-out-bridges-force-flood-hit-communities-to-rely-on-choppers
+- Same article, by place: the Trishuli river bridge at Trishuli Bazar swept away; every bridge between Trishuli and Betrawati washed away; the road to Dhunche and Rasuwagadhi heavily damaged; the Phurke Khola bridge at Malekhu washed away; three bridges between Galchhi and Malekhu destroyed, cutting Dhadingbesi off; the Baireni–Mugling section of the Prithvi Highway blocked for three days, then reopened.
+- UN News, 31 Aug 2026: roads passable only as far as Nuwakot; access named as the biggest obstacle to the response. https://news.un.org/en/story/2026/08/1168233
+
+1. Copy the approach of `scripts/prefetch_wayanad.py` into a new `scripts/prefetch_nepal.py`: OpenStreetMap roads and bridges for the corridor Galchhi – Trishuli (Bidur) – Betrawati – Dhunche – Rasuwagadhi, plus Malekhu – Dhadingbesi, with settlements and facilities. Keep it to this corridor: 3 hours, not the whole country.
+2. Road and bridge states come only from cited reports, each with a specific URL and date in `docs/sources_teammate.md`. No report, no state: it stays unknown. A road that was blocked and later reopened is recorded with both dates.
+3. Population figures are real cited numbers (census or municipality) or `null`. Never zero, never guessed.
+4. **Deaths and missing people are not part of the pack and are never used as a hook.** If the pitch states a toll, it gives the figure, its date and its source (the UN gave 903 confirmed dead and more than 4,200 missing on 31 Aug 2026; later counts are higher and we have not verified them).
+5. Write the limits in the report: today's OpenStreetMap may already show repairs or may not match 26 August; we have no drone imagery of it; nothing here is a measurement.
+6. If your reading gives different figures from "about 40 km" or "41 bridges", tell the lead at once: the video shows both numbers.
+
+**Why it is worth doing:** one valley, many breaks, and help that could only drive part of the way. Which break to clear first, and which stretch to fly next, are real questions here, so T3's queries have something to answer.
 
 **Done when:** the pack loads offline through the same loader as Wayanad, and T3's three queries run on it.
 
 ## 5. Definition of done
 - `uv run pytest -q` passes, with the counts in the report.
-- `docs/teammate_finale_report.md` exists with: the licence table, the score tables (held-out region and our own crops, separately), timing, the AuraDB findings, the three queries with results, the Kedarnath limits, and a list of anything that stayed `PENDING`.
+- `docs/teammate_finale_report.md` exists with: the licence table, the score tables (held-out region and our own crops, separately), timing, the AuraDB findings, the three queries with results, the Nepal pack's limits, and a list of anything that stayed `PENDING`.
 - Nothing large is committed. Nothing is pushed without the lead's yes.
 
 ## 6. Send back by Thu 19 Nov, 22:00 IST
