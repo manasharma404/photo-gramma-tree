@@ -6,7 +6,8 @@
 <link rel="icon" href="data:," />
 <!-- Every frame is a pure function of time: window.renderAt(seconds). web/scripts/motion_render.mjs steps through
      it and joins the frames. Script, sources and the claims that must be true before this is submitted:
-     docs/demo/motion/storyboard.md. Terrain and flight path are real (data/terrain.json, made by prep_data.py). -->
+     docs/demo/motion/storyboard.md. Terrain and flight path are real (data/terrain.json, made by prep_data.py).
+     The road in scene 1 and the graph in scene 6 are drawings, and are labelled as such on screen. -->
 <style>
   @font-face { font-family: "Space Grotesk"; font-weight: 300; src: url("/fonts/space-grotesk/files/space-grotesk-latin-300-normal.woff2") format("woff2"); }
   @font-face { font-family: "Space Grotesk"; font-weight: 500; src: url("/fonts/space-grotesk/files/space-grotesk-latin-500-normal.woff2") format("woff2"); }
@@ -18,46 +19,62 @@
   #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); font-family: "Space Grotesk", sans-serif; color: var(--sand); }
   #gl, .layer { position: absolute; inset: 0; width: 1920px; height: 1080px; }
   .layer { pointer-events: none; }
-  .caps { font: 500 17px/1.35 "Inter", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+  /* Type scale for a panel watching a laptop: nothing below 28 px. Display 130+, sentences 72, support 40 to 46, labels 28 to 30. */
+  .caps { font: 500 28px/1.3 "Inter", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
   .dots { background-image: radial-gradient(circle, rgba(245,241,230,0.5) 1.6px, transparent 2.2px); background-size: 64px 64px; background-position: 32px 28px; }
 
   /* sentences: a masked block that rises into place */
-  .head { position: absolute; left: 124px; top: 150px; font-weight: 500; font-size: 54px; letter-spacing: -0.02em; line-height: 1.07; overflow: hidden; padding-bottom: 0.12em; }
+  .head { position: absolute; left: 124px; top: 150px; font-weight: 500; font-size: 72px; letter-spacing: -0.025em; line-height: 1.05; overflow: hidden; padding-bottom: 0.12em; }
   .head > span { display: inline-block; }
-  .head i, .plate i, .benefit i { font-style: normal; color: var(--lime); }
-  .tag { position: absolute; left: 126px; top: 112px; color: var(--lime); }
+  .head i, .plate i, .benefit i, .bars b { font-style: normal; color: var(--lime); }
+  .tag { position: absolute; left: 126px; top: 92px; color: var(--lime); }
+  .tag b { font-weight: 500; color: var(--ink); background: var(--lime); padding: 4px 12px 3px; margin-right: 16px; }
   .bignum { position: absolute; left: 120px; font-weight: 700; font-size: 200px; line-height: 0.85; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .bignum small { font: 500 17px/1 "Inter", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; display: block; margin-bottom: 22px; color: var(--lime); }
-  .facts { position: absolute; left: 124px; display: flex; gap: 56px; }
-  .facts div { border-top: 2px solid rgba(245,241,230,0.35); padding-top: 14px; min-width: 270px; }
-  .facts b { display: block; font-weight: 500; font-size: 40px; letter-spacing: -0.02em; margin-top: 6px; text-transform: none; }
-  .benefit { position: absolute; left: 110px; font-weight: 500; font-size: 38px; letter-spacing: -0.01em; white-space: nowrap; }
-  .benefit span { background: rgba(6,11,24,0.82); padding: 8px 14px; border-left: 4px solid var(--lime); }
+  .bignum small { font: 500 30px/1 "Inter", sans-serif; letter-spacing: 0.01em; display: block; margin-bottom: 20px; color: var(--lime); }
+  .bars { position: absolute; left: 124px; width: 780px; }
+  .bars p { font-weight: 500; font-size: 42px; letter-spacing: -0.01em; margin-bottom: 12px; }
+  .bars b { font-weight: 700; }
+  .bars div { height: 24px; margin-bottom: 34px; transform-origin: left center; }
+  .benefit { position: absolute; left: 124px; font-weight: 500; font-size: 46px; letter-spacing: -0.015em; line-height: 1.16; background: rgba(6,11,24,0.84); padding: 12px 22px 14px; border-left: 6px solid var(--lime); }
+  .note { font: 500 28px/1.2 "Inter", sans-serif; letter-spacing: 0.005em; }
+  .mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; }
+  .mask > span { display: inline-block; }
 
-  /* S1 / S6: the road */
-  #road path { fill: none; stroke-linecap: round; }
-  #h1b { top: 292px; font-weight: 300; font-size: 46px; }
-  #n1 { bottom: 118px; }
-  #h6 { left: 0; right: 0; top: 236px; text-align: center; font-size: 70px; }
+  /* S1: the case */
+  #road path, #road line { fill: none; stroke-linecap: round; }
+  #date { position: absolute; left: 116px; top: 136px; font-weight: 700; font-size: 156px; line-height: 0.9; letter-spacing: -0.04em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #h1a { top: 296px; font-size: 60px; }
+  #n1 { bottom: 116px; }
+  #n2 { bottom: 116px; left: 1440px; font-size: 136px; }
+  #flash { background: var(--lime); }
 
-  /* S2: rows of "unknown" */
-  #rows { display: flex; flex-direction: column; justify-content: center; }
+  /* S2 / S7: rows of "unknown" */
+  .rows { display: flex; flex-direction: column; justify-content: center; }
   .row { white-space: nowrap; font-weight: 700; font-size: 168px; line-height: 0.93; letter-spacing: -0.035em; color: transparent; -webkit-text-stroke: 2px rgba(245,241,230,0.5); will-change: transform; }
   .row span { display: inline-block; padding-right: 0.22em; }
-  .plate { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; font-size: 58px; letter-spacing: -0.015em; }
-  .plate span { display: inline-block; background: var(--ink); padding: 14px 34px; }
+  .row .fly { transform-origin: center center; }
+  .row u { text-decoration: none; }
+  #rows7b .row { -webkit-text-stroke: 0; color: var(--sand); }
+  #rows7b .row u { color: transparent; -webkit-text-stroke: 2px rgba(245,241,230,0.28); }
+  #rows7b .row:nth-child(4) { color: var(--lime); }
+  #sweep { position: absolute; top: 0; width: 6px; height: 1080px; background: var(--lime); box-shadow: 0 0 40px 8px rgba(181,211,52,0.7); }
+  .plate { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; font-size: 76px; letter-spacing: -0.025em; line-height: 1.08; }
+  .plate span { display: inline-block; background: var(--ink); padding: 18px 44px 22px; }
   #scan { position: absolute; left: 0; top: 50%; height: 3px; background: var(--lime); box-shadow: 0 0 24px rgba(181,211,52,0.8); }
 
-  /* S3: title card, S7: end card */
-  #card, #endcard { background: var(--sand); color: var(--navy); }
+  /* sand cards: title, "what sets us apart", logo */
+  #card, #usp, #endcard { background: var(--sand); color: var(--navy); }
   #title { position: absolute; left: 120px; top: 300px; font-weight: 700; font-size: 330px; line-height: 0.9; letter-spacing: -0.045em; white-space: nowrap; }
-  #title .m { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; }
-  #title .m > span { display: inline-block; }
-  #title .dot { color: var(--lime); -webkit-text-stroke: 3px var(--navy); }
+  .dot { color: var(--lime); -webkit-text-stroke: 3px var(--navy); }
   #sub { position: absolute; left: 136px; top: 640px; font-weight: 300; font-size: 58px; letter-spacing: -0.01em; color: var(--blue); overflow: hidden; white-space: nowrap; }
   #sub > span, #endsub > span { display: inline-block; }
   #rule { position: absolute; left: 136px; top: 760px; height: 4px; background: var(--navy); transform-origin: left center; width: 1648px; }
   #cardmeta { position: absolute; left: 136px; right: 136px; top: 790px; display: flex; justify-content: space-between; color: var(--navy); }
+  #uspmeta { position: absolute; left: 136px; top: 786px; font-weight: 500; font-size: 44px; letter-spacing: -0.015em; color: var(--blue); }
+  #usptag { position: absolute; left: 136px; top: 136px; color: var(--blue); }
+  #usplines { position: absolute; left: 124px; top: 196px; font-weight: 700; font-size: 176px; line-height: 0.98; letter-spacing: -0.045em; white-space: nowrap; }
+  #usplines .dot { -webkit-text-stroke: 2px var(--navy); }
+  #usprule { position: absolute; left: 136px; top: 760px; height: 4px; background: var(--navy); transform-origin: left center; width: 1648px; }
   #logo { position: absolute; left: 330px; top: 380px; width: 1260px; color: var(--navy); --logo-cutout: var(--sand); }
   #logo svg { display: block; width: 100%; height: auto; }
   #endsub { position: absolute; left: 0; right: 0; top: 590px; text-align: center; font-weight: 300; font-size: 58px; letter-spacing: -0.01em; color: var(--blue); overflow: hidden; }
@@ -65,19 +82,21 @@
   #endmeta { position: absolute; left: 0; right: 0; top: 736px; text-align: center; color: var(--navy); }
 
   /* S4: terrain overlay */
-  #hb { max-width: 900px; }
-  .numA { bottom: 318px; } .factsA { bottom: 204px; } .benA { bottom: 108px; }
+  #bars { top: 500px; }
+  #nb { top: 500px; }
+  .benA { bottom: 112px; }
 
-  /* S5: the graph */
-  #graph line, #graph path { stroke-linecap: round; fill: none; }
-  #legend { position: absolute; right: 56px; bottom: 96px; display: flex; gap: 40px; align-items: center; }
-  #legend span { display: flex; gap: 12px; align-items: center; }
-  .s5head { top: 150px; max-width: 1240px; }
+  /* S6: the decision */
+  #legend { position: absolute; right: 64px; top: 92px; display: flex; gap: 48px; align-items: center; }
+  #legend span { display: flex; gap: 16px; align-items: center; }
+  .s5head { top: 150px; max-width: 1500px; }
+  #baselabel { position: absolute; transform: translate(-50%, 0); color: var(--sand); }
 
-  /* always on top */
-  #hud span { position: absolute; }
-  #hud .tl { left: 56px; top: 44px; } #hud .tr { right: 56px; top: 44px; text-align: right; }
-  #hud .bl { left: 56px; bottom: 40px; } #hud .br { right: 56px; bottom: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+  /* transitions and things that are always on top */
+  #wipe { background: var(--ink); border-left: 46px solid var(--lime); border-right: 46px solid var(--lime); width: 2012px; left: -46px; }
+  #hudbl { position: absolute; left: 124px; bottom: 48px; }
+  #bar { position: absolute; left: 0; right: 0; bottom: 18px; display: flex; gap: 10px; justify-content: center; }
+  #bar i { display: block; width: 64px; height: 5px; background: currentColor; }
   #black { background: #000; }
   #vig { background: radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.5) 100%); }
   #grain { mix-blend-mode: overlay; opacity: 0.11; }
@@ -87,66 +106,70 @@
 <div id="stage">
   <canvas id="gl" width="1920" height="1080"></canvas>
 
-  <!-- S1 the case, S6 the close: one road, cut by a slide -->
+  <!-- S1 the case: one road, cut in many places. A drawing, not a map. -->
   <div class="layer" id="S1">
     <div class="layer dots" id="g1"></div>
     <svg class="layer" id="road" viewBox="0 0 1920 1080">
       <defs><radialGradient id="glowg"><stop offset="0" stop-color="#C8EB5A" stop-opacity="0.9" /><stop offset="0.35" stop-color="#B5D334" stop-opacity="0.28" /><stop offset="1" stop-color="#B5D334" stop-opacity="0" /></radialGradient></defs>
-      <path id="rd" d="M -20 668 C 260 656, 380 596, 640 614 S 980 566, 1180 544 S 1640 474, 1940 446" stroke="#F5F1E6" stroke-width="6" pathLength="1" />
-      <g id="cuts"></g>
-      <g id="debris"></g>
-      <circle id="pulse" fill="none" stroke="#B5D334" stroke-width="3" />
-      <path id="fl" d="M -20 668 C 260 656, 380 596, 640 614 S 980 566, 1180 544 S 1640 474, 1940 446" stroke="#B5D334" stroke-width="3" pathLength="1" transform="translate(0,-74)" />
-      <g id="drone6"><circle r="70" fill="url(#glowg)" /><circle r="20" fill="none" stroke="#B5D334" stroke-width="3" /><circle r="8" fill="#E9F6A0" /></g>
+      <path id="rdref" d="M -20 668 C 260 656, 380 596, 640 614 S 980 566, 1180 544 S 1640 474, 1940 446" stroke="none" />
+      <path id="rdnear" pathLength="1" /><path id="rdfar" pathLength="1" />
+      <g id="cuts"></g><g id="debris"></g>
+      <circle id="pulse" fill="none" stroke="#B5D334" stroke-width="3" /><circle id="pulse2" fill="none" stroke="#F5F1E6" stroke-width="2" />
+      <g id="ticks"></g>
     </svg>
-    <p class="head" id="h1a"><span>26 August 2026. A glacier collapse and a landslide<br />send a flash flood into <i>Nepal</i>.</span></p>
-    <p class="head" id="h1b"><span>About 40 km of road damaged. Roads were passable<br />only as far as Nuwakot.</span></p>
+    <p class="caps tag" id="t1"><b>The case</b>Nepal</p>
+    <p id="date"></p>
+    <p class="head" id="h1a"><span>A glacier collapse and a landslide<br />flood <i>Nepal</i>.</span></p>
     <p class="bignum" id="n1"><small>Bridges destroyed or damaged</small><span id="pc">0</span></p>
-    <p class="head" id="h6"><span>When the next road is cut, the first map<br />should take <i>minutes</i>.</span></p>
+    <p class="bignum" id="n2"><small>Road damaged, about</small><span>40 km</span></p>
   </div>
 
   <!-- S2 the problem -->
   <div class="layer" id="S2">
-    <div class="layer" id="rows"></div>
-    <p class="plate" id="p2a" style="top: 424px"><span>The UN said the biggest obstacle to the response was access.</span></p>
-    <p class="plate" id="p2b" style="top: 548px"><span>Which roads still hold? <i>Unknown.</i></span></p>
+    <div class="layer rows" id="rows"></div>
+    <p class="plate" id="p2a" style="top: 430px"><span>The UN called access<br />the <i>biggest obstacle</i>.</span></p>
+    <p class="plate" id="p2b" style="top: 290px"><span>Which roads still hold?</span></p>
     <div id="scan"></div>
   </div>
 
   <!-- S4 what we measured -->
   <div class="layer" id="S4">
+    <p class="caps tag" id="ta"><b>01</b>What sets us apart</p>
     <p class="head" id="ha"><span>The map grows while the<br />drone is <i>still in the air</i>.</span></p>
-    <p class="bignum numA" id="na"><small>Drone photos placed, about one a second</small><span id="count">0</span></p>
-    <div class="facts factsA caps" id="fa">
-      <div>Rough map ready in<b>about 5 min</b></div>
-      <div>Detailed map takes<b>80 min</b></div>
-      <div>Rough map is off by<b>about 12 m</b></div>
+    <div class="bars" id="bars">
+      <p id="bl1">Rough map: <b>about 5 min</b></p><div id="bar1" style="background: var(--lime)"></div>
+      <p id="bl2">Detailed map: 80 min</p><div id="bar2" style="background: var(--sand)"></div>
     </div>
-    <p class="benefit benA" id="ba"><span>Rescue teams start reading the ground <i>before the drone lands</i>.</span></p>
+    <p class="benefit benA" id="ba">Rescue teams start reading the ground<br /><i>before the drone lands</i>.</p>
 
-    <p class="head" id="hb"><span>Height differences come out<br />right to about <i>one metre</i>.</span></p>
-    <p class="bignum numA" id="nb"><small>Spread against 326 surveyed ground points</small><span>±1.1 m</span></p>
-    <div class="facts factsA caps" id="fb">
-      <div>Survey markers placed<b>none</b></div>
-      <div>Enough to<b>size a debris pile</b></div>
-    </div>
-    <p class="benefit benA" id="bb"><span><i>Nobody walks onto the slide</i> before the map exists.</span></p>
+    <p class="caps tag" id="tb"><b>02</b>What sets us apart</p>
+    <p class="head" id="hb"><span>Height differences<br />come out right to<br />about <i>one metre</i>.</span></p>
+    <p class="bignum" id="nb"><small>Checked against 326 surveyed ground points</small><span>±1.1 m</span></p>
+    <p class="benefit benA" id="bb"><i>Nobody walks onto the slide</i><br />before the map exists.</p>
   </div>
 
-  <!-- S5 the decision -->
-  <div class="layer" id="S5">
-    <div class="layer dots" id="g5"></div>
-    <svg class="layer" id="graph" viewBox="0 0 1920 1080"></svg>
-    <p class="head s5head" id="h5"><span>Typhon turns the map into a graph of roads and<br />villages, then answers <i>two questions</i>.</span></p>
-    <p class="caps tag" id="t5a">Question 1 · Clear first</p>
-    <p class="head s5head" id="q5a"><span>Which blocked road, once cleared,<br /><i>reconnects the most people</i>?</span></p>
-    <p class="caps tag" id="t5b">Question 2 · Fly next</p>
-    <p class="head s5head" id="q5b"><span>Which unknown road is worth<br /><i>the next flight</i>?</span></p>
+  <!-- S6 the decision (3D, drawn in the canvas) -->
+  <div class="layer" id="S6">
+    <p class="caps tag" id="t6"><b>03</b>What sets us apart</p>
+    <p class="head s5head" id="h6"><span>It doesn't stop at the map.<br />It answers <i>two questions</i>.</span></p>
+    <p class="caps tag" id="t6a"><b>Question 1</b>Clear first</p>
+    <p class="head s5head" id="q6a"><span>Which blocked road, once cleared,<br /><i>reconnects the most people</i>?</span></p>
+    <p class="caps tag" id="t6b"><b>Question 2</b>Fly next</p>
+    <p class="head s5head" id="q6b"><span>Which unknown road is worth<br /><i>the next flight</i>?</span></p>
+    <p class="caps" id="baselabel">Base</p>
     <div class="caps" id="legend">
-      <span><svg width="56" height="10"><line x1="2" y1="5" x2="54" y2="5" stroke="#F5F1E6" stroke-width="5" stroke-linecap="round" /></svg>Open</span>
-      <span><svg width="56" height="18"><line x1="2" y1="9" x2="54" y2="9" stroke="#F5F1E6" stroke-opacity="0.4" stroke-width="5" stroke-linecap="round" /><path d="M21 2 L35 16 M35 2 L21 16" stroke="#F5F1E6" stroke-width="3" /></svg>Blocked</span>
-      <span><svg width="56" height="10"><line x1="2" y1="5" x2="54" y2="5" stroke="#7E9BEA" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 13" /></svg>Unknown</span>
+      <span><svg width="72" height="24"><line x1="4" y1="12" x2="68" y2="12" stroke="#F5F1E6" stroke-width="8" stroke-linecap="round" /></svg>Open</span>
+      <span><svg width="72" height="24"><line x1="4" y1="12" x2="68" y2="12" stroke="#F5F1E6" stroke-opacity="0.4" stroke-width="8" stroke-linecap="round" /><rect x="26" y="2" width="20" height="20" fill="#7E9BEA" /></svg>Blocked</span>
+      <span><svg width="72" height="24"><line x1="4" y1="12" x2="68" y2="12" stroke="#7E9BEA" stroke-width="8" stroke-dasharray="12 10" /></svg>Unknown</span>
     </div>
+  </div>
+
+  <!-- S7 the close -->
+  <div class="layer" id="S7">
+    <div class="layer rows" id="rows7a"></div>
+    <div class="layer rows" id="rows7b"></div>
+    <div id="sweep"></div>
+    <p class="plate" id="p7" style="top: 428px"><span>Next time, the first map<br />should take <i>minutes</i>.</span></p>
   </div>
 
   <!-- S3 title card -->
@@ -154,10 +177,18 @@
     <h1 id="title"></h1>
     <p id="sub"><span>The first map after a landslide, from one small drone.</span></p>
     <div id="rule"></div>
-    <div id="cardmeta" class="caps"><span>Team Vortex</span><span>Drone photos in. Decisions out.</span><span>One laptop, no internet</span></div>
+    <div id="cardmeta" class="caps"><span>Team Vortex</span><span>Drone photos in. Decisions out.</span><span>hackFront India 2026</span></div>
   </div>
 
-  <!-- S7 end card with the logo -->
+  <!-- S5 the work behind it -->
+  <div class="layer" id="usp">
+    <p class="caps" id="usptag">The work behind it</p>
+    <div id="usplines"></div>
+    <div id="usprule"></div>
+    <p id="uspmeta">Tested on real flights. The failures are published too.</p>
+  </div>
+
+  <!-- S8 end card with the logo -->
   <div class="layer" id="endcard">
     <div id="logo"></div>
     <p id="endsub"><span>The first map after the landslide.</span></p>
@@ -165,14 +196,14 @@
     <p id="endmeta" class="caps">Team Vortex &nbsp;·&nbsp; hackFront India 2026 &nbsp;·&nbsp; Problem statement T8.2</p>
   </div>
 
+  <div class="layer" id="flash"></div>
+  <div class="layer" id="wipe"></div>
   <div class="layer" id="black"></div>
   <div class="layer" id="vig"></div>
   <canvas class="layer" id="grain" width="960" height="540"></canvas>
-  <div class="layer caps" id="hud">
-    <span class="tl">Project Typhon</span>
-    <span class="tr" id="hudtr"></span>
-    <span class="bl" id="hudbl"></span>
-    <span class="br" id="tc">00:00:00</span>
+  <div class="layer" id="hud">
+    <p class="note" id="hudbl"></p>
+    <div id="bar"></div>
   </div>
 </div>
 
@@ -180,8 +211,9 @@
 import * as THREE from "/three/build/three.module.js";
 
 const FPS = 30;
-// scene starts, seconds: case, problem, title, measured, decision, close, logo
-const T = { S1: 0, S2: 6.0, S3: 11.5, S4: 15.0, S5: 26.0, S6: 37.5, S7: 41.0, END: 45.0 };
+// scene starts, seconds: case, problem, title, measured, the work, decision, close, logo
+const T = { S1: 0, S2: 6.0, S3: 10.5, S4: 13.2, S5: 24.9, S6: 29.3, S7: 38.6, S8: 41.6, END: 45.0 };
+const STARTS = [T.S1, T.S2, T.S3, T.S4, T.S5, T.S6, T.S7, T.S8];
 window.DURATION = T.END; window.FPS = FPS;
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -200,117 +232,91 @@ const show = (el, on) => { el.style.visibility = on ? "inherit" : "hidden"; };  
 // a sentence rises in at t0 and fades out at t1 (t1 = null: stays)
 function sentence(el, t, t0, t1) {
   el.firstElementChild.style.transform = `translateY(${lerp(114, 0, outExpo(prog(t, t0, t0 + 0.7)))}%)`;
-  el.style.opacity = t1 == null ? 1 : 1 - prog(t, t1 - 0.25, t1);
+  el.style.opacity = (t >= t0 - 0.02 ? 1 : 0) * (t1 == null ? 1 : 1 - prog(t, t1 - 0.25, t1));
 }
 function rise(el, t, t0, t1, dy = 34) {
   const p = outExpo(prog(t, t0, t0 + 0.7));
   el.style.opacity = p * (t1 == null ? 1 : 1 - prog(t, t1 - 0.25, t1));
   el.style.transform = `translateY(${lerp(dy, 0, p)}px)`;
 }
+const letters = (el, text, dotLast) => { el.innerHTML = [...text].map((c, i) => `<span class="mask"><span${dotLast && i === text.length - 1 ? ' class="dot"' : ""}>${c === " " ? "&nbsp;" : c}</span></span>`).join(""); return [...el.querySelectorAll(".mask > span")]; };
 
 const BRIDGES = 41;  // destroyed or damaged, Nepal Department of Roads (source in storyboard.md)
-
 const D = await (await fetch("data/terrain.json")).json();
 $("logo").innerHTML = await (await fetch("/assets/logo-lockup.svg")).text();
+$("bar").innerHTML = STARTS.map(() => "<i></i>").join("");
+const barEls = [...$("bar").children];
 
-// ---------- title letters ----------
-$("title").innerHTML = [..."TYPHON"].map((c) => `<span class="m"><span>${c}</span></span>`).join("") + `<span class="m"><span class="dot">.</span></span>`;
-const letters = [...document.querySelectorAll("#title .m > span")];
+const titleL = letters($("title"), "TYPHON.", true);
+const dateL = letters($("date"), "26.08.2026", false);
+$("usplines").innerHTML = ["NO INTERNET.", "NO SURVEY CREW.", "ONE LAPTOP."].map((l) => `<div class="mask"><span>${l.slice(0, -1)}<b class="dot">.</b></span></div>`).join("<br />");
+const uspL = [...document.querySelectorAll("#usplines .mask > span")];
 
-// ---------- S2: rows of "unknown" ----------
-const ROWS = 7;
-$("rows").innerHTML = Array.from({ length: ROWS }, () => `<div class="row">${Array.from({ length: 9 }, () => `<span>UNKNOWN</span>`).join("")}</div>`).join("");
-const rows = [...document.querySelectorAll(".row")];
+// ---------- rows of "unknown" (S2, and again in S7 where they turn into "known") ----------
+const ROWS = 7, MID = 3;
+const rowsHTML = (mid) => Array.from({ length: ROWS }, (_, r) => `<div class="row">${Array.from({ length: 9 }, (_, i) => `<span${mid && r === MID && i === 4 ? ' class="fly"' : ""}><u>UN</u>KNOWN</span>`).join("")}</div>`).join("");
+$("rows").innerHTML = rowsHTML(true); $("rows7a").innerHTML = rowsHTML(false); $("rows7b").innerHTML = rowsHTML(false);
+const rows = [...$("rows").children], rows7a = [...$("rows7a").children], rows7b = [...$("rows7b").children];
+const fly = document.querySelector(".fly");
+let flyMid = 0;
 
-// ---------- S1 / S6: the road and where it was cut ----------
-const rd = $("rd"), fl = $("fl"), RL = rd.getTotalLength();
-const GAP = 0.6, GW = 0.024;                       // where the slide lands on the road, and half the gap, as shares of its length
-const at = (u) => rd.getPointAtLength(clamp(u) * RL);
-const gp = at(GAP);
-const r1 = rng(21);
-// more breaks along the same road: the flood cut it in many places, not one
-const cuts = [0.27, 0.86, 0.12, 0.43, 0.74].map((u, i) => {
+// ---------- S1: the road and where it was cut ----------
+const ref = $("rdref"), RL = ref.getTotalLength();
+const at = (u) => ref.getPointAtLength(clamp(u) * RL);
+const NUW = 0.2, GAP = 0.6, GW = 0.026;            // shares of the road's length: the last passable point, the slide, half its gap
+const SAMPLES = 220, pts = Array.from({ length: SAMPLES + 1 }, (_, i) => at(i / SAMPLES));
+const slice = (u0, u1, m) => {                    // the road between two shares of its length; m morphs it from a straight line
+  let d = "";
+  for (let i = Math.round(u0 * SAMPLES); i <= Math.round(u1 * SAMPLES); i++) d += `${d ? "L" : "M"}${lerp(-20 + (1960 * i) / SAMPLES, pts[i].x, m).toFixed(1)} ${lerp(540, pts[i].y, m).toFixed(1)}`;
+  return d;
+};
+const gp = at(GAP), r1 = rng(21);
+const cuts = [0.34, 0.46, 0.74, 0.86, 0.94].map((u, i) => {
   const p = at(u), g = svg("g", {}, $("cuts"));
-  svg("circle", { r: 24, fill: "#060B18" }, g); svg("path", { d: "M-12 -12 L12 12 M12 -12 L-12 12", stroke: "#F5F1E6", "stroke-width": 5 }, g);
-  return { g, x: p.x, y: p.y, t0: 2.95 + i * 0.36 };
+  svg("circle", { r: 26, fill: "#060B18" }, g); svg("path", { d: "M-13 -13 L13 13 M13 -13 L-13 13", stroke: "#F5F1E6", "stroke-width": 5 }, g);
+  return { g, x: p.x, y: p.y, t0: 2.5 + i * 0.24, ring: svg("circle", { cx: p.x, cy: p.y, fill: "none", stroke: "#F5F1E6", "stroke-width": 2 }, $("cuts")) };
 });
-const debris = Array.from({ length: 18 }, (_, i) => {
-  const s = 14 + r1() * 20, ox = (r1() - 0.5) * 2 * (GW * RL + 8), oy = -r1() * 26 + 8;
-  return { s, ox, oy, sx: ox + 190 + r1() * 120, sy: -330 - r1() * 160, rot: r1() * 90, t0: 1.38 + r1() * 0.3,
+const debris = Array.from({ length: 22 }, (_, i) => {
+  const s = 18 + r1() * 30, ox = (r1() - 0.5) * 2 * (GW * RL + 12), oy = -r1() * 44 + 12;
+  return { s, ox, oy, sx: ox + 240 + r1() * 160, sy: -420 - r1() * 220, rot: r1() * 90, t0: 1.5 + r1() * 0.34,
     el: svg("rect", { x: -s / 2, y: -s / 2, width: s, height: s, fill: ["#F5F1E6", "#7E9BEA", "#2A4EA8"][i % 3] }, $("debris")) };
 });
-function road(t1, t6) {          // t1 = seconds into S1 (or null), t6 = seconds into S6 (or null)
-  const cut = t6 != null ? 1 : outExpo(prog(t1, 1.72, 2.05));
-  const drawn = t6 != null ? 1 : inOutCubic(prog(t1, 0.15, 1.25));
-  rd.setAttribute("stroke-dasharray", cut > 0 ? `${GAP - GW * cut} ${2 * GW * cut} 1` : `${drawn} 1`);
-  rd.setAttribute("stroke-opacity", t6 != null ? 0.55 : 1);
+const ticks = Array.from({ length: BRIDGES }, (_, i) => ({ ang: (r1() - 0.5) * 70, el: svg("rect", { x: -6, y: -30, width: 12, height: 60, stroke: "#F5F1E6", "stroke-width": 2 }, $("ticks")) }));
+const IMPACT = 1.9;
+function road(a) {
+  const drawn = inOutCubic(prog(a, 0.08, 0.72)), m = inOutCubic(prog(a, 0.72, 1.45)), cut = outExpo(prog(a, IMPACT, IMPACT + 0.33));
+  const near = $("rdnear"), far = $("rdfar"), col = m < 0.35 ? "#B5D334" : "#F5F1E6", w = lerp(3, 7, m);
+  near.setAttribute("d", slice(0, NUW, m)); far.setAttribute("d", slice(NUW, 1, m));
+  for (const p of [near, far]) { p.setAttribute("stroke", col); p.setAttribute("stroke-width", w); }
+  near.setAttribute("stroke-dasharray", `${clamp(drawn / NUW)} 1`);
+  const g0 = (GAP - GW * cut - NUW) / (1 - NUW), g1 = (2 * GW * cut) / (1 - NUW);
+  far.setAttribute("stroke-dasharray", cut > 0 ? `${g0} ${g1} 1` : `${clamp((drawn - NUW) / (1 - NUW))} 1`);
   debris.forEach((d) => {
-    const f = t6 != null ? 1 : prog(t1, d.t0, d.t0 + 0.4), e = f * f;
-    d.el.setAttribute("transform", `translate(${gp.x + lerp(d.sx, d.ox, e)} ${gp.y + lerp(d.sy, d.oy, e)}) rotate(${d.rot + (1 - e) * 220})`);
+    const f = prog(a, d.t0, d.t0 + 0.4), e = f * f;
+    d.el.setAttribute("transform", `translate(${gp.x + lerp(d.sx, d.ox, e)} ${gp.y + lerp(d.sy, d.oy, e)}) rotate(${d.rot + (1 - e) * 240})`);
     d.el.setAttribute("opacity", f > 0 ? 1 : 0);
   });
-  const pu = t6 != null ? 1 : prog(t1, 1.76, 2.6);
-  $("pulse").setAttribute("cx", gp.x); $("pulse").setAttribute("cy", gp.y);
-  $("pulse").setAttribute("r", lerp(12, 190, outExpo(pu))); $("pulse").setAttribute("opacity", pu > 0 && pu < 1 ? 0.9 * (1 - pu) : 0);
-  cuts.forEach((k) => { const s = t6 != null ? 1 : outBack(prog(t1, k.t0, k.t0 + 0.35)); k.g.setAttribute("transform", `translate(${k.x} ${k.y}) scale(${Math.max(0.001, s)})`); k.g.setAttribute("opacity", s > 0 ? 1 : 0); });
-  // S6: the drone flies the valley, its track drawn behind it
-  const f6 = t6 == null ? 0 : inOutSine(prog(t6, 0.35, 3.1));
-  fl.setAttribute("stroke-dasharray", `${f6} 1`); fl.setAttribute("opacity", t6 != null && f6 > 0 ? 1 : 0);
-  const dp = at(f6); $("drone6").setAttribute("transform", `translate(${dp.x} ${dp.y - 74})`); $("drone6").setAttribute("opacity", t6 != null ? prog(t6, 0.25, 0.45) : 0);
+  [["pulse", 0, 260], ["pulse2", 0.12, 420]].forEach(([id, dl, R]) => {
+    const pu = prog(a, IMPACT + dl, IMPACT + dl + 0.9);
+    $(id).setAttribute("cx", gp.x); $(id).setAttribute("cy", gp.y); $(id).setAttribute("r", lerp(14, R, outExpo(pu))); $(id).setAttribute("opacity", pu > 0 && pu < 1 ? 0.9 * (1 - pu) : 0);
+  });
+  cuts.forEach((k) => {
+    const s = outBack(prog(a, k.t0, k.t0 + 0.35)), rp = prog(a, k.t0, k.t0 + 0.7);
+    k.g.setAttribute("transform", `translate(${k.x} ${k.y}) scale(${Math.max(0.001, s)})`); k.g.setAttribute("opacity", s > 0 ? 1 : 0);
+    k.ring.setAttribute("r", lerp(20, 86, outExpo(rp))); k.ring.setAttribute("opacity", rp > 0 && rp < 1 ? 0.7 * (1 - rp) : 0);
+  });
+  // 41 bridges: one bar each, knocked over as the count runs
+  const cf = BRIDGES * inOutSine(prog(a, 3.3, 5.2));
+  ticks.forEach((k, i) => {
+    const inn = outExpo(prog(a, 2.9 + i * 0.012, 3.3 + i * 0.012)), q = clamp(cf - i), hit = q > 0 && q < 1;
+    k.el.setAttribute("transform", `translate(${452 + i * 22} ${900 + 12 * q}) rotate(${k.ang * q}) scale(1 ${Math.max(0.001, inn)})`);
+    k.el.setAttribute("fill", hit ? "#B5D334" : "#F5F1E6"); k.el.setAttribute("fill-opacity", 1 - 0.88 * (hit ? 0 : q));
+    k.el.setAttribute("stroke", hit ? "#B5D334" : "#F5F1E6"); k.el.setAttribute("stroke-opacity", 0.75);
+  });
+  return Math.round(cf);
 }
 
-// ---------- S5: a small road graph (an illustration of the method, no real place) ----------
-const N = { base: [380, 720], a: [660, 580], b: [700, 880], c: [980, 490], d: [1020, 750], e: [1330, 660], f: [1150, 930], g: [1610, 490], h: [1680, 800] };
-const reached0 = ["a", "b", "c", "d"];
-const E = [["base", "a", "open"], ["base", "b", "open"], ["a", "c", "open"], ["a", "d", "open"], ["b", "d", "open"], ["e", "g", "open"], ["e", "h", "open"],
-  ["d", "e", "blocked"], ["b", "f", "blocked"], ["c", "g", "unknown"], ["f", "h", "unknown"]];
-const G = $("graph");
-const edges = E.map(([p, q, kind], i) => {
-  const [x1, y1] = N[p], [x2, y2] = N[q], o = { p, q, kind, i, x1, y1, x2, y2 };
-  o.el = svg("line", { x1, y1, x2, y2, "stroke-width": 6 }, G);
-  if (kind === "blocked") { const mx = (x1 + x2) / 2, my = (y1 + y2) / 2; o.x = svg("path", { d: `M${mx - 13} ${my - 13} L${mx + 13} ${my + 13} M${mx + 13} ${my - 13} L${mx - 13} ${my + 13}`, stroke: "#F5F1E6", "stroke-width": 5 }, G); }
-  return o;
-});
-const rings = {}; for (const k of ["e", "g", "h"]) rings[k] = svg("circle", { cx: N[k][0], cy: N[k][1], fill: "none", stroke: "#B5D334", "stroke-width": 3 }, G);
-const nodes = {};
-Object.entries(N).forEach(([k, [x, y]], i) => {
-  const el = k === "base" ? svg("rect", { x: -22, y: -22, width: 44, height: 44, rx: 6, fill: "#F5F1E6" }, G) : svg("circle", { r: 17, "stroke-width": 4 }, G);
-  nodes[k] = { el, i, x, y };
-});
-const baseLabel = svg("text", { x: N.base[0], y: N.base[1] + 62, "text-anchor": "middle", fill: "#F5F1E6", "font-family": "Inter", "font-weight": 500, "font-size": 17, "letter-spacing": "0.16em" }, G); baseLabel.textContent = "BASE";
-const drone5 = svg("g", {}, G);
-svg("circle", { r: 70, fill: "url(#glowg)" }, drone5); svg("circle", { r: 20, fill: "none", stroke: "#B5D334", "stroke-width": 3 }, drone5); svg("circle", { r: 8, fill: "#E9F6A0" }, drone5);
-const Q1 = 3.6, Q2 = 7.6;   // seconds into S5 when each question starts
-function graph(s) {
-  edges.forEach((e) => {
-    const inn = outExpo(prog(s, 0.35 + e.i * 0.07, 1.0 + e.i * 0.07));
-    const first = e.p === "d" && e.q === "e", next = e.p === "c" && e.q === "g";
-    const hot = first ? prog(s, Q1 + 0.5, Q1 + 0.9) : next ? prog(s, Q2 + 0.5, Q2 + 0.9) : 0;
-    const beat = hot > 0 && hot < 1 ? 1 : 0;
-    e.el.setAttribute("stroke", hot > 0 ? "#B5D334" : e.kind === "unknown" ? "#7E9BEA" : "#F5F1E6");
-    e.el.setAttribute("stroke-width", 6 + 4 * hot + 3 * beat);
-    e.el.setAttribute("stroke-dasharray", e.kind === "unknown" ? "1 15" : `${Math.hypot(e.x2 - e.x1, e.y2 - e.y1) * inn} 4000`);
-    e.el.setAttribute("opacity", e.kind === "unknown" ? inn : e.kind === "blocked" ? lerp(0.4, 1, hot) : 1);
-    if (e.x) e.x.setAttribute("opacity", inn * (1 - (first ? prog(s, Q1 + 1.1, Q1 + 1.5) : 0)));
-  });
-  Object.entries(nodes).forEach(([k, nd]) => {
-    const el = nd.el, pop = outBack(prog(s, 0.15 + nd.i * 0.08, 0.6 + nd.i * 0.08));
-    const order = { e: 0, g: 1, h: 2 }[k], lit = order == null ? 0 : prog(s, Q1 + 1.3 + order * 0.32, Q1 + 1.6 + order * 0.32);
-    el.setAttribute("transform", `translate(${nd.x} ${nd.y}) scale(${Math.max(0.001, pop * (1 + 0.35 * Math.sin(Math.PI * lit)))})`);
-    if (k !== "base") {
-      const on = reached0.includes(k);
-      el.setAttribute("fill", lit > 0.5 ? "#B5D334" : on ? "#F5F1E6" : "#060B18");
-      el.setAttribute("stroke", lit > 0.5 ? "#B5D334" : "#F5F1E6");
-    }
-    if (rings[k]) { const r = prog(s, Q1 + 1.45 + order * 0.32, Q1 + 2.3 + order * 0.32); rings[k].setAttribute("r", lerp(18, 74, outExpo(r))); rings[k].setAttribute("opacity", r > 0 && r < 1 ? 1 - r : 0); }
-  });
-  baseLabel.setAttribute("opacity", prog(s, 0.5, 0.9));
-  const fly = inOutSine(prog(s, Q2 + 0.9, Q2 + 3.3));
-  drone5.setAttribute("transform", `translate(${lerp(N.c[0], N.g[0], fly)} ${lerp(N.c[1], N.g[1], fly)})`);
-  drone5.setAttribute("opacity", prog(s, Q2 + 0.6, Q2 + 0.9));
-}
-
-// ---------- S4: the real surface model and the real flight ----------
+// ---------- 3D: one renderer, two worlds (the real terrain, the graph drawing) ----------
 const renderer = new THREE.WebGLRenderer({ canvas: $("gl"), antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1); renderer.setSize(1920, 1080, false); renderer.setClearColor(0x060b18);
 const scene = new THREE.Scene();
@@ -319,7 +325,22 @@ const camera = new THREE.PerspectiveCamera(30, 16 / 9, 1, 2000);
 scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x0a1126, 1.0));
 const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-60, 170, 110); scene.add(sun);
 const grid = new THREE.GridHelper(520, 52, 0x24386b, 0x121d3d); grid.position.y = -0.05; scene.add(grid);
+const M = new THREE.Matrix4(), V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+const gc = document.createElement("canvas"); gc.width = gc.height = 128;
+{ const g = gc.getContext("2d"), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(200,235,90,0.9)"); gr.addColorStop(0.35, "rgba(181,211,52,0.28)"); gr.addColorStop(1, "rgba(181,211,52,0)"); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }
+const glowTex = new THREE.CanvasTexture(gc);
+const glowSprite = (size) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); s.scale.set(size, size, 1); return s; };
+function makeDrone() {            // the drone marker: a bright point with two turning rings and a line to the ground
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe9f6a0 })));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.16, 8, 48), new THREE.MeshBasicMaterial({ color: 0xb5d334 })); g.add(ring);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(4.6, 0.09, 8, 48), new THREE.MeshBasicMaterial({ color: 0xf5f1e6, transparent: true, opacity: 0.7 })); g.add(ring2);
+  g.add(glowSprite(26));
+  const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, -1, 0)]), new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.35 })); g.add(drop);
+  return { g, spin: (t) => { ring.rotation.set(1.1, t * 2.2, 0.3); ring2.rotation.set(0.4 + t * 1.3, 0.2, t * 1.7); }, drop };
+}
 
+// S4: the real surface model and the real flight
 const BASE = 1.2, up = (z) => (z - D.zmin) / D.cell_m + BASE;  // true scale: no height exaggeration
 const cells = [];
 let cx = 0, cz = 0;
@@ -344,26 +365,14 @@ cells.forEach((c, i) => {
 });
 const K = 120 / D.w;  // the scene is framed for a 120-unit-wide model, whatever the block count
 const world = new THREE.Group(); world.scale.setScalar(K); world.position.set(-cx * K, 0, -cz * K); scene.add(world); world.add(blocks);
-
-// the real flight: one point per photo, from the photos' GPS
-const track = D.track.map(([c, r, alt]) => new THREE.Vector3(c - D.w / 2, up(alt), r - D.h / 2));
+const track = D.track.map(([c, r, alt]) => new THREE.Vector3(c - D.w / 2, up(alt), r - D.h / 2));  // one point per photo, from the photos' GPS
 const lineGeo = new THREE.BufferGeometry().setFromPoints(track);
-const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.9 }));
-world.add(line);
-const ticks = new THREE.InstancedMesh(new THREE.SphereGeometry(0.46 / K, 10, 8), new THREE.MeshBasicMaterial({ color: 0xb5d334 }), track.length);
-world.add(ticks);
-const head = new THREE.Group(); head.scale.setScalar(1 / K); world.add(head);
-head.add(new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe9f6a0 })));
-const ring = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.16, 8, 48), new THREE.MeshBasicMaterial({ color: 0xb5d334 })); head.add(ring);
-const ring2 = new THREE.Mesh(new THREE.TorusGeometry(4.6, 0.09, 8, 48), new THREE.MeshBasicMaterial({ color: 0xf5f1e6, transparent: true, opacity: 0.7 })); head.add(ring2);
-const gc = document.createElement("canvas"); gc.width = gc.height = 128;
-{ const g = gc.getContext("2d"), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(200,235,90,0.9)"); gr.addColorStop(0.35, "rgba(181,211,52,0.28)"); gr.addColorStop(1, "rgba(181,211,52,0)"); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }
-const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false })); glow.scale.set(26, 26, 1); head.add(glow);
-const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, -1, 0)]), new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.35 })); head.add(drop);
-
-const M = new THREE.Matrix4(), V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.9 })); world.add(line);
+const tickM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.46 / K, 10, 8), new THREE.MeshBasicMaterial({ color: 0xb5d334 }), track.length); world.add(tickM);
+const drone4 = makeDrone(); drone4.g.scale.setScalar(1 / K); world.add(drone4.g);
 const S4LEN = T.S5 - T.S4;
 function terrain(tc) {            // tc = seconds since the terrain scene began
+  world.visible = true; gw.visible = false;
   cells.forEach((c, i) => {
     const p = outExpo(prog(tc, c.delay, c.delay + 1.0));
     M.compose(V.set(c.x, 0, c.z), Q, S.set(1, Math.max(0.001, c.hgt * p), 1));
@@ -371,21 +380,119 @@ function terrain(tc) {            // tc = seconds since the terrain scene began
   });
   blocks.instanceMatrix.needsUpdate = true;
   const u = inOutSine(prog(tc, 1.25, 5.3)), f = u * (track.length - 1), i0 = Math.floor(f), i1 = Math.min(track.length - 1, i0 + 1);
-  head.position.lerpVectors(track[i0], track[i1], f - i0);
-  head.visible = line.visible = ticks.visible = tc > 1.25;
+  drone4.g.position.lerpVectors(track[i0], track[i1], f - i0);
+  drone4.g.visible = line.visible = tickM.visible = tc > 1.25;
   lineGeo.setDrawRange(0, i0 + 1);
   for (let i = 0; i < track.length; i++) {
     const s = i <= i0 ? outBack(prog(f - i, 0, 5)) : 0.0001;
-    M.compose(track[i], Q, S.set(s, s, s)); ticks.setMatrixAt(i, M);
+    M.compose(track[i], Q, S.set(s, s, s)); tickM.setMatrixAt(i, M);
   }
-  ticks.instanceMatrix.needsUpdate = true;
-  ring.rotation.set(1.1, tc * 2.2, 0.3); ring2.rotation.set(0.4 + tc * 1.3, 0.2, tc * 1.7);
-  drop.scale.y = head.position.y * K;
+  tickM.instanceMatrix.needsUpdate = true;
+  drone4.spin(tc); drone4.drop.scale.y = drone4.g.position.y * K;
   const o = inOutSine(prog(tc, 0, S4LEN + 0.4)), az = lerp(-0.85, 0.42, o), R = lerp(280, 222, o), y = lerp(176, 122, o);
   camera.position.set(R * Math.sin(az), y, R * Math.cos(az));
-  camera.lookAt(0, 26, 0); camera.setViewOffset(1920, 1080, -330, 70, 1920, 1080);  // model sits right of centre, text on the left
+  camera.lookAt(0, 26, 0); camera.setViewOffset(1920, 1080, -430, 10, 1920, 1080);  // model sits on the right, text on the left
   renderer.render(scene, camera);
-  return Math.round(u * track.length);
+}
+
+// S6: a small road network, drawn in the same blocks. An illustration of the method: no real place, no real numbers.
+const N = { base: [380, 720], a: [660, 580], b: [700, 880], c: [980, 490], d: [1020, 750], e: [1330, 660], f: [1150, 930], g: [1610, 490], h: [1680, 800] };
+const reached0 = ["a", "b", "c", "d"];
+const E = [["base", "a", "open"], ["base", "b", "open"], ["a", "c", "open"], ["a", "d", "open"], ["b", "d", "open"], ["e", "g", "open"], ["e", "h", "open"],
+  ["d", "e", "blocked"], ["b", "f", "blocked"], ["c", "g", "unknown"], ["f", "h", "unknown"]];
+const gw = new THREE.Group(); scene.add(gw);
+const P3 = (k) => new THREE.Vector3((N[k][0] - 1030) * 0.13, 0, (N[k][1] - 700) * 0.19);
+const C = { sand: new THREE.Color("#F5F1E6"), lime: new THREE.Color("#B5D334"), dark: new THREE.Color("#3554B0"), sky: new THREE.Color("#7E9BEA"), blue: new THREE.Color("#2A4EA8") };
+const boxG = new THREE.BoxGeometry(1, 1, 1); boxG.translate(0, 0.5, 0);
+const r3 = rng(5);
+const nodes = {};
+Object.keys(N).forEach((k, i) => {
+  const g = new THREE.Group(); g.position.copy(P3(k)); gw.add(g);
+  const mat = new THREE.MeshLambertMaterial({ color: k === "base" || reached0.includes(k) ? C.sand : C.dark });
+  if (k === "base") { const m = new THREE.Mesh(boxG, mat); m.scale.set(11, 2.8, 11); g.add(m); }
+  else for (let j = 0; j < 7; j++) { const m = new THREE.Mesh(boxG, mat), a = r3() * 6.28, d = j === 0 ? 0 : 2.6 + r3() * 3.2; m.position.set(Math.cos(a) * d, 0, Math.sin(a) * d); m.scale.set(2.4 + r3() * 1.9, 2.2 + r3() * (j === 0 ? 7 : 4), 2.4 + r3() * 1.9); g.add(m); }
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 1, 16).translate(0, 0.5, 0), new THREE.MeshBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0 })); g.add(beam);
+  const ripple = new THREE.Mesh(new THREE.RingGeometry(0.93, 1, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0, side: THREE.DoubleSide })); ripple.position.y = 0.2; g.add(ripple);
+  nodes[k] = { g, mat, beam, ripple, i, from: mat.color.clone() };
+});
+const baseRing = new THREE.Mesh(new THREE.RingGeometry(10.4, 11.1, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xb5d334, side: THREE.DoubleSide })); baseRing.position.copy(P3("base")).setY(0.15); gw.add(baseRing);
+const INSET = 7.6;
+const edges = E.map(([p, q, kind], i) => {
+  const A = P3(p), B = P3(q), dir = B.clone().sub(A), L = dir.length() - 2 * INSET; dir.normalize();
+  const g = new THREE.Group(); g.position.copy(A).addScaledVector(dir, INSET); g.rotation.y = -Math.atan2(dir.z, dir.x); gw.add(g);
+  const o = { p, q, kind, i, L, A, B, dir, g };
+  if (kind === "unknown") {
+    o.n = Math.floor(L / 4.4);
+    o.dash = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 0.4, 2.0).translate(1.2, 0.2, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }), o.n);
+    for (let j = 0; j < o.n; j++) { M.compose(V.set(j * 4.4 + 0.8, 0, 0), Q, S.set(1, 1, 1)); o.dash.setMatrixAt(j, M); o.dash.setColorAt(j, C.sky); }
+    g.add(o.dash);
+  } else {
+    o.mat = new THREE.MeshBasicMaterial({ color: C.sand.clone() });
+    o.rib = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 2.4).translate(0.5, 0.2, 0), o.mat); g.add(o.rib);
+  }
+  if (kind === "blocked") {     // a pile of blocks on the road
+    o.pile = Array.from({ length: 10 }, (_, j) => {
+      const m = new THREE.Mesh(boxG, new THREE.MeshLambertMaterial({ color: [C.sky, C.sand, C.blue][j % 3] })), s = 2.2 + r3() * 2.6;
+      const home = new THREE.Vector3(L / 2 + (r3() - 0.5) * 8, j > 6 ? 2.4 : 0, (r3() - 0.5) * 5);
+      m.position.copy(home); m.scale.setScalar(s); m.rotation.y = r3() * 3; g.add(m);
+      return { m, s, home, out: new THREE.Vector3((r3() - 0.5) * 26, 9 + r3() * 12, (r3() < 0.5 ? -1 : 1) * (8 + r3() * 12)), spin: (r3() - 0.5) * 9 };
+    });
+  }
+  return o;
+});
+const spark = new THREE.Group(); spark.add(new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 12), new THREE.MeshBasicMaterial({ color: 0xe9f6a0 }))); spark.add(glowSprite(18)); gw.add(spark);
+const drone6 = makeDrone(); gw.add(drone6.g);
+const foot = new THREE.Mesh(new THREE.PlaneGeometry(13, 13).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.22, depthWrite: false })); foot.position.y = 0.4; gw.add(foot);
+const Q1 = 2.6, Q2 = 5.9;   // seconds into the scene when each question starts
+const eDE = edges.find((e) => e.p === "d" && e.q === "e"), eCG = edges.find((e) => e.p === "c" && e.q === "g");
+function graph(s) {
+  world.visible = false; gw.visible = true;
+  edges.forEach((e) => {
+    const inn = outExpo(prog(s, 0.5 + e.i * 0.07, 1.25 + e.i * 0.07));
+    if (e.rib) {
+      e.rib.scale.x = Math.max(0.001, e.L * inn);
+      const hot = e === eDE ? prog(s, Q1 + 1.0, Q1 + 1.35) : 0;
+      e.mat.color.copy(C.sand).multiplyScalar(e.kind === "blocked" ? 0.36 : 0.92).lerp(C.lime, hot);
+      e.rib.scale.z = 1 + 0.9 * hot; e.rib.scale.y = 1 + 2 * hot;
+    } else {
+      e.dash.count = Math.round(e.n * inn);
+      if (e === eCG) { const f = inOutSine(prog(s, Q2 + 0.8, Q2 + 3.1)); for (let j = 0; j < e.n; j++) e.dash.setColorAt(j, (j + 0.5) / e.n < f ? C.lime : C.sky); e.dash.instanceColor.needsUpdate = true; }
+    }
+    if (e.pile) e.pile.forEach((b, j) => {
+      const land = outBack(prog(s, 1.2 + e.i * 0.05 + j * 0.03, 1.6 + e.i * 0.05 + j * 0.03));
+      const away = e === eDE ? prog(s, Q1 + 0.45 + j * 0.03, Q1 + 1.05 + j * 0.03) : 0, a2 = away * away;
+      b.m.position.copy(b.home).addScaledVector(b.out, 1 - Math.pow(1 - away, 2)); b.m.position.y += -14 * a2 * (b.out.y / 14);
+      b.m.rotation.x = b.spin * away; b.m.scale.setScalar(Math.max(0.001, b.s * land * (1 - a2)));
+    });
+  });
+  const order = { e: 0, g: 1, h: 1 };
+  Object.entries(nodes).forEach(([k, n]) => {
+    const pop = outBack(prog(s, 0.15 + n.i * 0.08, 0.7 + n.i * 0.08));
+    const t0 = order[k] == null ? 1e9 : Q1 + 1.45 + order[k] * 0.55, lit = prog(s, t0, t0 + 0.3);
+    n.g.scale.set(1, Math.max(0.001, pop * (1 + 0.5 * Math.sin(Math.PI * prog(s, t0, t0 + 0.5)))), 1);
+    n.mat.color.copy(n.from).lerp(C.lime, lit); n.mat.emissive = n.mat.emissive || new THREE.Color(); n.mat.emissive.copy(C.lime).multiplyScalar(0.25 * lit);
+    const bp = prog(s, t0, t0 + 1.4); n.beam.scale.y = lerp(1, 24, outExpo(prog(s, t0, t0 + 0.5))); n.beam.material.opacity = lit * lerp(0.6, 0.0, bp);
+    const rp = prog(s, t0, t0 + 1.0); n.ripple.scale.setScalar(lerp(6, 24, outExpo(rp))); n.ripple.material.opacity = rp > 0 && rp < 1 ? 0.8 * (1 - rp) : 0;
+  });
+  baseRing.scale.setScalar(outBack(prog(s, 0.2, 0.8))); baseRing.rotation.y = s * 0.3;
+  // the lime point that runs along the reopened road to each village it reconnects
+  const sp = s - (Q1 + 1.0), pe = P3("e");
+  spark.visible = sp > 0 && sp < 1.0;
+  if (sp <= 0.45) spark.position.lerpVectors(P3("d"), pe, clamp(sp / 0.45)); else spark.position.lerpVectors(pe, P3("g"), clamp((sp - 0.45) / 0.55));
+  spark.position.y = 2.2;
+  // the drone flies the unknown road
+  const fl = inOutSine(prog(s, Q2 + 0.8, Q2 + 3.1)), on = prog(s, Q2 + 0.45, Q2 + 0.8);
+  drone6.g.visible = foot.visible = on > 0;
+  drone6.g.position.lerpVectors(P3("c"), P3("g"), fl); drone6.g.position.y = lerp(34, 14, outExpo(on)); drone6.g.scale.setScalar(1.15);
+  drone6.spin(s); drone6.drop.scale.y = drone6.g.position.y / 1.15;
+  foot.position.x = drone6.g.position.x; foot.position.z = drone6.g.position.z; foot.material.opacity = 0.22 * on;
+  const o = inOutSine(prog(s, 0, T.S7 - T.S6 + 0.4)), az = lerp(-0.42, 0.3, o), R = lerp(236, 212, o), y = lerp(182, 150, o);
+  camera.position.set(R * Math.sin(az), y, R * Math.cos(az));
+  camera.lookAt(0, 0, 2); camera.setViewOffset(1920, 1080, 0, -150, 1920, 1080);  // the network sits low, text above it
+  camera.updateMatrixWorld();
+  renderer.render(scene, camera);
+  V.copy(P3("base")).setZ(P3("base").z + 9).project(camera);
+  $("baselabel").style.left = ((V.x + 1) / 2) * 1920 + "px"; $("baselabel").style.top = ((1 - V.y) / 2) * 1080 + 6 + "px";
 }
 
 // ---------- grain ----------
@@ -397,38 +504,45 @@ function grain(frame) {
 }
 
 const HUD = [
-  [T.S1, "Rasuwa, Nuwakot and Dhading, Nepal<br />26 August 2026", "Sources: Nepal Department of Roads via Kathmandu Post, 29 Aug 2026 · UN News, 31 Aug 2026"],
-  [T.S2, "", "Source: UN News, 31 August 2026"],
-  [T.S4, "South Fork, California<br />36.3451° N · 118.7578° W", "Measured on a replay of a USGS survey flight · not our footage"],
-  [T.S5, "How Typhon decides", "Illustration of the method · not a screen from the app"],
-  [T.S6, "", ""],
+  [T.S1, "A drawing, not a map. Sources: Nepal Department of Roads; UN News. August 2026."],
+  [T.S2, "Source: UN News, 31 August 2026."],
+  [T.S4, "South Fork, California. Replay of a USGS survey flight, not our footage. Rough map is off by about 12 m."],
+  [T.S6, "An illustration of the method, not a screen from the app."],
+  [T.S7, ""],
 ];
+const rowMove = (el, r, x) => { const dir = r % 2 ? 1 : -1; el.style.transform = `translateX(${-900 + dir * ((120 + r * 18) * x - 160)}px)`; };
 
 window.renderAt = (t) => {
   const frame = Math.round(t * FPS);
 
-  // S1 the case and S6 the close share the road
-  const in1 = t < T.S2, in6 = t >= T.S6 && t < T.S7 + 0.1;
-  show($("S1"), in1 || in6);
-  if (in1 || in6) {
-    const a = t - T.S1, z = t - T.S6;
-    road(in1 ? a : null, in6 ? z : null);
-    $("g1").style.opacity = 0.7 * (in1 ? outExpo(prog(a, 0, 0.5)) : 1);
-    show($("h1a"), in1); show($("h1b"), in1); show($("n1"), in1); show($("h6"), in6);
-    if (in1) {
-      sentence($("h1a"), a, 0.35, null);
-      sentence($("h1b"), a, 2.5, null);
-      rise($("n1"), a, 2.8, null, 40);
-      $("pc").textContent = Math.round(BRIDGES * inOutSine(prog(a, 2.9, 4.8)));
-    } else sentence($("h6"), z, 0.3, null);
+  // S1 the case
+  const a = t - T.S1, in1 = t < T.S2;
+  show($("S1"), in1);
+  if (in1) {
+    $("pc").textContent = road(a);
+    $("g1").style.opacity = 0.7 * outExpo(prog(a, 0, 0.5));
+    const sh = prog(a, IMPACT, IMPACT + 0.45), k = sh > 0 && sh < 1 ? 1 - sh : 0;     // the ground shakes when the slide lands
+    $("S1").style.transform = `translate(${Math.sin(a * 95) * 12 * k}px, ${Math.cos(a * 71) * 9 * k}px)`;
+    $("t1").style.opacity = prog(a, 0.7, 1.0);
+    dateL.forEach((el, i) => { el.style.transform = `translateY(${lerp(110, 0, outExpo(prog(a, 0.72 + i * 0.035, 1.3 + i * 0.035)))}%)`; });
+    sentence($("h1a"), a, 1.25, null);
+    rise($("n1"), a, 2.9, null, 40); rise($("n2"), a, 3.2, null, 40);
   }
+  const fl = prog(a, IMPACT, IMPACT + 0.3);
+  $("flash").style.opacity = in1 && fl > 0 && fl < 1 ? 0.3 * (1 - fl) : 0;
 
-  // S2 the problem, then the lime line that opens into the title card
+  // S2 the problem: the wall of "unknown", one word snaps to the answer; then the lime line opens into the title card
   const b2 = t - T.S2, in2 = t >= T.S2 && t < T.S3 + 0.02;
   show($("S2"), in2);
   if (in2) {
-    rows.forEach((el, r) => { const dir = r % 2 ? 1 : -1; el.style.transform = `translateX(${-900 + dir * ((120 + r * 18) * b2 - 160)}px)`; el.style.opacity = 0.62; });
-    rise($("p2a"), b2, 0.35, null, 26); rise($("p2b"), b2, 2.5, null, 26);
+    const SNAP = 2.75, snap = outExpo(prog(b2, SNAP, SNAP + 0.4)), on = b2 >= SNAP;
+    rows.forEach((el, r) => {
+      if (r === MID) el.style.transform = `translateX(${960 - flyMid + 46 * (b2 - SNAP - 0.5)}px)`; else rowMove(el, r, b2);
+      el.style.opacity = r === MID ? lerp(0.62, 1, snap) : lerp(0.62, 0.24, snap);
+    });
+    fly.style.color = on ? "#B5D334" : "transparent"; fly.style.webkitTextStroke = on ? "0" : "2px rgba(245,241,230,0.5)";
+    fly.style.transform = on ? `scale(${lerp(1.2, 1, snap)})` : "none";
+    rise($("p2a"), b2, 0.3, 2.35, 26); rise($("p2b"), b2, 2.3, null, 26);
     const k = t - (T.S3 - 0.85), open = inExpo(prog(k, 0.55, 0.85));
     $("scan").style.width = 1920 * inOutCubic(prog(k, 0, 0.5)) + "px";
     $("scan").style.height = lerp(3, 1100, open) + "px"; $("scan").style.top = lerp(540, -10, open) + "px";
@@ -438,65 +552,95 @@ window.renderAt = (t) => {
   // S3 title card, then it lifts away to reveal the terrain
   const b = t - T.S3;
   show($("card"), t >= T.S3 && t < T.S4 + 0.45);
-  letters.forEach((el, i) => { el.style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.02 + i * 0.045, 0.62 + i * 0.045)))}%)`; });
-  letters[6].style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.34, 0.8)))}%) scale(${lerp(0.4, 1, outBack(prog(b, 0.4, 0.9)))})`;
+  titleL.forEach((el, i) => { el.style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.02 + i * 0.045, 0.62 + i * 0.045)))}%)`; });
+  titleL[6].style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.34, 0.8)))}%) scale(${lerp(0.4, 1, outBack(prog(b, 0.4, 0.9)))})`;
   $("sub").firstElementChild.style.transform = `translateY(${lerp(110, 0, outExpo(prog(b, 0.38, 0.95)))}%)`;
   $("rule").style.transform = `scaleX(${inOutCubic(prog(b, 0.3, 0.95))})`;
   $("cardmeta").style.opacity = prog(b, 0.6, 0.9);
   $("card").style.transform = `translateY(${-100 * inOutCubic(prog(t, T.S4 - 0.05, T.S4 + 0.42))}%)`;
 
   // S4 what we measured: two facts, each with what it buys
-  const c = t - T.S4, in4 = t >= T.S4 - 0.06 && t < T.S5;
-  show($("gl"), in4); show($("S4"), in4);
+  const c = t - T.S4, in4 = t >= T.S4 - 0.06 && t < T.S5 + 0.08;
+  show($("S4"), in4);
   if (in4) {
-    $("count").textContent = terrain(Math.max(0, c));
-    const X = 5.9;  // the first fact hands over to the second
-    sentence($("ha"), c, 0.45, X); rise($("na"), c, 1.1, X, 40);
-    [...$("fa").children].forEach((el, i) => rise(el, c, 2.0 + i * 0.22, X, 30));
-    rise($("ba"), c, 3.3, X, 26);
-    sentence($("hb"), c, X + 0.1, null); $("hb").style.opacity = prog(c, X, X + 0.1);
-    rise($("nb"), c, X + 0.45, null, 40);
-    [...$("fb").children].forEach((el, i) => rise(el, c, X + 1.1 + i * 0.22, null, 30));
-    rise($("bb"), c, X + 2.2, null, 26);
+    terrain(Math.max(0, c));
+    const X = 6.5;  // the first fact hands over to the second
+    $("ta").style.opacity = prog(c, 0.45, 0.8) * (1 - prog(c, X - 0.25, X)); $("tb").style.opacity = prog(c, X + 0.1, X + 0.45);
+    sentence($("ha"), c, 0.45, X);
+    // two bars to the same scale: 5 minutes against 80
+    rise($("bl1"), c, 1.3, null, 24); rise($("bl2"), c, 1.6, null, 24); $("bars").style.opacity = 1 - prog(c, X - 0.25, X);
+    $("bar1").style.transform = `scaleX(${(5 / 80) * outExpo(prog(c, 1.4, 1.9))})`;
+    $("bar2").style.transform = `scaleX(${inOutCubic(prog(c, 1.7, 3.4))})`;
+    rise($("ba"), c, 3.0, X, 26);
+    sentence($("hb"), c, X + 0.1, null);
+    rise($("nb"), c, X + 0.6, null, 40);
+    rise($("bb"), c, X + 1.9, null, 26);
   }
 
-  // S5 the decision
-  const s = t - T.S5, in5 = t >= T.S5 && t < T.S6;
-  show($("S5"), in5);
+  // S5 the work behind it: a sand card drops over the terrain, then lifts to reveal the decision scene
+  const u = t - T.S5, in5 = t >= T.S5 - 0.45 && t < T.S6 + 0.45;
+  show($("usp"), in5);
   if (in5) {
-    graph(s);
-    $("g5").style.opacity = 0.42;
-    sentence($("h5"), s, 0.3, Q1);
-    sentence($("q5a"), s, Q1 + 0.1, Q2); $("q5a").style.opacity *= prog(s, Q1, Q1 + 0.1);
-    $("t5a").style.opacity = prog(s, Q1 + 0.1, Q1 + 0.4) * (1 - prog(s, Q2 - 0.25, Q2));
-    sentence($("q5b"), s, Q2 + 0.1, null); $("q5b").style.opacity = prog(s, Q2, Q2 + 0.1);
-    $("t5b").style.opacity = prog(s, Q2 + 0.1, Q2 + 0.4);
-    $("legend").style.opacity = prog(s, 1.2, 1.6);
+    $("usp").style.transform = `translateY(${-100 * (1 - inOutCubic(prog(t, T.S5 - 0.45, T.S5 + 0.05))) - 100 * inOutCubic(prog(t, T.S6 - 0.05, T.S6 + 0.42))}%)`;
+    $("usptag").style.opacity = prog(u, 0.15, 0.45);
+    uspL.forEach((el, i) => { el.style.transform = `translateY(${lerp(108, 0, outExpo(prog(u, 0.12 + i * 0.3, 0.8 + i * 0.3)))}%)`; });
+    $("usprule").style.transform = `scaleX(${inOutCubic(prog(u, 1.2, 1.9))})`;
+    $("uspmeta").style.opacity = prog(u, 1.7, 2.1);
   }
 
-  // S7 the logo
-  const e = t - T.S7;
-  show($("endcard"), t >= T.S7 - 0.45);
-  $("endcard").style.transform = `translateY(${100 * (1 - inOutCubic(prog(t, T.S7 - 0.45, T.S7 + 0.05)))}%)`;
+  // S6 the decision
+  const s = t - T.S6, in6 = t >= T.S6 - 0.06 && t < T.S7;
+  show($("S6"), in6);
+  if (in6) {
+    graph(Math.max(0, s));
+    $("t6").style.opacity = prog(s, 0.4, 0.7) * (1 - prog(s, Q1 - 0.25, Q1));
+    sentence($("h6"), s, 0.4, Q1);
+    sentence($("q6a"), s, Q1 + 0.1, Q2); $("t6a").style.opacity = prog(s, Q1 + 0.1, Q1 + 0.4) * (1 - prog(s, Q2 - 0.25, Q2));
+    sentence($("q6b"), s, Q2 + 0.1, null); $("t6b").style.opacity = prog(s, Q2 + 0.1, Q2 + 0.4);
+    $("legend").style.opacity = prog(s, 1.4, 1.8); $("baselabel").style.opacity = prog(s, 0.9, 1.3);
+  }
+  show($("gl"), in4 || in6);
+
+  // S7 the close: a lime line sweeps the wall and "unknown" becomes "known"
+  const z = t - T.S7, in7 = t >= T.S7 && t < T.S8 + 0.1;
+  show($("S7"), in7);
+  if (in7) {
+    const sw = inOutCubic(prog(z, 0.35, 1.75)) * 104 - 2;
+    rows7a.forEach((el, r) => { rowMove(el, r, z + 3); rowMove(rows7b[r], r, z + 3); });
+    $("rows7a").style.clipPath = `inset(0 0 0 ${clamp(sw, 0, 100)}%)`; $("rows7a").style.opacity = 0.62;
+    $("rows7b").style.clipPath = `inset(0 ${100 - clamp(sw, 0, 100)}% 0 0)`; $("rows7b").style.opacity = 0.5;
+    $("sweep").style.left = sw + "%"; $("sweep").style.opacity = sw > 0 && sw < 100 ? 1 : 0;
+    rise($("p7"), z, 0.25, null, 26);
+  }
+
+  // S8 the logo
+  const e = t - T.S8;
+  show($("endcard"), t >= T.S8 - 0.45);
+  $("endcard").style.transform = `translateY(${100 * (1 - inOutCubic(prog(t, T.S8 - 0.45, T.S8 + 0.05)))}%)`;
   $("logo").style.clipPath = `inset(0 ${100 * (1 - inOutCubic(prog(e, 0.15, 1.05)))}% 0 0)`;
   $("endsub").firstElementChild.style.transform = `translateY(${lerp(114, 0, outExpo(prog(e, 0.75, 1.4)))}%)`;
   $("endrule").style.transform = `scaleX(${inOutCubic(prog(e, 0.9, 1.5))})`;
   $("endmeta").style.opacity = prog(e, 1.3, 1.7);
 
-  // cuts: short dips to black between dark scenes
-  const dip = (x) => prog(t, x - 0.16, x - 0.02) * (1 - prog(t, x, x + 0.14));
-  $("black").style.opacity = Math.max(dip(T.S2), dip(T.S5), dip(T.S6));
-  const onCard = (t >= T.S3 - 0.03 && t < T.S4 + 0.2) || t >= T.S7 - 0.2;
+  // wipes: an ink panel with lime edges crosses the frame between dark scenes
+  let wx = null;
+  for (const x of [T.S2, T.S7]) if (t > x - 0.3 && t < x + 0.3) wx = t < x ? -104 * (1 - inOutCubic(prog(t, x - 0.3, x))) : 104 * inOutCubic(prog(t, x, x + 0.3));
+  show($("wipe"), wx != null); if (wx != null) $("wipe").style.transform = `translateX(${wx}%)`;
+  $("black").style.opacity = 0;
+
+  const onCard = (t >= T.S3 - 0.03 && t < T.S4 + 0.2) || (t >= T.S5 - 0.2 && t < T.S6 + 0.2) || t >= T.S8 - 0.2;
   $("vig").style.opacity = onCard ? 0.28 : 1;
   $("hud").style.color = onCard ? "#0F1E3D" : "rgba(245,241,230,0.72)";
   let h = HUD[0]; for (const x of HUD) if (t >= x[0]) h = x;
-  const cardNow = (t >= T.S3 && t < T.S4) || t >= T.S7;
-  $("hudtr").innerHTML = cardNow ? "" : h[1]; $("hudbl").textContent = cardNow ? "" : h[2];
-  $("tc").textContent = `00:${String(Math.floor(t)).padStart(2, "0")}:${String(frame % FPS).padStart(2, "0")}`;
+  const cardNow = (t >= T.S3 && t < T.S4) || (t >= T.S5 && t < T.S6) || t >= T.S8;
+  $("hudbl").textContent = cardNow ? "" : h[1];
+  let now = 0; STARTS.forEach((x, i) => { if (t >= x) now = i; });
+  barEls.forEach((el, i) => { el.style.opacity = i === now ? 1 : i < now ? 0.5 : 0.2; el.style.background = i === now ? "#B5D334" : "currentColor"; });
   grain(frame);
 };
 
 await document.fonts.ready;
+flyMid = fly.offsetLeft + fly.offsetWidth / 2;
 window.renderAt(0);
 window.ready = true;
 </script>
