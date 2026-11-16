@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Typhon motion: proof scene</title>
+<link rel="icon" href="data:," />
+<!-- Every frame is a pure function of time: window.renderAt(seconds). web/scripts/motion_render.mjs steps through
+     it and joins the frames. Data is real (data/terrain.json, made by prep_data.py). Colours: Typhon tokens. -->
+<style>
+  @font-face { font-family: "Space Grotesk"; font-weight: 300; src: url("/fonts/space-grotesk/files/space-grotesk-latin-300-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Space Grotesk"; font-weight: 500; src: url("/fonts/space-grotesk/files/space-grotesk-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Space Grotesk"; font-weight: 700; src: url("/fonts/space-grotesk/files/space-grotesk-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Inter"; font-weight: 500; src: url("/fonts/inter/files/inter-latin-500-normal.woff2") format("woff2"); }
+  :root { --ink: #060B18; --navy: #0F1E3D; --blue: #2A4EA8; --lime: #B5D334; --sand: #F5F1E6; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); font-family: "Space Grotesk", sans-serif; color: var(--sand); }
+  #gl, .layer { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+  .layer { pointer-events: none; }
+  .caps { font: 500 17px/1.35 "Inter", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+
+  /* A: grid intro */
+  #grid { background-image: radial-gradient(circle, rgba(245,241,230,0.55) 1.6px, transparent 2.2px); background-size: 64px 64px; background-position: 32px 28px; }
+  #scan { position: absolute; left: 0; top: 50%; height: 3px; background: var(--lime); box-shadow: 0 0 24px rgba(181,211,52,0.8); transform-origin: left center; }
+  #introcap { position: absolute; left: 0; right: 0; top: calc(50% + 26px); text-align: center; }
+
+  /* B: title card */
+  #card { background: var(--sand); color: var(--navy); }
+  #title { position: absolute; left: 120px; top: 300px; font-weight: 700; font-size: 330px; line-height: 0.9; letter-spacing: -0.045em; white-space: nowrap; }
+  #title .m { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; }
+  #title .m > span { display: inline-block; }
+  #title .dot { color: var(--lime); -webkit-text-stroke: 3px var(--navy); }
+  #sub { position: absolute; left: 136px; top: 640px; font-weight: 300; font-size: 62px; letter-spacing: -0.01em; color: var(--blue); overflow: hidden; }
+  #sub > span { display: inline-block; }
+  #rule { position: absolute; left: 136px; top: 760px; height: 4px; background: var(--navy); transform-origin: left center; width: 1648px; }
+  #cardmeta { position: absolute; left: 136px; right: 136px; top: 790px; display: flex; justify-content: space-between; color: var(--navy); }
+
+  /* C: terrain overlay */
+  #cnum { position: absolute; left: 120px; bottom: 200px; font-weight: 700; font-size: 220px; line-height: 0.85; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  #cnum small { font: 500 17px/1 "Inter", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; display: block; margin-bottom: 22px; color: var(--lime); }
+  #cfacts { position: absolute; left: 124px; bottom: 112px; display: flex; gap: 56px; }
+  #cfacts div { border-top: 2px solid rgba(245,241,230,0.35); padding-top: 14px; min-width: 250px; }
+  #cfacts b { display: block; font-weight: 500; font-size: 40px; letter-spacing: -0.02em; margin-top: 6px; text-transform: none; }
+  #chead { position: absolute; left: 124px; top: 150px; font-weight: 500; font-size: 54px; letter-spacing: -0.02em; line-height: 1.05; overflow: hidden; }
+  #chead > span { display: inline-block; }
+  #chead i { font-style: normal; color: var(--lime); }
+
+  /* D: kinetic type */
+  #rows { display: flex; flex-direction: column; justify-content: center; gap: 0; }
+  .row { white-space: nowrap; font-weight: 700; font-size: 168px; line-height: 0.93; letter-spacing: -0.035em; color: transparent; -webkit-text-stroke: 2px rgba(245,241,230,0.5); will-change: transform; }
+  .row span { display: inline-block; padding-right: 0.22em; }
+  .row .fly { -webkit-text-stroke: 0; color: var(--lime); transform-origin: left center; }
+  #dcap { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center; font-weight: 500; font-size: 44px; letter-spacing: -0.01em; }
+  #dcap span { background: var(--ink); padding: 10px 26px; }
+  #dcap i { font-style: normal; color: var(--lime); }
+
+  /* always on top */
+  #hud span { position: absolute; }
+  #hud .tl { left: 56px; top: 44px; } #hud .tr { right: 56px; top: 44px; text-align: right; }
+  #hud .bl { left: 56px; bottom: 40px; } #hud .br { right: 56px; bottom: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+  #black { background: #000; }
+  #vig { background: radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,0.5) 100%); }
+  #grain { mix-blend-mode: overlay; opacity: 0.11; image-rendering: auto; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1920" height="1080"></canvas>
+
+  <div class="layer" id="A">
+    <div class="layer" id="grid"></div>
+    <div id="scan"></div>
+    <p class="caps" id="introcap">Typhon / the first map / 2026</p>
+  </div>
+
+  <div class="layer" id="C">
+    <p id="chead"><span>The surface, rebuilt from<br />the <i>photos alone</i>.</span></p>
+    <p id="cnum"><small>Drone photos placed</small><span id="count">0</span></p>
+    <div id="cfacts" class="caps">
+      <div>Relief in view<b id="f1">154 m</b></div>
+      <div>Heights, relative<b>±1.1 m</b></div>
+      <div>Ground control used<b>none</b></div>
+    </div>
+  </div>
+
+  <div class="layer" id="D">
+    <div class="layer" id="rows"></div>
+    <p id="dcap"><span>498 roads still unknown. <i>Which one first?</i></span></p>
+  </div>
+
+  <div class="layer" id="card">
+    <h1 id="title"></h1>
+    <p id="sub"><span>the first map after the landslide</span></p>
+    <div id="rule"></div>
+    <div id="cardmeta" class="caps"><span>Team Vortex</span><span>Drone photos in. Decisions out.</span><span>One laptop, no internet</span></div>
+  </div>
+
+  <div class="layer" id="black"></div>
+  <div class="layer" id="vig"></div>
+  <canvas class="layer" id="grain" width="960" height="540"></canvas>
+  <div class="layer caps" id="hud">
+    <span class="tl">Project Typhon</span>
+    <span class="tr">South Fork, California<br />36.3451° N · 118.7578° W</span>
+    <span class="bl">USGS public survey data · not our footage</span>
+    <span class="br" id="tc">00:00:00</span>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from "/three/build/three.module.js";
+
+const FPS = 30;
+const T = { A: 0, B: 1.1, C: 2.45, D: 7.3, END: 9.4 };  // scene starts, seconds
+window.DURATION = T.END; window.FPS = FPS;
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const inExpo = (x) => (x <= 0 ? 0 : Math.pow(2, 10 * x - 10));
+const inOutCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const inOutSine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+const outBack = (x) => 1 + 2.7 * Math.pow(x - 1, 3) + 1.7 * Math.pow(x - 1, 2);
+const $ = (id) => document.getElementById(id);
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+const D = await (await fetch("data/terrain.json")).json();
+$("f1").textContent = Math.round(D.zmax - D.zmin) + " m";
+
+// ---------- title letters ----------
+$("title").innerHTML = [..."TYPHON"].map((c) => `<span class="m"><span>${c}</span></span>`).join("") + `<span class="m"><span class="dot">.</span></span>`;
+const letters = [...document.querySelectorAll("#title .m > span")];
+
+// ---------- kinetic rows ----------
+const ROWS = 7, MID = 3;
+$("rows").innerHTML = Array.from({ length: ROWS }, (_, r) =>
+  `<div class="row">${Array.from({ length: 9 }, (_, i) => (r === MID && i === 4 ? `<span class="fly">FLY NEXT</span>` : `<span>UNKNOWN</span>`)).join("")}</div>`).join("");
+const rows = [...document.querySelectorAll(".row")];
+const fly = document.querySelector(".fly");
+let flyMid = 0;
+
+// ---------- 3D terrain ----------
+const renderer = new THREE.WebGLRenderer({ canvas: $("gl"), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(1920, 1080, false); renderer.setClearColor(0x060b18);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x060b18, 190, 470);
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 1, 2000);
+scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x0a1126, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 1.9); sun.position.set(-60, 170, 110); scene.add(sun);
+const grid = new THREE.GridHelper(520, 52, 0x24386b, 0x121d3d); grid.position.y = -0.05; scene.add(grid);
+
+const BASE = 1.2, up = (z) => (z - D.zmin) / D.cell_m + BASE;  // true scale: no height exaggeration
+const cells = [];
+let cx = 0, cz = 0;
+for (let r = 0; r < D.h; r++) for (let c = 0; c < D.w; c++) if (D.z[r][c] != null) { cells.push({ x: c - D.w / 2, z: r - D.h / 2, hgt: up(D.z[r][c]), n: (D.z[r][c] - D.zmin) / (D.zmax - D.zmin) }); cx += c - D.w / 2; cz += r - D.h / 2; }
+cx /= cells.length; cz /= cells.length;
+let dmax = 0; for (const c of cells) { c.d = Math.hypot(c.x - cx, c.z - cz); dmax = Math.max(dmax, c.d); }
+const geo = new THREE.BoxGeometry(0.84, 1, 0.84); geo.translate(0, 0.5, 0);
+{ // sides fade to the dark floor, so the top surface carries the colour
+  const pos = geo.attributes.position, vc = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) { const v = pos.getY(i) > 0.5 ? 1 : 0.1; vc[i * 3] = vc[i * 3 + 1] = vc[i * 3 + 2] = v; }
+  geo.setAttribute("color", new THREE.BufferAttribute(vc, 3));
+}
+const blocks = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }), cells.length);
+const stops = [[0, new THREE.Color("#1B3A94")], [0.38, new THREE.Color("#2A4EA8")], [0.7, new THREE.Color("#7E9BEA")], [1, new THREE.Color("#F5F1E6")]];
+const rnd = rng(7), col = new THREE.Color();
+cells.forEach((c, i) => {
+  let k = 0; while (k < stops.length - 2 && c.n > stops[k + 1][0]) k++;
+  col.copy(stops[k][1]).lerp(stops[k + 1][1], clamp((c.n - stops[k][0]) / (stops[k + 1][0] - stops[k][0])));
+  col.multiplyScalar(0.93 + rnd() * 0.14);
+  blocks.setColorAt(i, col);
+  c.delay = (c.d / dmax) * 1.25 + rnd() * 0.12;
+});
+scene.add(blocks);
+const K = 120 / D.w;  // the scene is framed for a 120-unit-wide model, whatever the block count
+const world = new THREE.Group(); world.scale.setScalar(K); world.position.set(-cx * K, 0, -cz * K); scene.add(world); world.add(blocks);
+
+// the real flight: one point per photo, from the photos' GPS
+const track = D.track.map(([c, r, alt]) => new THREE.Vector3(c - D.w / 2, up(alt), r - D.h / 2));
+const lineGeo = new THREE.BufferGeometry().setFromPoints(track);
+const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.9 }));
+world.add(line);
+const ticks = new THREE.InstancedMesh(new THREE.SphereGeometry(0.46 / K, 10, 8), new THREE.MeshBasicMaterial({ color: 0xb5d334 }), track.length);
+world.add(ticks);
+const head = new THREE.Group(); head.scale.setScalar(1 / K); world.add(head);
+head.add(new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe9f6a0 })));
+const ring = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.16, 8, 48), new THREE.MeshBasicMaterial({ color: 0xb5d334 })); head.add(ring);
+const ring2 = new THREE.Mesh(new THREE.TorusGeometry(4.6, 0.09, 8, 48), new THREE.MeshBasicMaterial({ color: 0xf5f1e6, transparent: true, opacity: 0.7 })); head.add(ring2);
+const gc = document.createElement("canvas"); gc.width = gc.height = 128;
+{ const g = gc.getContext("2d"), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, "rgba(200,235,90,0.9)"); gr.addColorStop(0.35, "rgba(181,211,52,0.28)"); gr.addColorStop(1, "rgba(181,211,52,0)"); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }
+const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false })); glow.scale.set(26, 26, 1); head.add(glow);
+const drop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, -1, 0)]), new THREE.LineBasicMaterial({ color: 0xb5d334, transparent: true, opacity: 0.35 })); head.add(drop);
+
+const M = new THREE.Matrix4(), V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+function terrain(tc) {            // tc = seconds since the terrain scene began
+  cells.forEach((c, i) => {
+    const p = outExpo(prog(tc, c.delay, c.delay + 1.0));
+    M.compose(V.set(c.x, 0, c.z), Q, S.set(1, Math.max(0.001, c.hgt * p), 1));
+    blocks.setMatrixAt(i, M);
+  });
+  blocks.instanceMatrix.needsUpdate = true;
+  const u = inOutSine(prog(tc, 1.25, 4.35)), f = u * (track.length - 1), i0 = Math.floor(f), i1 = Math.min(track.length - 1, i0 + 1);
+  head.position.lerpVectors(track[i0], track[i1], f - i0);
+  head.visible = line.visible = ticks.visible = tc > 1.25;
+  lineGeo.setDrawRange(0, i0 + 1);
+  for (let i = 0; i < track.length; i++) {
+    const s = i <= i0 ? outBack(prog(f - i, 0, 5)) : 0.0001;
+    M.compose(track[i], Q, S.set(s, s, s)); ticks.setMatrixAt(i, M);
+  }
+  ticks.instanceMatrix.needsUpdate = true;
+  ring.rotation.set(1.1, tc * 2.2, 0.3); ring2.rotation.set(0.4 + tc * 1.3, 0.2, tc * 1.7);
+  drop.scale.y = head.position.y * K;
+  const o = inOutSine(prog(tc, 0, 4.9)), az = lerp(-0.85, 0.3, o), R = lerp(280, 226, o), y = lerp(176, 124, o);
+  camera.position.set(R * Math.sin(az), y, R * Math.cos(az));
+  camera.lookAt(0, 26, 0); camera.setViewOffset(1920, 1080, -330, 70, 1920, 1080);  // model sits right of centre, text on the left
+  renderer.render(scene, camera);
+  return Math.round(u * track.length);
+}
+
+// ---------- grain ----------
+const gctx = $("grain").getContext("2d"), gimg = gctx.createImageData(960, 540);
+function grain(frame) {
+  const r = rng(frame * 9973 + 11), d = gimg.data;
+  for (let i = 0; i < d.length; i += 4) { const v = (r() * 255) | 0; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+  gctx.putImageData(gimg, 0, 0);
+}
+
+const show = (el, on) => { el.style.visibility = on ? "visible" : "hidden"; };
+
+window.renderAt = (t) => {
+  const frame = Math.round(t * FPS);
+  // A: grid and scan line, which opens into the sand card
+  const a = t - T.A;
+  show($("A"), t < T.B + 0.02);
+  $("grid").style.opacity = 0.75 * outExpo(prog(a, 0, 0.5)) * (1 - prog(a, 0.85, 1.0));
+  const open = inExpo(prog(a, 0.82, 1.1));
+  $("scan").style.width = 1920 * inOutCubic(prog(a, 0.08, 0.72)) + "px";
+  $("scan").style.height = lerp(3, 1100, open) + "px"; $("scan").style.top = lerp(540, -10, open) + "px";
+  $("scan").style.background = open > 0.12 ? "#F5F1E6" : "#B5D334";
+  $("introcap").style.opacity = prog(a, 0.3, 0.5) * (1 - prog(a, 0.72, 0.84));
+
+  // B: title card, then it lifts away to reveal the terrain
+  const b = t - T.B;
+  show($("card"), t >= T.B && t < T.C + 0.45);
+  letters.forEach((el, i) => { el.style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.02 + i * 0.045, 0.62 + i * 0.045)))}%)`; });
+  letters[6].style.transform = `translateY(${lerp(108, 0, outExpo(prog(b, 0.34, 0.8)))}%) scale(${lerp(0.4, 1, outBack(prog(b, 0.4, 0.9)))})`;
+  $("sub").firstElementChild.style.transform = `translateY(${lerp(110, 0, outExpo(prog(b, 0.38, 0.95)))}%)`;
+  $("rule").style.transform = `scaleX(${inOutCubic(prog(b, 0.3, 0.95))})`;
+  $("cardmeta").style.opacity = prog(b, 0.6, 0.9);
+  $("card").style.transform = `translateY(${-100 * inOutCubic(prog(t, T.C - 0.05, T.C + 0.42))}%)`;
+
+  // C: terrain
+  const c = t - T.C;
+  const inC = t >= T.C - 0.06 && t < T.D;
+  show($("gl"), inC); show($("C"), inC);
+  if (inC) {
+    const n = terrain(Math.max(0, c));
+    $("count").textContent = n;
+    $("chead").firstElementChild.style.transform = `translateY(${lerp(112, 0, outExpo(prog(c, 0.45, 1.15)))}%)`;
+    $("cnum").style.opacity = prog(c, 1.1, 1.4);
+    $("cnum").style.transform = `translateY(${lerp(40, 0, outExpo(prog(c, 1.1, 1.8)))}px)`;
+    [...$("cfacts").children].forEach((el, i) => { const p = outExpo(prog(c, 2.0 + i * 0.22, 2.7 + i * 0.22)); el.style.opacity = p; el.style.transform = `translateY(${lerp(30, 0, p)}px)`; });
+  }
+
+  // D: rows of "unknown", one becomes the answer
+  const d = t - T.D;
+  show($("D"), t >= T.D);
+  if (t >= T.D) {
+    const snap = outExpo(prog(d, 0.75, 1.15));
+    rows.forEach((el, r) => {
+      const dir = r % 2 ? 1 : -1, speed = 150 + r * 22;
+      el.style.transform = `translateX(${r === MID ? 960 - flyMid + 52 * (d - 1.0) : -900 + dir * (speed * d - 120)}px)`;
+      el.style.opacity = r === MID ? 1 : lerp(1, 0.28, snap);
+    });
+    fly.style.color = d > 0.75 ? "#B5D334" : "transparent";
+    fly.style.webkitTextStroke = d > 0.75 ? "0" : "2px rgba(245,241,230,0.42)";
+    fly.textContent = d > 0.75 ? "FLY NEXT" : "UNKNOWN";
+    fly.style.transform = d > 0.75 ? `scale(${lerp(1.18, 1, snap)})` : "none";
+    $("dcap").style.opacity = prog(d, 1.05, 1.35);
+  }
+
+  // cuts
+  $("black").style.opacity = Math.max(prog(t, T.D - 0.16, T.D - 0.02) * (1 - prog(t, T.D, T.D + 0.14)), prog(t, T.END - 0.3, T.END));
+  const onCard = t >= T.B - 0.03 && t < T.C + 0.2;
+  $("vig").style.opacity = onCard ? 0.28 : 1;
+  $("hud").style.color = onCard ? "#0F1E3D" : "rgba(245,241,230,0.72)";
+  const s = Math.floor(t), ff = frame % FPS;
+  $("tc").textContent = `00:${String(s).padStart(2, "0")}:${String(ff).padStart(2, "0")}`;
+  grain(frame);
+};
+
+await document.fonts.ready;
+fly.textContent = "FLY NEXT"; flyMid = fly.offsetLeft + fly.offsetWidth / 2;
+window.renderAt(0);
+window.ready = true;
+</script>
+</body>
+</html>
