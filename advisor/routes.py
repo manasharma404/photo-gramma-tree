@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
 from advisor.assess import assess_collection, load_vehicle_config
@@ -34,6 +36,30 @@ class FieldReportIn(BaseModel):
     )
     note: str | None = Field(default=None, max_length=500)
     reporter: str | None = Field(default=None, max_length=120)
+
+
+LOCAL_HOSTS = {"127.0.0.1", "::1"}
+PIN_MAX_FAILS, PIN_LOCKOUT_S = 5, 600
+_pin_fails: dict[str, list[float]] = {}
+
+
+def check_field_pin(client_host: str | None, pin: str | None) -> None:
+    """Phones on the hotspot must send the PIN shown in the laptop's console; the laptop itself is trusted.
+
+    VORTEX_FIELD_PIN unset or "off" disables the check. After 5 wrong PINs a device waits 10 minutes.
+    """
+    expected = os.environ.get("VORTEX_FIELD_PIN", "").strip()
+    if not expected or expected.lower() == "off" or client_host in LOCAL_HOSTS:
+        return
+    now = time.monotonic()
+    fails = [t for t in _pin_fails.get(client_host or "", []) if now - t < PIN_LOCKOUT_S]
+    if len(fails) >= PIN_MAX_FAILS:
+        raise HTTPException(status_code=429, detail="Too many wrong PINs from this device. Wait 10 minutes.")
+    if pin and secrets.compare_digest(pin.strip(), expected):
+        _pin_fails.pop(client_host or "", None)
+        return
+    _pin_fails[client_host or ""] = fails + [now]
+    raise HTTPException(status_code=403, detail="Wrong or missing field PIN. Ask the laptop operator for it.")
 
 
 def _data_root() -> Path:
@@ -63,6 +89,14 @@ def resolve_project(project: str | None = None, data_root: Path | None = None) -
     if env_proj:
         return env_proj
     projs = available_projects(data_root=data_root)
+    # the map the dashboard shows (pipeline.activate), so /field reports land on the same project by default
+    active_file = Path(os.environ.get("VORTEX_ACTIVE", "") or (data_root or _data_root()) / "data" / "active.json")
+    try:
+        active_proj = json.loads(active_file.read_text(encoding="utf-8")).get("project")
+    except (OSError, ValueError, AttributeError):
+        active_proj = None
+    if active_proj in projs:
+        return active_proj
     for preferred in ("southfork", "wayanad"):
         if preferred in projs:
             return preferred
@@ -171,8 +205,14 @@ def get_field_reports(project: str | None = Query(default=None)) -> dict[str, An
 
 
 @router.post("/reports")
-def post_field_report(payload: FieldReportIn) -> dict[str, Any]:
+def post_field_report(
+    payload: FieldReportIn,
+    request: Request = None,  # type: ignore[assignment]  # None when called directly (tests, scripts)
+    x_field_pin: str | None = Header(default=None),
+) -> dict[str, Any]:
     """Record a ground responder field report into SQLite and update /advisor/state immediately."""
+    client = request.client.host if request is not None and request.client else None
+    check_field_pin(client, x_field_pin if isinstance(x_field_pin, str) else None)
     proj = resolve_project(payload.project)
     seg_fc, places_fc, _ = _load_project_inputs(proj)
 

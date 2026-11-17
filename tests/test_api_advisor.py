@@ -267,3 +267,59 @@ def test_full_http_asgi_stack_via_testclient(tmp_path: Path, monkeypatch: pytest
         assert t_ok.status_code == 200
         assert t_ok.content == b"\x89PNG\r\n\x1a\nmocktile"
         assert tile_client.get("/tiles/demo/15/10/99.png").status_code == 404
+
+
+def test_field_reports_default_to_the_dashboard_project(tmp_path, monkeypatch):
+    """With no project given, /field must report on the map the dashboard shows (data/active.json), not the mock."""
+    from advisor.routes import resolve_project
+
+    monkeypatch.delenv("VORTEX_DEFAULT_PROJECT", raising=False)
+    monkeypatch.delenv("VORTEX_ACTIVE", raising=False)
+    for name in ("site_a", "site_b"):
+        seg = tmp_path / "data" / "projects" / name / "roads" / "segments.geojson"
+        seg.parent.mkdir(parents=True)
+        seg.write_text('{"type": "FeatureCollection", "features": []}', encoding="utf-8")
+    assert resolve_project(None, data_root=tmp_path) == "mock"
+    (tmp_path / "data" / "active.json").write_text('{"project": "site_b"}', encoding="utf-8")
+    assert resolve_project(None, data_root=tmp_path) == "site_b"
+    assert resolve_project("site_a", data_root=tmp_path) == "site_a"
+
+
+def test_field_pin_rules(monkeypatch):
+    """Phones need the PIN, the laptop itself does not, and a device is locked out after 5 wrong tries."""
+    from advisor import routes
+
+    monkeypatch.setattr(routes, "_pin_fails", {})
+    monkeypatch.delenv("VORTEX_FIELD_PIN", raising=False)
+    routes.check_field_pin("192.168.137.20", None)  # no PIN configured: open
+    monkeypatch.setenv("VORTEX_FIELD_PIN", "off")
+    routes.check_field_pin("192.168.137.20", None)
+    monkeypatch.setenv("VORTEX_FIELD_PIN", "482913")
+    routes.check_field_pin("127.0.0.1", None)  # the laptop
+    routes.check_field_pin("192.168.137.20", " 482913 ")
+    for _ in range(5):
+        with pytest.raises(HTTPException) as e:
+            routes.check_field_pin("192.168.137.21", "000000")
+        assert e.value.status_code == 403
+    with pytest.raises(HTTPException) as e:
+        routes.check_field_pin("192.168.137.21", "482913")  # right PIN, but locked out
+    assert e.value.status_code == 429
+    routes.check_field_pin("192.168.137.22", "482913")  # other devices unaffected
+
+
+@pytest.mark.skipif(not _loopback_socket_allowed(), reason="loopback sockets blocked")
+def test_field_report_endpoint_checks_pin_header(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from advisor import routes
+
+    monkeypatch.setattr(routes, "_pin_fails", {})
+    monkeypatch.setenv("VORTEX_ADVISOR_DB", str(tmp_path / "reports.db"))
+    monkeypatch.setenv("VORTEX_FIELD_PIN", "482913")
+    body = {"project": "mock", "segment_id": "seg_0001", "kind": "other"}
+    with TestClient(create_app(root_dir=ROOT)) as client:  # TestClient's host is "testclient": treated as a phone
+        assert client.post("/advisor/reports", json=body).status_code == 403
+        seg = client.get("/advisor/state?project=mock").json()["segments"][0]["segment_id"]
+        body["segment_id"] = seg
+        assert client.post("/advisor/reports", json=body, headers={"X-Field-PIN": "111111"}).status_code == 403
+        assert client.post("/advisor/reports", json=body, headers={"X-Field-PIN": "482913"}).status_code == 200

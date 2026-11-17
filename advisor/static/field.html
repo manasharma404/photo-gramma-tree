@@ -68,11 +68,13 @@
     </section>
 
     <section class="card">
-      <h2>4. Details (optional)</h2>
+      <h2>4. Details and PIN</h2>
       <label class="field-label" for="report-callsign">Team / Callsign</label>
       <input id="report-callsign" type="text" placeholder="e.g. NDRF Team-2 / Ward Officer">
       <label class="field-label" for="report-note" style="margin-top: 10px;">Ground note</label>
       <textarea id="report-note" placeholder="e.g. Culvert washed out 20m before school gate"></textarea>
+      <label class="field-label" for="report-pin" style="margin-top: 10px;">Field PIN (from the laptop operator)</label>
+      <input id="report-pin" type="text" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="6 digits">
       <button id="submit-btn" type="button" class="submit-btn" disabled>Submit Field Report</button>
       <div id="toast" class="toast hidden" role="status"></div>
     </section>

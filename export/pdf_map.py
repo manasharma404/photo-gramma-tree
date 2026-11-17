@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -472,10 +473,15 @@ def write_pdf_map(
         "  Decision-support map only (not dispatch).",
         "  'unknown' is never treated as 'open'.",
     ])
+    # Wrap long lines (data basis, accuracy) so the panel stays inside the page.
+    wrapped: list[str] = []
+    for line in meta_lines:
+        indent = " " * (len(line) - len(line.lstrip()) + 2)
+        wrapped.extend(textwrap.wrap(line, width=46, subsequent_indent=indent) or [""])
     panel_ax.text(
         0.02,
         0.54,
-        "\n".join(meta_lines),
+        "\n".join(wrapped),
         transform=panel_ax.transAxes,
         va="top",
         ha="left",

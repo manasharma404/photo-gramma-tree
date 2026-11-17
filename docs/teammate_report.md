@@ -74,6 +74,7 @@ Reconstructed post-landslide scenario for Meppadi / Chooralmala / Mundakai disas
 - **Status:** **Not run empirically on live drone frames.**
 - **Honest Reason:**
   1. Our planned UAV survey flights were cancelled due to rain, so no raw drone video stream from our own footage was collected for live frame extraction.
+     *(Lead's note, 3 Nov: our two earlier DJI Neo 2 night clips do exist, in `data/raw/neo2/`, used for validation Run 3; they were not used for a BRISQUE comparison.)*
   2. The available project aerial data consists of the USGS public orthophoto (`samples/southfork_f01_4/orthophoto_small.tif`) and synthetic test fixtures. No raw drone video footage from Wayanad exists in this repository.
   3. No pre-trained BRISQUE / `libsvm` package was bundled in the offline runtime environment.
 - **Current Quality Implementation:**

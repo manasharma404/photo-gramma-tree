@@ -3,6 +3,8 @@
 Goal: prove a responder's phone can open the map and the field form from the laptop **with no internet anywhere**.
 Already checked headlessly on the laptop (`web/scripts/offline_check.mjs`, 31 Oct 17:30 IST): landing, dashboard (desktop and phone width, all tabs, 3D) and `/field` made 81 requests, **none left the laptop**, no errors. What the phone test adds: the real network path, the firewall, and a real phone screen.
 
+**Status (31 Oct 20:45 IST):** the teammate ran `/field` on an iPhone over her laptop's hotspot with no internet and submitted a report (`docs/teammate_report.md`, V3). Not yet done by a person: the dashboard `/app/` on a phone. Her firewall rule had no `-RemoteAddress LocalSubnet`; remove it after the event (`Remove-NetFirewallRule -DisplayName "Typhon Field Hotspot Port 8000"`).
+
 ## Network: the phone makes the hotspot (recommended)
 Windows' own Mobile Hotspot usually refuses to start without an internet connection to share, so use the phone's hotspot instead:
 1. Phone: **turn mobile data OFF**, then turn on its hotspot. (No mobile data = no internet for anyone.)

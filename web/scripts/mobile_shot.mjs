@@ -5,7 +5,7 @@ import { mkdirSync } from "node:fs";
 const url = process.argv[2] || "http://127.0.0.1:8000/app/";
 const out = process.argv[3] || "../data/screenshots";
 mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));

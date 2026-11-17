@@ -24,7 +24,7 @@ from accuracy.datum import NOTE as DATUM_NOTE, rtk_to_wgs84
 
 ROOT = Path(__file__).resolve().parent.parent
 STANDARD_NOTE = ("ASPRS Positional Accuracy Standards Ed. 2 (2023) ask for at least 30 checkpoints for full "
-                 "compliance; this assessment uses n_checkpoints.")
+                 "compliance; this assessment uses {n}.")
 
 
 def rms(values):
@@ -70,7 +70,7 @@ def main():
         if r.get("horiz_precision_m"):
             precisions.append(float(r["horiz_precision_m"]))
         per_point.append({"id": p["id"], "dx_m": round(dx, 3), "dy_m": round(dy, 3), "dz_m": dz,
-                          "found_by": p["found_by"]})
+                          "found_by": p["found_by"], "lon": round(lon, 8), "lat": round(lat, 8)})
         arrows.append({"type": "Feature",
                        "geometry": {"type": "LineString",
                                     "coordinates": [[lon, lat],
@@ -95,7 +95,7 @@ def main():
                      "max_error_m": round(max(abs(z) for z in dzs), 3) if dzs else None},
         "relative": [],
         "per_point": per_point,
-        "standard_note": STANDARD_NOTE,
+        "standard_note": STANDARD_NOTE.format(n=len(per_point)),
     }
     schema = json.loads((ROOT / "contracts/accuracy.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(acc, schema)

@@ -24,6 +24,10 @@
   const elNote = document.getElementById("report-note");
   const elReporter = document.getElementById("report-callsign");
   const elSubmit = document.getElementById("submit-btn");
+  const elPin = document.getElementById("report-pin");
+  try {
+    elPin.value = sessionStorage.getItem("vortex_field_pin") || "";
+  } catch (_) {}
   const elToast = document.getElementById("toast");
   const elReports = document.getElementById("recent-reports");
   const elPriorities = document.getElementById("priority-preview");
@@ -291,7 +295,7 @@
     try {
       const resp = await fetch("/advisor/reports", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Field-PIN": elPin.value.trim() },
         body: JSON.stringify(payload),
       });
       const out = await resp.json();
@@ -300,6 +304,9 @@
       } else {
         const segTxt = out.segment_state ? out.segment_state.segment_id + " (source=" + out.segment_state.source + ")" : "recorded";
         showToast("Saved report #" + out.report.id + " -> updated " + segTxt, false);
+        try {
+          sessionStorage.setItem("vortex_field_pin", elPin.value.trim());
+        } catch (_) {}
         elNote.value = "";
         await loadContext(state.project);
       }

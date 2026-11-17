@@ -6,6 +6,10 @@ hackFront IIITD, team Vortex (repo: photo-gramma-tree). hackFront India 2026, **
 
 **Status (round 1, 31 Oct 2026):** working prototype; results below come from runs on this laptop. Plan, owners and decisions: [PLAN.md](PLAN.md). Validation write-up: [docs/validation.md](docs/validation.md).
 
+**Try it:** [manasharma404.github.io/photo-gramma-tree](https://manasharma404.github.io/photo-gramma-tree/) is a read-only copy of the app (South Fork block): map, 3D view, panels, the guided tour, About and Drone data. Measuring and field reports run on the Typhon laptop (`uv run python -m api.main`).
+
+**Watch it:** [docs/demo/typhon_demo.mp4](docs/demo/typhon_demo.mp4) (1 min 41 s): the real laptop app, recorded headlessly by `web/scripts/demo_video.mjs`: home, the guided tour, vehicles, measuring a span across the debris channel (59.40 ± 8.62 m), accuracy, 3D view, the field page. Captions describe what is on screen; frames are captured about 1.5 per second, so scrolling looks stepped.
+
 ## What it does
 ```
 drone photos or video (+GPS) ──► ODM (Docker, GPU) ──► orthophoto, height models (DSM/DTM)
@@ -39,7 +43,10 @@ Our planned survey flights on 29–30 Oct were cancelled by rain. We will fly ou
 | USGS F01-5 strip, full tier | 109 | 66.6 min (incremental) | 7.01 GiB | 9.07 ha | DSM/DTM at 0.10 m |
 | USGS F01-4 block (5 parallel lines), quick tier | 248 | 145.6 min | 8.61 GiB | 12.94 ha | ~11.2 min/ha; GPU feature extraction |
 | USGS F01-4 block, full tier (height models) | 248 | 171.4 min (incremental) | 11.0 GiB | 13.19 ha | DSM/DTM at 0.10 m |
+| USGS F01-4 block, **middle tier** | 248 | **80.2 min** | 8.77 GiB | 13.14 ha | 5 cm; **±6.06 m at the same 3 checkpoints** (quick: ±6.09 m), 1.8× faster ([validation Run 6](docs/validation.md)) |
+| USGS F01-4 block, **first-look tier** (2 runs) | 248 | **50.3 / 49.2 min** | 6.92 GiB (2nd run) | 10.63 / 11.73 ha | 10 cm pixels; ±8.4 m and ±11.4 m at 2 checkpoints, warped differently each run: for seeing, not measuring ([validation Run 5](docs/validation.md)) |
 | Our DJI Neo 2 video (220 frames), quick tier | 220 | 67.7 min | 8.24 GiB | 4.32 ha extent | 7 pieces joined by GPS; open ground clean, buildings smeared, so usable area is smaller (not measured); no checkpoints |
+| Our DJI Neo 2 video, **first-look tier** | 220 | **26.7 min** | 11.0 GiB | 2.06 ha | 10 cm; 201 frames in 15 pieces, part of the field shows twice: for seeing open ground only ([validation Run 3](docs/validation.md)) |
 
 **Accuracy without ground control (USGS RTK checkpoints):**
 | Flight geometry | Checkpoints | Horizontal RMSE | Max |
@@ -63,7 +70,7 @@ cd web && npm install && npm run build && cd ..
 uv run python -m pipeline.subset --images <photo folder> --rtk <checkpoints.csv> --out-dir <dir>
 uv run python -m pipeline.video_frames --video <clip.mp4> --project <name>
 ```
-**2. Map.** Quick tier first (orthophoto), full tier later (adds DSM/DTM). Each run is logged in `data/runs/<run_id>/` with time and peak memory. Ground control is refused on purpose: checkpoints only measure error.
+**2. Map.** Optionally a `first` tier for a rough look in about a third of the time (`--tier first`, 10 cm, not for measuring); then the `middle` tier (orthophoto; on our block as accurate as `quick` in about half the time, validation Run 6) or the `quick` tier, and the full tier later (adds DSM/DTM). Each run is logged in `data/runs/<run_id>/` with time and peak memory. Ground control is refused on purpose: checkpoints only measure error.
 ```
 uv run python -m pipeline.run_odm --project <name> --tier quick --images-list <list.txt> --extra --feature-type sift
 uv run python -m pipeline.run_odm --project <name> --tier full  --images-list <list.txt> --extra --feature-type sift
@@ -71,7 +78,7 @@ uv run python -m pipeline.run_odm --project <name> --tier full  --images-list <l
 **3. Accuracy** (only where surveyed checkpoints exist). `find_targets` saves crops; a person confirms the IDs in `confirmed.json` before errors are computed.
 ```
 uv run python -m accuracy.find_targets --ortho <odm_orthophoto.tif> --rtk <checkpoints.csv> --out data/runs/<run_id>/targets
-uv run python -m accuracy.compute_errors --confirmed data/runs/<run_id>/targets/confirmed.json --rtk <checkpoints.csv> --run-id <run_id> --out data/runs/<run_id> --dsm <dsm.tif>
+uv run python -m accuracy.compute_errors --confirmed data/runs/<run_id>/targets/confirmed.json --rtk <checkpoints.csv> --run-id <run_id> --out data/runs/<run_id>/accuracy.json --dsm <dsm.tif>
 uv run python -m accuracy.vertical --dtm <dtm.tif> --rtk <checkpoints.csv> --accuracy data/runs/<run_id>/accuracy.json
 ```
 **4. Roads, tiles, 3D, serve.** OSM roads are fetched once beforehand (`scripts/prefetch_osm_southfork.py`); nothing touches the internet after that.
@@ -82,7 +89,7 @@ uv run python -m pipeline.terrain --dsm <dsm.tif> --ortho <odm_orthophoto.tif> -
 uv run python -m pipeline.activate --run <quick_run_id> --full <full_run_id> --accuracy data/runs/<run_id>/accuracy.json
 uv run python -m api.main
 ```
-Then open `http://localhost:8000` (laptop) or `http://<laptop-ip>:8000` (phone on the hotspot). Field reports: `/field`. Advisor setup (Neo4j, Wayanad): [docs/runbook_advisor.md](docs/runbook_advisor.md).
+Then open `http://localhost:8000` (laptop) or `http://<laptop-ip>:8000` (phone on the hotspot). Field reports: `/field`. Phones need the 6-digit PIN the server prints at start (a new one each start; set `VORTEX_FIELD_PIN` to choose one, or `off`); the laptop itself is not asked, and a phone is locked out for 10 minutes after 5 wrong PINs (checked by `web/scripts/field_pin_test.mjs`). An open dashboard picks up a new report within about 3 seconds: the road recolours, the cut-off count updates and a notice says what changed (checked end to end by `web/scripts/report_loop_test.mjs`). Advisor setup (Neo4j, Wayanad): [docs/runbook_advisor.md](docs/runbook_advisor.md).
 
 ## Repo map
 | Folder | What |

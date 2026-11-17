@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 
 const P = JSON.parse(readFileSync(new URL("./tools_test_points.json", import.meta.url)));
 const out = "../data/screenshots";
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));

@@ -5,14 +5,14 @@
   --font-num: "Space Grotesk", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Brand Palette (web/src/styles/tokens.css) */
-  --sand: #F8F6EF;     /* background */
+  --sand: #F5F1E6;     /* background */
   --stone: #E6E1D6;    /* surfaces, cards */
-  --sage: #A7B399;     /* accents, highlights */
-  --forest: #2F3E2E;   /* text, primary buttons, key elements */
-  --terrain: #6B7F6A;  /* secondary, icons */
-  --ocean: #0F3D4E;    /* data overlays, focus ring */
+  --sage: #B5D334;     /* accents, highlights */
+  --forest: #0F1E3D;   /* text, primary buttons, key elements */
+  --terrain: #56607A;  /* secondary, icons */
+  --ocean: #2A4EA8;    /* data overlays, focus ring */
   --line: #D8D2C4;
-  --text-2: #5C6B5B;
+  --text-2: #56607A;
 
   --bg: var(--sand);
   --surface: #FFFFFF;
@@ -389,7 +389,7 @@ textarea {
 /* Unknown: grey #8C918A dotted line */
 .badge.unknown {
   background: rgba(140, 145, 138, 0.14);
-  color: #5C6B5B;
+  color: #56607A;
   border: 1px dotted var(--status-unknown);
 }
 

@@ -1,7 +1,7 @@
 // Why is the 2D map blank headless? Reports map state, tile requests and canvas size. (diagnostic)
 import { chromium } from "playwright-core";
 
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const tiles = { ok: 0, fail: 0 };
 page.on("response", (r) => { if (r.url().includes("/tiles/")) r.ok() ? tiles.ok++ : tiles.fail++; });

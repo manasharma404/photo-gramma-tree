@@ -9,4 +9,10 @@ Every external dataset we use. Public data is labelled as public in the UI and n
 | USGS South Fork RTK GNSS points (`SEKI_SouthFork_DebrisFlow_2024_RTK_GNSS.csv`: 18 AT + 5 CHLK targets, 1576 TOPO, 1 BASE) | Same data release, ScienceBase item 6735365ad34e6fbce7b5d592; metadata `SEKI_SouthFork_DebrisFlow_GNSS_metadata.xml` (states NAD83(2011), NAVD88/GEOID18) | Public domain; credit USGS | 31 Oct 2026 | Independent checkpoints (never used as GCPs) and height comparison |
 | OpenStreetMap roads and tracks around South Fork (`data/prefetch/osm_southfork.gpkg`) | OpenStreetMap via the Overpass API, fetched once by `scripts/prefetch_osm_southfork.py` (no internet at runtime) | ODbL 1.0; credit "© OpenStreetMap contributors" (shown on the map) | 31 Oct 2026 | Road centrelines that we check against the map |
 
+## Demo video audio
+
+| Item | Source | Licence | Used for |
+|---|---|---|---|
+| "WIN AGAIN" (free type beat) | Truckky Beats, YouTube | Free-download beat; terms not checked beyond the title ("FREE"). Credit: **prod. Truckky Beats**. Non-commercial hackathon use only | Background music under the voiceover in the final demo video (not in this repo) |
+
 Add any other dataset here when it is downloaded.

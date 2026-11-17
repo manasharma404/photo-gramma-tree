@@ -81,23 +81,23 @@ vehicles:
   jeep:
     label: "Light 4WD Reconnaissance / Utility SUV (3-Door 4x4 class)"
     width_m:
-      value: 1.82
-      source: "PLACEHOLDER (representative 3-door 4WD SUV overall width; Mahindra Thar brochure PDF uses CID glyph encoding without machine-readable plain text in 10-minute audit)"
+      value: 1.87
+      source: "Mahindra, Thar OG Specifications and Features, https://auto.mahindra.com/suv/thar/specs-and-features.html (opened 4 Nov 2026), Dimensions: Width 1870 mm (was 1.82 m, narrower than the published vehicle)"
     height_m:
       value: 1.855
-      source: "PLACEHOLDER (representative 3-door 4WD SUV overall height; Mahindra Thar brochure PDF uses CID glyph encoding without machine-readable plain text in 10-minute audit)"
+      source: "Mahindra, Thar OG Specifications and Features, https://auto.mahindra.com/suv/thar/specs-and-features.html (opened 4 Nov 2026), Dimensions: Height 1855 mm"
     ground_clearance_m:
       value: 0.226
-      source: "PLACEHOLDER (representative 3-door 4WD SUV ground clearance; Mahindra Thar brochure PDF uses CID glyph encoding without machine-readable plain text in 10-minute audit)"
+      source: "Mahindra press release 'Mahindra Unveils the All-New Thar' (2020), https://www.mahindra.com/news-room/press-release/en/mahindra-unveils-the-all-new-thar-the-4x4-icon-is-now-a-contemporary-world-class-suv: 226 mm unladen. The current spec page lists 232 mm; the lower figure is kept (stricter)"
     overhead_clearance_margin_m:
       value: 0.25
       source: "PLACEHOLDER (vertical overhead buffer above 1.855 m 4x4 roof)"
     clearance_per_side_m:
       value: 0.30
-      source: "PLACEHOLDER (0.30 m lateral buffer per side -> 2.42 m minimum clear width for unobstructed 4WD passage)"
+      source: "PLACEHOLDER (0.30 m lateral buffer per side -> 2.47 m minimum clear width for unobstructed 4WD passage)"
     partial_clearance_per_side_m:
       value: 0.15
-      source: "PLACEHOLDER (0.15 m tight lateral buffer per side -> 2.12 m minimum clear width for low-range crawl)"
+      source: "PLACEHOLDER (0.15 m tight lateral buffer per side -> 2.17 m minimum clear width for low-range crawl)"
     max_obstruction_open_m:
       value: 0.15
       source: "PLACEHOLDER (unobstructed 4WD passability height below 0.226 m ground clearance)"

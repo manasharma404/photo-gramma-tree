@@ -43,7 +43,7 @@ Every number below is from `docs/validation.md` / `README.md` (runs in `data/run
 - Dashboard: map, 3D view, road status per vehicle (fire truck, ambulance, jeep, on foot), measuring tools
 - Status by colour **and** line pattern (open / partial / blocked / unknown)
 - Visual: dashboard screenshot (`data/screenshots/01_map_act.png`) + 3D (`04_3d.png`)
-- Notes: everything served by the laptop; headless check found 0 of 81 requests leaving the laptop. Phone test: **PENDING** (`docs/phone_check.md`).
+- Notes: everything served by the laptop; headless check found 0 of 81 requests leaving the laptop. Phone test: `/field` done by the teammate on an iPhone over a hotspot with no internet (`docs/teammate_report.md`); dashboard on a phone **PENDING** (`docs/phone_check.md`).
 
 ### 8. Honest "unknown"
 - 16 trails under canopy: only 5–43% visible → marked **unknown**, not open

@@ -2,7 +2,7 @@
 import { chromium } from "playwright-core";
 
 for (const args of [[], ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"], ["--use-gl=angle", "--use-angle=d3d11", "--ignore-gpu-blocklist"]]) {
-  const browser = await chromium.launch({ channel: "msedge", headless: true, args });
+  const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true, args });
   const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
   const r = await page.evaluate(() => {
     const c = document.createElement("canvas");
