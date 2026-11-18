@@ -18,6 +18,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import time
 from typing import Any
 import requests
 
@@ -65,45 +66,61 @@ def find_target_files(files: list[dict[str, Any]]) -> list[tuple[dict[str, Any],
     return matched
 
 
-def download_file(url: str, dest_path: Path, expected_size: int, expected_md5: str | None = None) -> bool:
+def download_file(url: str, dest_path: Path, expected_size: int, expected_md5: str | None = None, max_retries: int = 15) -> bool:
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = dest_path.with_suffix(dest_path.suffix + ".part")
 
-    existing_bytes = 0
-    if temp_path.exists():
-        existing_bytes = temp_path.stat().st_size
+    retry = 0
+    while retry < max_retries:
+        existing_bytes = temp_path.stat().st_size if temp_path.exists() else 0
+        if existing_bytes >= expected_size:
+            temp_path.replace(dest_path)
+            print(f"\nSaved: {dest_path}")
+            return True
 
-    headers = {"User-Agent": "Typhon-Research/0.1"}
-    if existing_bytes > 0 and existing_bytes < expected_size:
-        headers["Range"] = f"bytes={existing_bytes}-"
-        mode = "ab"
-        print(f"Resuming download from byte {existing_bytes} ({existing_bytes / 1e6:.1f} MB)...")
-    else:
-        existing_bytes = 0
-        mode = "wb"
+        headers = {"User-Agent": "Typhon-Research/0.1"}
+        if existing_bytes > 0:
+            headers["Range"] = f"bytes={existing_bytes}-"
+            mode = "ab"
+            print(f"Resuming download from byte {existing_bytes} ({existing_bytes / 1e6:.1f} MB)...")
+        else:
+            mode = "wb"
 
-    with requests.get(url, headers=headers, stream=True, timeout=60) as resp:
-        if resp.status_code not in (200, 206):
-            print(f"Failed download: HTTP {resp.status_code}")
-            return False
+        try:
+            with requests.get(url, headers=headers, stream=True, timeout=60) as resp:
+                if resp.status_code not in (200, 206):
+                    print(f"Failed download: HTTP {resp.status_code}")
+                    retry += 1
+                    time.sleep(3)
+                    continue
 
-        total_bytes = existing_bytes + int(resp.headers.get("content-length", expected_size - existing_bytes))
-        downloaded = existing_bytes
+                total_bytes = existing_bytes + int(resp.headers.get("content-length", expected_size - existing_bytes))
+                downloaded = existing_bytes
 
-        with open(temp_path, mode) as fp:
-            for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                if chunk:
-                    fp.write(chunk)
-                    downloaded += len(chunk)
-                    pct = (downloaded / total_bytes * 100) if total_bytes else 0
-                    print(f"\r  Downloaded: {downloaded / 1e6:.1f} / {total_bytes / 1e6:.1f} MB ({pct:.1f}%)", end="", flush=True)
+                with open(temp_path, mode) as fp:
+                    for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                        if chunk:
+                            fp.write(chunk)
+                            downloaded += len(chunk)
+                            pct = (downloaded / total_bytes * 100) if total_bytes else 0
+                            print(f"\r  Downloaded: {downloaded / 1e6:.1f} / {total_bytes / 1e6:.1f} MB ({pct:.1f}%)", end="", flush=True)
 
-    print()
-    if temp_path.stat().st_size != expected_size:
-        print(f"Warning: File size mismatch. Got {temp_path.stat().st_size}, expected {expected_size}")
-    temp_path.replace(dest_path)
-    print(f"Saved: {dest_path}")
-    return True
+            print()
+            if temp_path.stat().st_size == expected_size:
+                temp_path.replace(dest_path)
+                print(f"Saved: {dest_path}")
+                return True
+            else:
+                print(f"Partial download ({temp_path.stat().st_size} of {expected_size} bytes). Retrying...")
+                retry += 1
+                time.sleep(2)
+        except Exception as e:
+            print(f"\nDownload interrupted ({e}). Retrying in 3 seconds (attempt {retry+1}/{max_retries})...")
+            retry += 1
+            time.sleep(3)
+
+    print(f"Failed to download after {max_retries} attempts.")
+    return False
 
 
 def main() -> None:
