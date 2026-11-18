@@ -24,13 +24,15 @@ In accordance with Hard Rule 4, all dataset terms are checked and recorded prior
 ## 2. Model & Debris Segmentation (T1 & T2)
 
 ### 2.1 Resolution & Ground Sampling Distance (GSD)
-- Our South Fork drone orthomosaic resolution: **5–10 cm / pixel** (GSD).
-- Target training resolution for CAS Landslide drone crops: **0.10 m / pixel (10 cm / px)**.
-- Input prediction tiles are resized to $512 \times 512$ at 10 cm/pixel GSD.
+- **South Fork drone orthomosaic resolution:** 5-10 cm / pixel (GSD).
+- **CAS Landslide UAV Subsets Downloaded & Verified (Zenodo 10294997):**
+  1. cas_train_val_0.2m.zip: 1,017,160,974 bytes (MD5: 30b4f45903d0eb0b3e72b978a2625595, SHA-256: 4134470a51e6b5c8dcf3809bbc258340207f8f610cd5de99f89a38aeffc9853d), GSD 0.20 m, 4,908 entries (img/, mask/, label/).
+  2. cas_held_out_test_0.6m.zip: 545,905,382 bytes (MD5: 597f8560ef8e572143211baea6d50080, SHA-256: 8f1e61b23137acd04d0cb8f84b469e669ed23095930adfcb2d67d8057f089ffe), GSD 0.60 m, 2,955 entries (img/, mask/, label/).
+- **GSD Standardization:** Input drone crops resized to training resolution (0.20 m GSD, 512x512 tiles).
 
 ### 2.2 Split & Hold-out Region
-- **Held-out Region:** The Bijie (Guizhou) drone flight block is held out completely as the test set prior to training.
-- **Training / Validation:** Remaining UAV subsets from Sichuan and Yunnan.
+- **Held-out Test Region:** Moxitaidi (UAV-0.6m) (984 images / masks) held out completely as the test set before any model training.
+- **Training / Validation Set:** Moxi town (UAV-0.2m) (1,635 images / masks) split 80/20 into train/validation.
 
 ### 2.3 Proposed Rule: Debris Mask to `ml_scores.json` Contract
 To keep the contract (`contracts/ml_scores.schema.json`: `p_blocked`, `p_partial`, `p_clear`, `model`, `version`), the model output per road segment corridor is mapped via the following proposed geometric rule:
@@ -45,8 +47,8 @@ $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road ba
 
 | Evaluation Set | Model | IoU (Debris) | Precision | Recall | Status / Notes |
 |---|---|---|---|---|---|
-| **Held-out UAV Region (Bijie)** | Small U-Net (ResNet-18 backbone, ImageNet pretrain) | `PENDING` | `PENDING` | `PENDING` | Model training scheduled in finale compute slot |
-| **Held-out UAV Region (Bijie)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR weights expect 4-channel `(RGB + mask)` trained specifically on flood water, not rock/soil landslide debris |
+| **Held-out UAV Region (Moxitaidi 0.6m)** | Small U-Net (ResNet-18 backbone, ImageNet pretrain) | `PENDING` | `PENDING` | `PENDING` | Model training scheduled in finale compute slot |
+| **Held-out UAV Region (Moxitaidi 0.6m)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR weights expect 4-channel `(RGB + mask)` trained specifically on flood water, not rock/soil landslide debris |
 | **South Fork 50 Road Crops** | Typhon Debris Segmenter | `PENDING` | `PENDING` | `PENDING` | Road crops to be labeled jointly with lead (T2) |
 
 ### 2.5 Inference Timing & Checksum
@@ -156,8 +158,9 @@ LIMIT 5;
 
 ---
 
-## 5. Summary of `PENDING` Items for Finale Slot
-- [ ] Model weights training on CAS Landslide dataset (requires full dataset download and training on GPU during the finale build).
-- [ ] Joint labeling of the 50 South Fork road crops with the lead.
-- [ ] Final IoU/Precision/Recall numbers to replace `PENDING` placeholders.
-- [ ] Model weights SHA-256 checksum and ONNX export.
+## 5. Status of Remaining Tasks (Groundwork & Finale)
+- [x] **CAS UAV Dataset Download:** Complete (1.56 GB total downloaded to data/cas/zips/, MD5 checksums matched with Zenodo record 10294997).
+- [ ] **Model Training (T1):** Train small U-Net (ResNet-18) on Moxi town (0.2m) and evaluate on held-out Moxitaidi (0.6m) before Thu 19 Nov 22:00 IST.
+- [ ] **ONNX Weights & Checksum (T1):** Export model weights to .onnx outside git and record SHA-256 in report.
+- [ ] **South Fork 50 Road Crops (T2):** Awaiting lead's joint labeling of the 50 road crops.
+- [ ] **Neo4j Cypher Integration (T3):** Ready for live cluster connection with pure Cypher fallback queries.
