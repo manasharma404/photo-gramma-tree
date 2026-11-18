@@ -132,7 +132,7 @@ def main() -> None:
 
     dest_zip_dir = args.dest / "zips"
     for target, f in matched:
-        safe_name = f.get("key", "")
+        safe_name = f.get("key", "").encode("ascii", "replace").decode("ascii")
         # Normalize non-ascii characters for windows path safety
         ascii_name = f"cas_{target['role']}_{target['resolution']}.zip"
         dest_file = dest_zip_dir / ascii_name
