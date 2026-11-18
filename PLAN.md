@@ -40,7 +40,7 @@ A responder flies a consumer drone over a landslide. A rough map grows on the la
 | Tue 17 – Wed 18 | F1, still open: how photos reach the laptop during a flight (or straight after landing) | Claude + lead | Written up as what we will actually do on the day |
 | ~~Tue 17~~ done 16 Nov | Download the 1 m pre-event terrain and confirm its flight date | Claude | Done: file in `data/prefetch/usgs_1m/`, date and licence in `data/LICENSES.md` |
 | Tue 17 – Thu 19 | One model, one job: find debris on roads in drone maps. Train on the CAS drone subsets; hold out one whole region for testing | Teammate | Weights file, and a score on the held-out region written to `docs/validation.md` (PENDING until run) |
-| Wed 18 | Hand-label about 50 South Fork road crops (debris / clear) as our own test set | Lead + teammate | Labels in `data/eval/`; the model's score on them recorded |
+| Wed 18 | Hand-label 50 South Fork crops (debris / no debris / can't tell) as our own test set. **Crops ready 18 Nov** (`docs/eval_southfork_crops.md`); a mix of path, bare-ground and random spots, because no road in our map crosses the debris | Lead + teammate | Labels in `data/eval/southfork_crops/labels.csv`; the model's score on them recorded |
 | Wed 18 | Wayanad pack: OpenStreetMap roads and the Copernicus terrain model, tiles built for offline use | Claude | Opens with Wi-Fi off |
 | Wed 18 – Fri 20 | Home page 3D object and the design spec | Lead | Spec file in `docs/`; model file ready to load |
 | Thu 19 | Our own survey flight with checkpoints, weather allowing; process it overnight | Lead | Run logged in `data/runs/` |

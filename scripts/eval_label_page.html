@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Label the test crops</title>
+<!-- Template for scripts/make_eval_crops.py, which writes a copy into data/eval/southfork_crops/label.html.
+     Open that copy straight from the folder (double-click). It works offline. Labels stay in this browser
+     until "Save labels.csv" is pressed. -->
+<style>
+  :root { --ink: #060B18; --navy: #0F1E3D; --lime: #B5D334; --sand: #F5F1E6; --blue: #2A4EA8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--sand); font: 16px/1.4 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  #img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #000; image-rendering: auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .muted { opacity: 0.7; }
+  button { font: inherit; cursor: pointer; border: 2px solid var(--sand); background: transparent; color: var(--sand); padding: 12px 14px; border-radius: 8px; width: 100%; text-align: left; margin-bottom: 8px; }
+  button.on { background: var(--lime); border-color: var(--lime); color: var(--ink); font-weight: 600; }
+  button kbd { float: right; opacity: 0.7; }
+  textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 1px solid #44507a; background: #0d1530; color: var(--sand); }
+  nav { display: flex; gap: 8px; margin: 12px 0; }
+  nav button { text-align: center; }
+  #bar { height: 6px; background: #1d2a52; border-radius: 3px; overflow: hidden; margin: 8px 0 16px; }
+  #bar i { display: block; height: 100%; background: var(--lime); }
+  details { margin-top: 16px; }
+  details p { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <img id="img" alt="Crop from the South Fork map" />
+    <p class="muted">25.6 m across. Top of the image is north.</p>
+  </div>
+  <div>
+    <h1 id="cid">c01</h1>
+    <p class="muted" id="count"></p>
+    <div id="bar"><i></i></div>
+    <button data-v="debris">Debris <kbd>D</kbd></button>
+    <button data-v="clear">No debris <kbd>C</kbd></button>
+    <button data-v="unsure">Can't tell <kbd>U</kbd></button>
+    <textarea id="notes" rows="2" placeholder="Notes (optional)"></textarea>
+    <nav><button id="prev">← Back</button><button id="next">Next →</button></nav>
+    <button id="save" style="text-align: center">Save labels.csv</button>
+    <details open>
+      <summary>Rules</summary>
+      <p><b>Debris:</b> fresh landslide or debris-flow material anywhere in the crop: mud, loose rock and boulders, sand fans, broken or piled trees, a raw scar.</p>
+      <p><b>No debris:</b> none of that. Bare trails, old rock outcrops, dry grass and shadows are "no debris".</p>
+      <p><b>Can't tell:</b> too dark, too blurred, or hidden by trees. Use it honestly; it is not counted as either.</p>
+      <p>Label what you see, not what you expect. Agree on each crop together; write disagreements in the notes.</p>
+    </details>
+  </div>
+</main>
+<script>
+const IDS = __IDS__;
+const KEY = "typhon-eval-labels-southfork";
+let labels = {};
+try { labels = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { labels = {}; }
+let i = Math.max(0, IDS.findIndex((id) => !(labels[id] && labels[id].label)));  // resume at the first unlabelled crop
+const $ = (s) => document.querySelector(s);
+function store() { try { localStorage.setItem(KEY, JSON.stringify(labels)); } catch (e) {} }
+function show() {
+  const id = IDS[i], l = labels[id] || {};
+  $("#img").src = id + ".png"; $("#cid").textContent = id;
+  const done = IDS.filter((x) => labels[x] && labels[x].label).length;
+  $("#count").textContent = `${i + 1} of ${IDS.length} · ${done} labelled`;
+  $("#bar i").style.width = (100 * done / IDS.length) + "%";
+  document.querySelectorAll("button[data-v]").forEach((b) => b.classList.toggle("on", b.dataset.v === l.label));
+  $("#notes").value = l.notes || "";
+}
+function set(v) { const id = IDS[i]; labels[id] = { ...(labels[id] || {}), label: v }; store(); show(); setTimeout(() => { if (i < IDS.length - 1) { i++; show(); } }, 180); }
+document.querySelectorAll("button[data-v]").forEach((b) => b.onclick = () => set(b.dataset.v));
+$("#notes").oninput = (e) => { const id = IDS[i]; labels[id] = { ...(labels[id] || {}), notes: e.target.value }; store(); };
+$("#prev").onclick = () => { if (i > 0) { i--; show(); } };
+$("#next").onclick = () => { if (i < IDS.length - 1) { i++; show(); } };
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA") return;
+  const k = e.key.toLowerCase();
+  if (k === "d") set("debris"); else if (k === "c") set("clear"); else if (k === "u") set("unsure");
+  else if (k === "arrowleft") $("#prev").click(); else if (k === "arrowright") $("#next").click();
+});
+$("#save").onclick = () => {
+  const q = (s) => `"${String(s || "").replace(/"/g, '""')}"`;
+  const csv = "crop_id,label,notes\n" + IDS.map((id) => [id, (labels[id] || {}).label || "", q((labels[id] || {}).notes)].join(",")).join("\n") + "\n";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "labels.csv"; a.click();
+};
+show();
+</script>
+</body>
+</html>

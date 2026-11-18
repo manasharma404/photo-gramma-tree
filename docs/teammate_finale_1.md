@@ -53,7 +53,9 @@ uv run pytest -q
 **Done when:** a weights file exists outside git with its checksum; the report has a score table from a repeatable run; a script reproduces the scores from the downloaded data.
 
 ### T2. Our own test set (Wed, 2 hours, with the lead)
-The lead's side will send about 50 road crops from the South Fork map. Label each "debris on road" or "clear" with the lead, then run the model on them. Report precision and recall on these separately from the held-out region. **If the model does badly on our own map, say so plainly:** that result decides whether F3 sets a status or only raises "needs checking".
+**Update, 18 Nov:** the 50 crops are ready, made by `scripts/make_eval_crops.py`. They are not all road crops: no road inside our map crosses the debris, so the set mixes path, bare-ground and random spots. How to label and score them: `docs/eval_southfork_crops.md`.
+
+The lead's side will send about 50 crops from the South Fork map. Label each "debris on road" or "clear" with the lead, then run the model on them. Report precision and recall on these separately from the held-out region. **If the model does badly on our own map, say so plainly:** that result decides whether F3 sets a status or only raises "needs checking".
 
 ### T3. Neo4j: check what the finale instance can do (Tue, 2 hours)
 At the finale we get a hosted Neo4j (AuraDB). Our access report uses the Graph Data Science plugin (`gds.allShortestPaths.dijkstra` in `advisor/report.py`), and **as far as we know, free AuraDB instances do not include that plugin (not verified by us: step 2 checks it).**
