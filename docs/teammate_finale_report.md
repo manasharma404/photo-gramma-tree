@@ -104,7 +104,7 @@ RETURN seg_to_clear,
 ORDER BY reconnects_people DESC, reconnects_places DESC
 LIMIT 5;
 ```
-*Validation:* Identifies Trishuli Bazar Bridge (`seg_NEPAL_0006`) as Rank 1 (reconnecting Bidur, population 59,227), and Phurke Khola Bridge (`seg_NEPAL_0003`) as Rank 2 (reconnecting Dhadingbesi, population 58,828). Matches NetworkX rank order identically.
+*Validation:* Identifies Trishuli Bazar Bridge (`seg_NEPAL_0006`) as Rank 1 (serves Bidur Municipality, 59,227, 2021 census; bridge joins two parts of same municipality), and Phurke Khola Bridge (`seg_NEPAL_0003`) as Rank 2 (serves Nilkantha Municipality / Dhadingbesi, population 58,828, 2021 census). Matches NetworkX rank order identically.
 
 #### Query 3: Fly Next (Drone Reconnaissance Priority)
 *Which unknown road segment, if surveyed and verified, settles the route for the most people?*
@@ -134,20 +134,19 @@ LIMIT 5;
   - Dhading Link: Malekhu $\leftrightarrow$ Dhadingbesi
   - Pasang Lhamu Highway: Galchhi $\leftrightarrow$ Bidur / Trishuli Bazar $\leftrightarrow$ Betrawati $\leftrightarrow$ Dhunche $\leftrightarrow$ Syabrubesi $\leftrightarrow$ Rasuwagadhi (China border)
 - **Key Damage Points Reconstructed from Cited Reports:**
-  1. *Trishuli River Bridge at Trishuli Bazar:* Swept away; completely isolates Bidur and eastern bank.
+  1. *Trishuli River Bridge at Trishuli Bazar:* Swept away; serves Bidur Municipality (59,227, 2021 census), joining two parts of the same municipality.
   2. *Trishuli–Betrawati Bridges:* All river crossings washed away; isolates northern Rasuwa road access.
   3. *Phurke Khola Bridge at Malekhu:* Washed away; cuts off the primary link to Dhadingbesi.
-  4. *Northern Mountain Highway (Betrawati $\rightarrow$ Dhunche $\rightarrow$ Rasuwagadhi):* Carriageway heavily broken by landslides and boulder flows; impassable for wheeled ambulances and fire tenders; partial scramble for 4x4 convoys and foot columns.
-  5. *Prithvi Highway:* Reopened on 29 August after 3 days of closure.
+  4. *Northern Mountain Highway (Betrawati $\rightarrow$ Dhunche $\rightarrow$ Rasuwagadhi):* Carriageway heavily broken by landslides and boulder flows; impassable for wheeled ambulances and fire tenders (blocked); passability for 4x4 convoys and foot columns is unverified in reports -> set to unknown (Hard Rule 3: unknown is not open and not blocked).
+  5. *Prithvi Highway:* Reopened Friday evening 28 August after 3 days of closure (Kathmandu Post 29 Aug report explicitly states 'Friday evening').
 
 ### 4.2 Official Cited Population Figures
-- **Bidur Municipality:** 59,227 (2021 Census)
-- **Nilkantha Municipality (Dhadingbesi):** 58,828 (2021 Census)
-- **Galchhi Rural Municipality:** 27,784 (2021 Census)
-- **Uttargaya (Betrawati):** 8,255 (2021 Census)
-- **Gosaikunda (Dhunche):** 7,143 (2021 Census)
-- **Syabrubesi Ward:** 3,200 (2021 Census)
-- **Timure / Rasuwagadhi Ward:** 1,123 (2021 Census)
+- **Bidur Municipality:** 59,227 (National Population and Housing Census 2021, National Statistics Office Nepal; bridge joins two parts of same municipality)
+- **Nilkantha Municipality (Dhadingbesi):** 58,828 (National Population and Housing Census 2021, National Statistics Office Nepal)
+- **Galchhi Rural Municipality:** 27,784 (National Population and Housing Census 2021, National Statistics Office Nepal)
+- **Uttargaya (Betrawati) Rural Municipality:** 8,255 (National Population and Housing Census 2021, National Statistics Office Nepal)
+- **Gosaikunda (Dhunche) Rural Municipality:** 7,143 (National Population and Housing Census 2021, National Statistics Office Nepal)
+- **Baireni, Malekhu, Syabrubesi, Rasuwagadhi:** Set to null (sub-ward settlements and border checkpoints without standalone 2021 census municipal table; Hard Rule 1: no invented numbers)
 
 ### 4.3 Limits & Integrity Disclaimers
 1. **Reconstruction, not drone measurement:** This scenario is reconstructed strictly from cited reports (Kathmandu Post 29 Aug 2026; UN News 31 Aug 2026; Nepal Census 2021) and is explicitly labelled `scenario reconstructed from reports, not drone-measured` on every segment and place feature.

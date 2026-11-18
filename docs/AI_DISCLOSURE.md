@@ -18,3 +18,4 @@ The hackFront rules require disclosure of AI-assisted work. One line per piece o
 | 03 Nov 2026 | Antigravity | 90-second product demo video (`typhon_video/out/typhon_90s.mp4`) built with Remotion from demo video script | Teammate |
 | 4 Nov 2026 | Claude Code (Claude Opus 5.5) | Submission reopened to 5 Nov 06:00: added the field-page PIN, the `middle` processing tier and its runs, sourced the Thar and Dhruv dimensions from Mahindra, HAL and EASA pages (the rest stay PLACEHOLDER) | Lead |
 | 05 Nov 2026 | Antigravity | 90-second product demo video v2 (`typhon_v2.mp4`) built with Remotion; documentary voiceover via Microsoft Neural TTS (`en-US-ChristopherNeural`) at -16 LUFS; restructured 6-part pacing with hero phone-hotspot report loop and verified numbers | Teammate |
+| 18 Nov 2026 | Antigravity | Updated Nepal scenario passability rules, Bidur municipality context, 2021 census citations, and CAS Landslide UAV downloader | Teammate |

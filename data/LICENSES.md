@@ -10,7 +10,8 @@ Every external dataset we use. Public data is labelled as public in the UI and n
 | OpenStreetMap roads and tracks around South Fork (`data/prefetch/osm_southfork.gpkg`) | OpenStreetMap via the Overpass API, fetched once by `scripts/prefetch_osm_southfork.py` (no internet at runtime) | ODbL 1.0; credit "© OpenStreetMap contributors" (shown on the map) | 31 Oct 2026 | Road centrelines that we check against the map |
 | OpenStreetMap roads and places for Nepal flood corridor (`data/projects/nepal/`) | OpenStreetMap contributors (via `scripts/prefetch_nepal.py`) | ODbL 1.0; credit "© OpenStreetMap contributors" | 17 Nov 2026 | Road network geometry and facility locations for the 26 Aug 2026 Nepal flash flood scenario |
 | Nepal National Population and Housing Census 2021 | National Statistics Office, Government of Nepal | Government of Nepal Open Data | 17 Nov 2026 | Cited settlement populations for the Trishuli-Prithvi corridor |
-| CAS Landslide Dataset (UAV subsets) | Zenodo record 10294997 (Xu et al., Scientific Data 2024) | CC BY-NC 4.0 | 17 Nov 2026 | Drone debris segmentation model training and evaluation (T1) |
+| CAS Landslide Dataset: Moxi town (UAV-0.2 m, 1,635 images, GSD 0.20 m) | Sichuan Geomatics Center via Zenodo 10294997 (Xu et al., Scientific Data 2024) | CC BY-NC 4.0 (Derivative Works Licence) | 17 Nov 2026 | Training/val set for drone debris segmentation model (T1) |
+| CAS Landslide Dataset: Moxitaidi (UAV-0.6 m, 984 images, GSD 0.60 m) | Sichuan Geomatics Center via Zenodo 10294997 (Xu et al., Scientific Data 2024) | CC BY-NC 4.0 (Derivative Works Licence) | 17 Nov 2026 | Held-out test region for drone debris segmentation model (T1) |
 
 ## Demo video audio
 

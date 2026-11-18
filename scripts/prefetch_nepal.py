@@ -68,7 +68,7 @@ CITED_SOURCES = [
         "url": "https://kathmandupost.com/national/2026/08/29/washed-out-bridges-force-flood-hit-communities-to-rely-on-choppers",
         "licence": "Kathmandu Post journalistic reporting (public press article)",
         "date": "2026-08-29",
-        "quote_or_paraphrase": "Department of Roads: about 40 km of road damaged between Rasuwagadhi and Malekhu; 41 bridges destroyed or damaged; Trishuli Bazar bridge swept away; all bridges between Trishuli and Betrawati washed away; Phurke Khola bridge washed away; 3 bridges between Galchhi and Malekhu cut Dhadingbesi; Baireni-Mugling reopened after 3 days.",
+        "quote_or_paraphrase": "Department of Roads: about 40 km of road damaged between Rasuwagadhi and Malekhu; 41 bridges destroyed or damaged; Trishuli Bazar bridge swept away; all bridges between Trishuli and Betrawati washed away; Phurke Khola bridge washed away; 3 bridges between Galchhi and Malekhu cut Dhadingbesi; Baireni-Mugling reopened Friday evening 28 Aug (article says 'Friday evening').",
         "purpose": "Primary source for damaged/washed-out bridges and road closures across the Trishuli and Prithvi Highway corridors",
     },
     {
@@ -83,7 +83,7 @@ CITED_SOURCES = [
     {
         "id": "nepal_census_2021",
         "title": "National Population and Housing Census 2021 (National Statistics Office, Nepal)",
-        "url": "https://censusnepal.cbs.gov.np/",
+        "url": "https://censusnepal.cbs.gov.np/results",
         "licence": "Government of Nepal Open Data / Public Census",
         "date": "2021 Census (retrieved 2026-11-17)",
         "quote_or_paraphrase": "Bidur Municipality 59,227; Nilkantha Municipality (Dhadingbesi) 58,828; Galchhi Rural Municipality 27,784; Uttargaya (Betrawati) 8,255; Gosaikunda (Dhunche) 7,143; Timure/Rasuwagadhi 1,123; Malekhu ward 3,892.",
@@ -198,21 +198,21 @@ def classify_nepal_segment(
     # Rule 4: Upper corridor north of Betrawati to Dhunche and Rasuwagadhi
     if mid_lat > 27.985:
         if highway in ("primary", "secondary", "tertiary", "trunk"):
-            st = {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "partial", "foot": "partial"}
-            cite = f"{cite_kp} & {cite_un}: Road to Dhunche and Rasuwagadhi heavily damaged by landslides and debris flows; passable only as far as Nuwakot"
+            st = {"fire_truck": "blocked", "ambulance": "blocked", "jeep": "unknown", "foot": "unknown"}
+            cite = f"{cite_kp} & {cite_un}: Road to Dhunche and Rasuwagadhi heavily damaged by landslides and debris flows; passable only as far as Nuwakot; 4x4 and foot passability unverified in reports -> unknown (Hard Rule 3)"
             reasons = {
                 "fire_truck": ["Heavy debris flows and missing carriageway impassable for fire tender"],
                 "ambulance": ["Roadbed severed by landslides; impassable for standard ambulance"],
-                "jeep": ["4x4 convoy slow scramble over landslide debris with winch/escort"],
-                "foot": ["Foot teams traversing active landslide scree"],
+                "jeep": ["No report confirms 4x4 passability on severed mountain highway -> unknown"],
+                "foot": ["No report confirms foot traversal on active landslide scree -> unknown"],
             }
             return st, cite, reasons
 
     # Rule 5: Reopened Prithvi Highway (Baireni - Galchhi - Malekhu)
     if 27.79 <= mid_lat <= 27.84 and 84.82 <= mid_lon <= 85.12 and highway in ("trunk", "primary", "secondary"):
         st = {"fire_truck": "open", "ambulance": "open", "jeep": "open", "foot": "open"}
-        cite = f"{cite_kp}: Baireni-Mugling section of Prithvi Highway blocked for 3 days (26-29 Aug 2026), reopened 29 Aug"
-        reasons = {m: ["Prithvi Highway cleared and reopened on 29 August 2026 following 3-day blockage"] for m in st}
+        cite = f"{cite_kp}: Baireni-Mugling section of Prithvi Highway blocked for 3 days, reopened Friday evening 28 August"
+        reasons = {m: ["Prithvi Highway cleared and reopened on Friday evening 28 August 2026 (Kathmandu Post 29 Aug reports 'reopened Friday evening')"] for m in st}
         return st, cite, reasons
 
     # Rule 6: Malekhu to Dhadingbesi internal road (beyond washed out Phurke bridge)
@@ -238,15 +238,15 @@ def classify_nepal_segment(
 
 def _build_nepal_corridor_fixture() -> dict[str, Any]:
     elements: list[dict[str, Any]] = [
-        {"type": "node", "id": 2001, "lon": 85.0800, "lat": 27.8160, "tags": {"place": "town", "name": "Baireni", "population": "14500"}},
-        {"type": "node", "id": 2002, "lon": 85.0350, "lat": 27.8280, "tags": {"place": "town", "name": "Galchhi", "population": "27784"}},
-        {"type": "node", "id": 2003, "lon": 84.8250, "lat": 27.8110, "tags": {"place": "village", "name": "Malekhu", "population": "3892"}},
-        {"type": "node", "id": 2004, "lon": 84.8980, "lat": 27.8760, "tags": {"place": "town", "name": "Dhadingbesi", "population": "58828"}},
-        {"type": "node", "id": 2005, "lon": 85.1630, "lat": 27.9152, "tags": {"place": "town", "name": "Bidur", "population": "59227"}},
-        {"type": "node", "id": 2006, "lon": 85.1830, "lat": 27.9780, "tags": {"place": "village", "name": "Betrawati", "population": "8255"}},
-        {"type": "node", "id": 2007, "lon": 85.2970, "lat": 28.1110, "tags": {"place": "town", "name": "Dhunche", "population": "7143"}},
-        {"type": "node", "id": 2008, "lon": 85.3340, "lat": 28.1560, "tags": {"place": "village", "name": "Syabrubesi", "population": "3200"}},
-        {"type": "node", "id": 2009, "lon": 85.3780, "lat": 28.2660, "tags": {"place": "hamlet", "name": "Rasuwagadhi", "population": "1123"}},
+        {"type": "node", "id": 2001, "lon": 85.0800, "lat": 27.8160, "tags": {"place": "town", "name": "Baireni", "population": None, "population_source": "null (sub-ward settlement without standalone Census 2021 table)"}},
+        {"type": "node", "id": 2002, "lon": 85.0350, "lat": 27.8280, "tags": {"place": "town", "name": "Galchhi", "population": 27784, "population_source": "National Population and Housing Census 2021, National Statistics Office Nepal: Galchhi Rural Municipality (27,784)"}},
+        {"type": "node", "id": 2003, "lon": 84.8250, "lat": 27.8110, "tags": {"place": "village", "name": "Malekhu", "population": None, "population_source": "null (ward 3 population not separately cited in report)"}},
+        {"type": "node", "id": 2004, "lon": 84.8980, "lat": 27.8760, "tags": {"place": "town", "name": "Dhadingbesi", "population": 58828, "population_source": "National Population and Housing Census 2021, National Statistics Office Nepal: Nilkantha Municipality (58,828)"}},
+        {"type": "node", "id": 2005, "lon": 85.1630, "lat": 27.9152, "tags": {"place": "town", "name": "Bidur", "population": 59227, "population_source": "National Population and Housing Census 2021, National Statistics Office Nepal: Bidur Municipality (59,227)"}},
+        {"type": "node", "id": 2006, "lon": 85.1830, "lat": 27.9780, "tags": {"place": "village", "name": "Betrawati", "population": 8255, "population_source": "National Population and Housing Census 2021, National Statistics Office Nepal: Uttargaya Rural Municipality (8,255)"}},
+        {"type": "node", "id": 2007, "lon": 85.2970, "lat": 28.1110, "tags": {"place": "town", "name": "Dhunche", "population": 7143, "population_source": "National Population and Housing Census 2021, National Statistics Office Nepal: Gosaikunda Rural Municipality (7,143)"}},
+        {"type": "node", "id": 2008, "lon": 85.3340, "lat": 28.1560, "tags": {"place": "village", "name": "Syabrubesi", "population": None, "population_source": "null (village level breakdown not verified; kept null)"}},
+        {"type": "node", "id": 2009, "lon": 85.3780, "lat": 28.2660, "tags": {"place": "hamlet", "name": "Rasuwagadhi", "population": None, "population_source": "null (border checkpoint not a residential census town)"}},
         {"type": "node", "id": 2010, "lon": 85.1650, "lat": 27.9170, "tags": {"amenity": "hospital", "name": "Trishuli Hospital (Bidur)"}},
         {"type": "node", "id": 2011, "lon": 84.8990, "lat": 27.8780, "tags": {"amenity": "hospital", "name": "Dhading District Hospital"}},
         {"type": "node", "id": 2012, "lon": 85.2980, "lat": 28.1120, "tags": {"amenity": "hospital", "name": "Rasuwa District Hospital (Dhunche)"}},
@@ -412,11 +412,12 @@ def build_nepal_files(overpass_data: dict[str, Any], out_dir: Path) -> dict[str,
             kind = "settlement"
 
         pop_val: int | None = None
-        pop_src = "PLACEHOLDER (missing in OSM; kept null, never 0)"
-        if "population" in tags:
+        pop_src = str(tags.get("population_source") or "PLACEHOLDER (missing in OSM; kept null, never 0)")
+        if "population" in tags and tags["population"] is not None:
             try:
                 pop_val = int(str(tags["population"]).replace(",", "").strip())
-                pop_src = f"Nepal Census 2021 (National Statistics Office) via element {el['id']}"
+                if "population_source" not in tags:
+                    pop_src = f"National Population and Housing Census 2021 (National Statistics Office, Nepal) via element {el['id']}"
             except ValueError:
                 pop_val = None
 
