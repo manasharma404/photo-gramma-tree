@@ -47,15 +47,20 @@ $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road ba
 
 | Evaluation Set | Model | IoU (Debris) | Precision | Recall | Status / Notes |
 |---|---|---|---|---|---|
-| **Held-out UAV Region (Moxitaidi 0.6m)** | Small U-Net (ResNet-18 backbone, ImageNet pretrain) | `PENDING` | `PENDING` | `PENDING` | Model training scheduled in finale compute slot |
-| **Held-out UAV Region (Moxitaidi 0.6m)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR weights expect 4-channel `(RGB + mask)` trained specifically on flood water, not rock/soil landslide debris |
+| **Validation Set (Moxi town 0.2m, 327 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.5563 (55.63%)** | **0.7318 (73.18%)** | **0.6988 (69.88%)** | F1: 0.7149. Trained on 1,308 CAS UAV tiles (0.2m GSD) with BCE+Dice loss |
+| **Held-out UAV Region (Moxitaidi 0.6m, 984 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.2373 (23.73%)** | **0.6352 (63.52%)** | **0.2748 (27.48%)** | F1: 0.3836. Evaluated zero-shot on held-out 0.6m UAV flight |
+| **Held-out UAV Region (Moxitaidi 0.6m)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR-U-DROIDs was trained on post-disaster structural damage from hurricanes, tornadoes, and similar severe storm events (RGB + road mask), not aerial rock/soil landslide debris flows |
 | **South Fork 50 Road Crops** | Typhon Debris Segmenter | `PENDING` | `PENDING` | `PENDING` | Road crops to be labeled jointly with lead (T2) |
 
 ### 2.5 Inference Timing & Checksum
 - **Inference Timing (512x512 tile):**
-  - CPU (Intel Core i7 / AMD): `PENDING` ms
-  - GPU (RTX 4050 Laptop 6 GB): `PENDING` ms
-- **Weights File:** `PENDING` (will reside locally outside git; SHA-256 will be logged before commit).
+  - CPU (Intel Core i7 / AMD): **312.40 ms** (3.2 FPS)
+  - GPU (NVIDIA GeForce RTX 4050 Laptop 6 GB): **18.48 ms** (54.1 FPS)
+- **Model Checksums (stored outside git):**
+  - PyTorch weights: `models/typhon_debris_resnet18.pt` (57.49 MB)  
+    `SHA-256: 2ccee7c2f8762a510d12beaccf491f6feb5377f5b9235070759ca3f324d86d20`
+  - ONNX weights: `models/typhon_debris_resnet18.onnx` (57.37 MB)  
+    `SHA-256: 489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`
 
 ---
 
@@ -145,10 +150,8 @@ LIMIT 5;
 ### 4.2 Official Cited Population Figures
 - **Bidur Municipality:** 59,227 (National Population and Housing Census 2021, National Statistics Office Nepal; bridge joins two parts of same municipality)
 - **Nilkantha Municipality (Dhadingbesi):** 58,828 (National Population and Housing Census 2021, National Statistics Office Nepal)
-- **Galchhi Rural Municipality:** 27,784 (National Population and Housing Census 2021, National Statistics Office Nepal)
-- **Uttargaya (Betrawati) Rural Municipality:** 8,255 (National Population and Housing Census 2021, National Statistics Office Nepal)
-- **Gosaikunda (Dhunche) Rural Municipality:** 7,143 (National Population and Housing Census 2021, National Statistics Office Nepal)
-- **Baireni, Malekhu, Syabrubesi, Rasuwagadhi:** Set to null (sub-ward settlements and border checkpoints without standalone 2021 census municipal table; Hard Rule 1: no invented numbers)
+- **Galchhi, Uttargaya (Betrawati), and Gosaikunda (Dhunche):** Set to `null` (exact 2021 census table links not directly verified/available; kept null per Hard Rule 1: no invented numbers).
+- **Baireni, Malekhu, Syabrubesi, Rasuwagadhi:** Set to `null` (sub-ward settlements and border checkpoints without standalone 2021 census municipal table; Hard Rule 1: no invented numbers).
 
 ### 4.3 Limits & Integrity Disclaimers
 1. **Reconstruction, not drone measurement:** This scenario is reconstructed strictly from cited reports (Kathmandu Post 29 Aug 2026; UN News 31 Aug 2026; Nepal Census 2021) and is explicitly labelled `scenario reconstructed from reports, not drone-measured` on every segment and place feature.
@@ -160,7 +163,7 @@ LIMIT 5;
 
 ## 5. Status of Remaining Tasks (Groundwork & Finale)
 - [x] **CAS UAV Dataset Download:** Complete (1.56 GB total downloaded to data/cas/zips/, MD5 checksums matched with Zenodo record 10294997).
-- [ ] **Model Training (T1):** Train small U-Net (ResNet-18) on Moxi town (0.2m) and evaluate on held-out Moxitaidi (0.6m) before Thu 19 Nov 22:00 IST.
-- [ ] **ONNX Weights & Checksum (T1):** Export model weights to .onnx outside git and record SHA-256 in report.
+- [x] **Model Training (T1):** Trained lightweight U-Net (ResNet-18) on Moxi town (0.2m) and evaluated on held-out Moxitaidi (0.6m). Val IoU: 0.5563, Held-out Test IoU: 0.2373.
+- [x] **ONNX Weights & Checksum (T1):** Exported model weights to `models/typhon_debris_resnet18.onnx` (SHA-256: `489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`).
 - [ ] **South Fork 50 Road Crops (T2):** Awaiting lead's joint labeling of the 50 road crops.
 - [ ] **Neo4j Cypher Integration (T3):** Ready for live cluster connection with pure Cypher fallback queries.
