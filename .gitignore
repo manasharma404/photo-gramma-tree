@@ -24,5 +24,10 @@ neo4j/logs/
 /cache/
 /.claude/
 
+# Models & weights stay out of git
+/models/
+*.pt
+*.onnx
+
 # Secrets
 .env
