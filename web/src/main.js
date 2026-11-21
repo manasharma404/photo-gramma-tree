@@ -4,7 +4,7 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
-import { SNAPSHOT, api } from "./api.js";
+import { SNAPSHOT, api, getJSON } from "./api.js";
 import { VEHICLES, esc } from "./format.js";
 import { mountIcons } from "./icons.js";
 import { LAYER_GROUPS, createMap, legendHTML, segmentsForVehicle, setData, setGroupVisible } from "./map.js";
@@ -42,7 +42,16 @@ async function boot() {
   renderMeasureIntro();
   $("legend").innerHTML = legendHTML();
 
-  const [active, health] = await Promise.all([api.active(), api.health()]);
+  const [active, health, me] = await Promise.all([api.active(), api.health(), SNAPSHOT ? null : getJSON("/auth/me")]);
+  if (me?.auth && me.role) {  // who is signed in, and a way out
+    const who = $("who");
+    who.textContent = `${{ operator: "Operator", evaluator: "Evaluator", field: me.team || "Field team" }[me.role]} · Sign out`;
+    who.hidden = false;
+    who.addEventListener("click", async () => {
+      await fetch("/auth/logout", { method: "POST" });
+      location.replace("/login/");
+    });
+  }
   const off = $("offline");
   off.dataset.state = !health ? "down" : health.snapshot || !health.internet_reachable ? "offline" : "online";
   $("offline-text").textContent = !health ? "API not reachable"

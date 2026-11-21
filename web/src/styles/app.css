@@ -133,6 +133,8 @@ body.app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-r
 .live__behind { color: var(--status-blocked); font-weight: 500; }
 .live__label { margin-top: var(--space-2); font-size: var(--fs-xs); color: var(--text-2); }
 .hint { z-index: 2; }
+.who { cursor: pointer; border: 1px solid var(--line); background: var(--surface); font: var(--fs-s) var(--font-ui); color: var(--text); }
+.who:hover { background: var(--stone); }
 @media (max-width: 760px) { .live { width: auto; right: var(--space-4); } }
 .maplibregl-ctrl-group { border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; }
 .maplibregl-ctrl-attrib { font-size: 10px; background: color-mix(in srgb, var(--surface) 80%, transparent) !important; }

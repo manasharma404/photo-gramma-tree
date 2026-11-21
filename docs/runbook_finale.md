@@ -18,7 +18,7 @@ Setup detail lives in: `README.md` ("Run it"), `docs/runbook_advisor.md` (Neo4j 
 1. Laptop on charge. Wi-Fi off unless the step needs it.
 2. Start Docker Desktop; wait until `docker info` answers.
 3. Neo4j: collect the AuraDB access at the partner desk (from 14:30). Put it in the local `.env` only, never in chat or in the repo. If AuraDB is not ready, use the local container (`docs/runbook_advisor.md`) and keep going.
-4. Start the app: `uv run python -m api.main`. Note the field PIN it prints.
+4. Start the app: `uv run python -m api.main` (sign-in is on). In your own terminal, show the access codes with `uv run python -m auth.codes`: one operator code (you), one evaluator code (judges, on a card at the table), one PIN per field team. Never paste them in a chat. Sign in at `/login`.
 5. Open `http://localhost:8000`; check the map, the 3D view and one road panel.
 6. Phone: hotspot on with **mobile data off**; laptop joins it; `uv run python scripts/qr.py`; phone opens `/field` (`docs/phone_check.md` steps 1–4).
 7. Post the time and "baseline runs" in the team chat.
