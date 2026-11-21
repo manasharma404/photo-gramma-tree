@@ -39,6 +39,8 @@ _fails: dict[str, list[float]] = {}
 PUBLIC = [
     ("GET", "/"), ("GET", "/index.html"), ("GET", "/assets/"), ("GET", "/login"), ("GET", "/field-static/"),
     ("GET", "/favicon"), ("GET", "/health"), ("GET", "/accuracy/spec"),  # spec numbers are public (landing page)
+    # the public home pages' own pictures, and the earlier home page kept at /classic/ (web/public, web/classic)
+    ("GET", "/landing/"), ("GET", "/art/"), ("GET", "/hero.webp"), ("GET", "/contours.svg"), ("GET", "/classic/"),
     ("POST", "/auth/login"), ("POST", "/auth/logout"), ("GET", "/auth/me"),
 ]
 FIELD = [("GET", "/field"), ("GET", "/advisor/"), ("POST", "/advisor/reports")]

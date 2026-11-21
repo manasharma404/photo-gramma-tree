@@ -31,3 +31,9 @@ neo4j/logs/
 
 # Secrets
 .env
+
+# Local renders and tool locks (big or machine-specific)
+/docs/demo/motion/out/
+/skills-lock.json
+# Intermediate for scripts/bake_story_anchors.py; the home page no longer loads it
+/web/src/assets/slide_dots.bin

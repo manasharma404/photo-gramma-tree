@@ -43,6 +43,14 @@ def test_public_things_stay_public(client):
     assert client.get("/accuracy/spec").status_code in (200, 404)  # public numbers; 404 only if nothing processed
 
 
+def test_the_home_pages_pictures_need_no_sign_in(client):
+    # 21 Nov: with sign-in on, the landing page's own images answered 401 and showed broken
+    for path in ("/landing/ortho.jpg", "/art/ridge_we.svg", "/hero.webp", "/contours.svg", "/classic/"):
+        r = client.get(path, headers={"accept": "text/html"}, follow_redirects=False)
+        assert r.status_code not in (401, 403, 303), (path, r.status_code)
+    assert client.get("/landing-secret", follow_redirects=False).status_code == 401  # only those exact folders
+
+
 def test_operator_and_evaluator(client):
     assert sign_in(client, OP)["role"] == "operator"
     assert client.get("/live/sets").status_code == 200
