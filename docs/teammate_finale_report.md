@@ -69,7 +69,7 @@ $$\text{Predicted Class} = \begin{cases} \text{debris}, & \text{if } \frac{\sum 
 | **Validation Set (Moxi town 0.2m, 327 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.5563 (55.63%)** | **0.7318 (73.18%)** | **0.6988 (69.88%)** | F1: 0.7149. Trained on 1,308 CAS UAV tiles (0.2m GSD) with BCE+Dice loss |
 | **Held-out UAV Region (Moxitaidi 0.6m, 984 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.2373 (23.73%)** | **0.6352 (63.52%)** | **0.2748 (27.48%)** | F1: 0.3836. Evaluated zero-shot on held-out 0.6m UAV flight |
 | **Held-out UAV Region (Moxitaidi 0.6m)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR-U-DROIDs was trained on post-disaster structural damage from hurricanes, tornadoes, and similar severe storm events (RGB + road mask), not aerial rock/soil landslide debris flows |
-| **South Fork 50 Road Crops** | Typhon Debris Segmenter | `PENDING` | `PENDING` | `PENDING` | Road crops to be labeled jointly with lead (T2) |
+| **South Fork 50 Road Crops (evaluated N=35 valid crops)** | Typhon Debris Segmenter | — | **0.3333 (33.3%)** | **0.0435 (4.4%)** | F1: 0.0769 (TP=1, FP=2, FN=22, TN=10 at pre-set $T=0.005$). Broken trees recall: 0.0714 (1/14); mud/rock recall: 0.00 (0/9). Model struggles on California pine-forest broken timber (domain shift from CAS mud/rock slides). Plainly concludes: **model scores alone must never set road status directly and may only raise "needs checking" (Idea 7)**. |
 
 ### 2.5 Inference Timing & Checksum
 - **Inference Timing (512x512 tile):**
