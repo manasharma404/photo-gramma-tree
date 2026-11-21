@@ -14,7 +14,7 @@
 | 1 | ~~Copy the weights onto the demo laptop~~ **Done 21 Nov 12:25:** both files in `vortex/models/`, SHA-256 match your report | — |
 | 2 | Get `labels.csv` from the lead (50 crops; she and you labelled them on 21 Nov) | You have it as a file, not a photo |
 | 3 | ~~Nepal roads fetch~~ **Done 21 Nov 12:14 on the demo laptop:** 106,667 segments, 1,591 places. **85,625 of them are `unclassified` village roads**: for the Neo4j questions keep trunk, primary, secondary and tertiary (about 21,000), and say so | — |
-| 4 | Neo4j step 1.3 in `docs/runbook_advisor.md` on the demo laptop while online (the image is pulled; `neo4j/plugins/` does not exist yet). The password stays in the local `.env` | `neo4j/plugins/` holds the GDS jar; Neo4j starts with Wi-Fi off |
+| 4 | ~~Neo4j step 1.3~~ **Done on both laptops, 21 Nov.** Demo laptop: `.env` created with a local-only password (in the file, never in chat), GDS 2.13.14 answers, a restart uses the saved plugin. Its ports are now bound to the laptop only (`127.0.0.1`), so nobody on the venue Wi-Fi can reach it; the app is unaffected | — |
 
 ### In the car or on arrival (before 14:00): score the model on our 50 crops (agent step 1)
 This is evaluation, not a feature: it can happen before 14:00. **Fix the rule before you look at the results** (see Part B). The labels: 30 debris, 11 no debris, 9 can't tell. **20 of the 30 debris crops are "broken trees mainly"**, which the training data (CAS: mud and rock) may not cover. Report those separately: it tells us what the model can and cannot see.
