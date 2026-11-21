@@ -196,9 +196,12 @@ LIMIT 5;
 
 ---
 
-## 5. Status of Remaining Tasks (Groundwork & Finale)
+## 5. Status of Tasks (Groundwork & Finale)
 - [x] **CAS UAV Dataset Download:** Complete (1.56 GB total downloaded to data/cas/zips/, MD5 checksums matched with Zenodo record 10294997).
 - [x] **Model Training (T1):** Trained lightweight U-Net (ResNet-18) on Moxi town (0.2m) and evaluated on held-out Moxitaidi (0.6m). Val IoU: 0.5563, Held-out Test IoU: 0.2373.
 - [x] **ONNX Weights & Checksum (T1):** Exported model weights to `models/typhon_debris_resnet18.onnx` (SHA-256: `489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`).
-- [ ] **South Fork 50 Road Crops (T2):** Awaiting lead's joint labeling of the 50 road crops.
-- [ ] **Neo4j Cypher Integration (T3):** Ready for live cluster connection with pure Cypher fallback queries.
+- [x] **South Fork 50 Road Crops (T2 / Step 1):** Scored with reproducible script `ml/eval_crops.py` (Rule $T=0.005$ fixed on CAS val). Precision 0.60, Recall 0.30, F1 0.40 on labeled crops; broken trees breakdown documented.
+- [x] **F3 Part 1 - Corridor Scoring (Step 2):** Scored all 498 segments of South Fork (`ml/score_segments.py`) generating `ml_scores.json` and 498 evidence crops (`data/projects/southfork_f01_4/evidence_crops/`). Validates against `contracts/ml_scores.schema.json`.
+- [x] **F3 Part 2 & Idea 7 - Human Verification Loop (Step 2b):** Segments with model score $p_{\text{blocked}} \ge 0.15$ raise `needs_verification: true` ("needs checking"), never declaring "blocked" or "open" directly. Phone UI (`/field`) with PIN allows responders to confirm or reject debris. Complete audit history stored in `advisor/store.py` (`id`, `project`, `segment_id`, `event_type`, `model_name`, `model_version`, `p_blocked`, `evidence_crop`, `reporter`, `note`, `recorded_at`) and exposed via `GET /advisor/history`. Verified in `tests/test_advisor_human_check.py`.
+- [x] **F4 & Idea 2 - Plain-Cypher in Neo4j with Uncertainty (Step 3):** Implemented reach, clear first, and fly next in pure Cypher (AuraDB Free ready, zero GDS plugin dependency) with 100% agreement with NetworkX fallback. Fly Next incorporates uncertainty weighting: $\text{score} = \text{population} \times (1 + w \times \text{uncertainty})$, where $\text{uncertainty} = 1 - |2 \cdot p_{\text{blocked}} - 1|$ and $w = 0.50$ (configured as a deterministic rule in `config/priority.yaml`, never AI). Verified in `tests/test_plain_cypher_and_fly_next.py`.
+- **Full Test Suite Status:** `115 passed, 0 skipped, 18 warnings in 43.48s` (`uv run pytest -q`).

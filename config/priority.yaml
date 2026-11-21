@@ -30,3 +30,13 @@ scaling:
     critical: 75.0   # PLACEHOLDER
     high: 50.0       # PLACEHOLDER
     moderate: 25.0   # PLACEHOLDER
+
+fly_next:
+  uncertainty_weight:
+    value: 0.50
+    source: "PLACEHOLDER (hand-set weight w for Idea 2 reconnaissance priority: score = population * (1 + w * uncertainty); rule-based, not AI)"
+  limits:
+    - "Battery endurance / drone flight range not modelled"
+    - "Airspace restrictions and terrain obstacle altitude not modelled"
+    - "Flight cost per km not modelled"
+

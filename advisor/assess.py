@@ -298,16 +298,22 @@ def assess_segment(
             elif cur in ("open", "partial") and p_blocked >= ml_thresh:
                 needs_verification = True
                 reasons_by_mode[mode].append(
-                    f"rule=ml_disagreement_flag_review: {model_name} p_blocked={p_blocked:.2f} "
-                    f">= {ml_thresh:.2f} while geometry={cur} (needs_verification=true)"
+                    f"rule=needs_checking: {model_name} p_blocked={p_blocked:.2f} "
+                    f">= {ml_thresh:.2f} while geometry={cur} (awaiting ground verification)"
                 )
             elif cur == "unknown":
                 needs_verification = True
-                reasons_by_mode[mode].append(
-                    f"rule=ml_note_on_unknown: {model_name} p_blocked={p_blocked:.2f}; keeping unknown"
-                )
+                if p_blocked >= ml_thresh:
+                    reasons_by_mode[mode].append(
+                        f"rule=needs_checking: {model_name} p_blocked={p_blocked:.2f} "
+                        f">= {ml_thresh:.2f}; keeping unknown (awaiting ground verification)"
+                    )
+                else:
+                    reasons_by_mode[mode].append(
+                        f"rule=ml_note_on_unknown: {model_name} p_blocked={p_blocked:.2f}; keeping unknown"
+                    )
 
-    # Apply chronological ground responder field reports (T8).
+    # Apply chronological ground responder field reports (T8 & Idea 7).
     if field_reports:
         for rep in field_reports:
             kind = rep.get("kind", "other")
@@ -320,7 +326,23 @@ def assess_segment(
             note_suffix = f" ({note})" if note else ""
 
             source = "field_report"
-            if kind == "dead_end":
+            if kind in ("confirm", "confirmed"):
+                # Idea 7: Responder confirms model suspicion -> segment becomes blocked
+                needs_verification = False
+                for m in target_modes:
+                    status_by_mode[m] = "blocked"
+                    reasons_by_mode[m].append(
+                        f"rule=field_report: confirmed blockage reported at {ts}{note_suffix} -> blocked"
+                    )
+            elif kind in ("reject", "rejected"):
+                # Idea 7: Responder rejects model suspicion -> segment reverts back to unknown
+                needs_verification = False
+                for m in target_modes:
+                    status_by_mode[m] = "unknown"
+                    reasons_by_mode[m].append(
+                        f"rule=field_report: rejected model suspicion reported at {ts}{note_suffix} -> back to unknown"
+                    )
+            elif kind == "dead_end":
                 for m in target_modes:
                     status_by_mode[m] = "blocked"
                     reasons_by_mode[m].append(
