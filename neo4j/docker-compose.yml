@@ -4,8 +4,9 @@ services:
     image: neo4j:5.26-community@sha256:249a1ec6e3c52d82101a5ed33d6ed2b5ed5b0017b21a28c0bfebc335e87fb177
     container_name: t82-neo4j
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      # Bound to this laptop only: the app talks to Neo4j locally; nobody on the venue Wi-Fi or hotspot needs it.
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     env_file:
       - ../.env
     environment:
