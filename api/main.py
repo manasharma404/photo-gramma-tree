@@ -108,6 +108,7 @@ def create_app(root_dir: Path | None = None) -> FastAPI:
     mounted["measure"] = _try_mount_optional_router(app, "measure", "/measure")
     mounted["accuracy"] = _try_mount_optional_router(app, "accuracy", "/accuracy")
     mounted["live"] = _try_mount_optional_router(app, "live", "/live")
+    mounted["fieldkit"] = _try_mount_optional_router(app, "fieldkit", "/field")
 
     @app.get("/health")
     def get_health() -> dict[str, Any]:
@@ -195,6 +196,11 @@ def main() -> None:
             os.environ["VORTEX_FIELD_PIN"] = f"{secrets.randbelow(10 ** 6):06d}"
         pin = os.environ["VORTEX_FIELD_PIN"]
         print("Sign-in is OFF. " + (f"Field page PIN for phones: {pin}" if pin.lower() != "off" else "Field page PIN: off"))
+    try:  # draw the phones' saved map once now, so the first field team does not wait ~30 s
+        from fieldkit.routes import warm
+        warm()
+    except Exception:
+        logger.exception("field map warm-up could not start")
     uvicorn.run("api.main:app", host=host, port=port, reload=False)
 
 

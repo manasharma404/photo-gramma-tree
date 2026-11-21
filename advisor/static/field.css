@@ -417,3 +417,10 @@ textarea {
   border-radius: 4px;
   border: 1px solid var(--border);
 }
+
+/* Field outbox and saved map (finale item 4, advisor/static/outbox.js) */
+.outbox { margin-top: 12px; padding: 11px 12px; border-radius: 8px; font-size: 0.88rem;
+  background: rgba(42, 78, 168, 0.10); border: 1px solid var(--ocean); color: var(--forest); }
+.outbox[hidden] { display: none; }
+.outbox__msg { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-2); min-height: 1em; }
+.outbox__save { display: block; margin-top: 12px; font-size: 0.88rem; font-weight: 600; color: var(--ocean); }
