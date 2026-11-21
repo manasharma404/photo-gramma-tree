@@ -1,8 +1,8 @@
 """Cut an orthophoto into web-map tiles (XYZ, EPSG:3857, 256 px PNG) for offline MapLibre.
 
-    python -m pipeline.tiles --ortho <orthophoto.tif> --project <p> [--min-zoom 14] [--max-zoom 20]
+    python -m pipeline.tiles --ortho <orthophoto.tif> --project <p> [--min-zoom 14] [--max-zoom 20] [--layer ortho]
 
-Writes data/projects/<p>/tiles/ortho/{z}/{x}/{y}.png and tiles/ortho/meta.json
+Writes data/projects/<p>/tiles/<layer>/{z}/{x}/{y}.png and tiles/<layer>/meta.json (layer defaults to "ortho")
 (bounds, zooms, tile count). api/main.py serves them at /tiles/<p>/ortho/{z}/{x}/{y}.png.
 Fully transparent tiles are skipped.
 """
@@ -60,8 +60,9 @@ def main():
     ap.add_argument("--project", required=True)
     ap.add_argument("--min-zoom", type=int, default=14)
     ap.add_argument("--max-zoom", type=int, default=20)
+    ap.add_argument("--layer", default="ortho", help="folder under tiles/ (e.g. 'relief' for a shaded-relief base map)")
     args = ap.parse_args()
-    out = ROOT / "data" / "projects" / args.project / "tiles" / "ortho"
+    out = ROOT / "data" / "projects" / args.project / "tiles" / args.layer
     out.mkdir(parents=True, exist_ok=True)
 
     with rasterio.open(args.ortho) as src:
@@ -82,7 +83,7 @@ def main():
         wsen = transform_bounds(src.crs, "EPSG:4326", *src.bounds)
     meta = {"source": str(args.ortho).replace("\\", "/"), "bounds_wsen": [round(v, 7) for v in wsen],
             "min_zoom": args.min_zoom, "max_zoom": args.max_zoom, "tiles": written,
-            "url": f"/tiles/{args.project}/ortho/{{z}}/{{x}}/{{y}}.png"}
+            "url": f"/tiles/{args.project}/{args.layer}/{{z}}/{{x}}/{{y}}.png"}
     (out / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(json.dumps(meta, indent=2))
 
