@@ -243,5 +243,34 @@ Where the time went: 7.9 of the 11.6 minutes were finding and matching features 
 
 **What it means:** the growing map needs the camera pointing straight down, in daylight, flown in overlapping parallel lines. That is a capture rule, like "never one straight line" from Run 1. It is **not yet shown on any footage of our own**: a daylight test flight with the camera pointing down is needed before the finale, and it decides whether the campus flight can be part of the demo.
 
+### 7e. Our own test flight, camera pointing down, no GPS: **the map holds together; it does not yet keep pace**
+**Data:** clip `REC_0028.mp4` (20 Nov, evening, an open ground beside cricket nets; not the finale venue, where flying is not allowed). 3840×2160 HEVC, 25 fps, 7 min 15 s. The camera points straight down from about 0:45 to 5:42. Height not logged; the lead estimates 15–20 m. **The file carries no GPS:** its telemetry track holds only filler values (`0x0FFFFFFF`). Frames taken 2 per second, the sharper of each pair kept: **298 frames** at 1920×1080 (read at 960×540). Results and code: `data/runs/2026-11-21_rec28_live_nogps/` (not in git).
+
+**Method:** 7c unchanged except where GPS was used:
+- the first frame that matches anything is held fixed (it sets position and direction);
+- earlier frames from neighbouring passes are found from the map solved so far, not from GPS;
+- a weak pull keeps each frame near the held frame's size, because without GPS nothing else stops every frame from shrinking (a first attempt without it collapsed the map).
+
+Units are "map units" until a scale is applied.
+
+| | |
+|---|---|
+| Frames placed | **297 of 298**, all in one piece; 1,312 of 1,334 frame pairs matched (588 along the flight path, 724 across passes) |
+| Time per frame, laptop otherwise idle | **1.51 s** (449.7 s for 298 frames: features 115.9 s, matching 184.7 s, the rest re-solving). The flight gives 1 frame per second, so **this version falls behind the flight** |
+| Re-solving the whole map as it grows | 23.9 s at 298 frames, done every 20 frames (7c: 4.9 s at 248). This is what makes it fall behind |
+| Drawing the full picture | 114.0 s in one go at 0.03 map units per pixel |
+| Detailed map of the same 298 frames (ODM middle tier, no GPS) | 297 of 298 frames in **one** reconstruction, **92.5 min**, peak 1.64 GiB. 62 min of it was matching all 44,253 frame pairs, because without GPS ODM cannot tell which frames are neighbours. Run `2026-11-21_0248_rec28_campus_middle` |
+| Growing map against the detailed map, after one overall shift, turn and size (neither map knows north or scale) | 277 frames compared: a typical point in a frame is a median **0.116 map units** off; 90% of frames within 0.321; worst frame 1.144. 162,688 matched points; 6,107 (3.8%) dropped as mismatches (more than 5× the median) |
+| Same, in metres | **about 0.20 m median, 0.56 m for 90% of frames, 2.0 m worst**, using 1 map unit ≈ 1.75 m. That scale is an **estimate from two parked cars** (each about 0.98 units wide and 2.2 units long, against a typical car of about 1.7–1.8 m by 3.8–4.0 m), so roughly ±10% |
+| Six white sheets on the ground, each traced through every frame that sees it | each lands in the same place from every frame and pass: median spread 0.02–0.10 units, worst single frame 0.42 units (one sheet is seen in 106 frames spread over four minutes). The lead confirmed sheets 1–4 and 6 are our markers and sheet 5 is not ([candidates](screenshots/rec28_paper_candidates.jpg)) |
+| Map distances against the tape (A–B 23, B–C 21, C–D 31, D–E 25 m, measured roughly during a cricket match) | **Inconclusive.** A is sheet 1 (beside the nets); the order of the other four was not recorded. In our numbering order (1-2-3-4-6) the fit is poor: best single scale 1.26 m per unit, misses of −6.8, +2.3, −12.2 and +8.6 m. Of all 24 possible orders, the best (1-3-2-4-6) misses by at most 2.9 m, but at 1.05 m per unit, and the next two best need 1.15–1.17. **The car estimate (1.75) and the tape (about 1.05–1.26) disagree by 30–40%**, and we cannot tell yet whether the cars, the tape or the map is off. Choosing the best-fitting order would be circular, so no accuracy figure against the tape is claimed |
+
+**What it means:**
+- **The capture rule from 7d holds.** With the camera pointing down, in daylight, flown in overlapping passes, the growing map comes out in one piece with no GPS at all ([picture](screenshots/rough_map_test7e_campus.jpg)): pitch, nets, cars, path and sheets are recognisable, with visible seams.
+- **On this flat, low, well-overlapped flight it agrees with the detailed map to about 0.12 map units** (median): about 20 cm at the car scale, about 12–15 cm at the tape-suggested scales (estimates; see the tape row). That is far better than South Fork's 11.8 m, because the conditions were easy (flat ground, low height, lots of overlap), not because the method improved. It is a comparison between two maps made from the same frames, not a check against surveyed points.
+- **It does not keep pace yet:** 1.5 s per frame against 1 frame per second. Re-solving the whole map is the bottleneck. Fixing that is finale work (F1).
+- **Without GPS the map has no scale and no north.** On the day, scale must come from the drone's GPS (if the lead recovers it) or from a known distance on the ground. This flight shows why that matters: two rough scale sources (cars, tape) disagreed by 30–40%. A known distance should be taped carefully between two sheets whose labels are written on them.
+- **Not tested:** a live link from the drone (frames replayed from disk in order); any slope or built-up area; accuracy against surveyed points.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).
