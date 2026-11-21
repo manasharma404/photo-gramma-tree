@@ -7,9 +7,9 @@ Setup detail lives in: `README.md` ("Run it"), `docs/runbook_advisor.md` (Neo4j 
 ## 1. Friday night (before leaving)
 | # | Do | Check | Who |
 |---|---|---|---|
-| 1 | `git pull`; push the baseline; clone it fresh into a temp folder; `uv sync`; `uv run pytest -q`; `cd web && npm install && npm run build` | Fresh clone builds; tests pass (record the line here: PENDING) | Claude |
+| 1 | `git pull`; push the baseline; clone it fresh into a temp folder; `uv sync`; `uv run pytest -q`; `cd web && npm install && npm run build` | Fresh clone builds; tests pass. **21 Nov, commit `a0e2595`: `uv sync` OK, 106 passed / 2 skipped, web build OK** (repeat after the last pre-event push) | Claude |
 | 2 | Docker Desktop starts; ODM image already pulled; Neo4j image already pulled (`docs/runbook_advisor.md` step 1.3) | `docker images` lists both; nothing needs downloading at the venue | Lead |
-| 3 | Data on the laptop: South Fork project, Nepal pack (once it is real OpenStreetMap), the 50 test crops, the pre-event terrain, model weights (if trained) | Each opens with Wi-Fi off | Claude + teammate |
+| 3 | Data on the laptop: South Fork project, Nepal pack, the 50 test crops, the pre-event terrain, model weights (if trained). **Nepal terrain: done 21 Nov** (`uv run python scripts/prefetch_nepal_terrain.py --offline` rebuilds it). **Nepal roads: not on this laptop yet:** run `uv run python scripts/prefetch_nepal.py` once while online | Each opens with Wi-Fi off | Claude + teammate |
 | 4 | Offline check: `cd web && node scripts/offline_check.mjs` | "0 requests left the laptop" | Claude |
 | 5 | Copies of the fallbacks on a USB stick and on the phone: `docs/demo/motion/out/typhon_fallback_45s_v2.mp4`, the deck, a screen recording of the full demo | Each plays without the laptop | Lead |
 | 6 | Chargers, extension board, USB-C hub, the phone that makes the hotspot, drone batteries charged, markers and tape (if a campus flight is allowed) | Packed | Lead |
@@ -55,7 +55,9 @@ Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes 
 | Neo4j query fails with "unknown procedure" | AuraDB without the graph plugin | Use the plain Cypher queries (teammate report, T3) or the NetworkX fallback; say which one is running |
 | AuraDB unreachable | Venue network | Local Neo4j container; if that fails too, NetworkX fallback |
 | Docker will not start | WSL or Docker Desktop stuck | Restart Docker Desktop once; if still stuck, demo from the existing South Fork outputs (no new processing) |
-| Growing map stalls or drifts | Photos not looking straight down, or too little overlap | Switch to the USGS replay; never fake progress | 
+| Growing map stalls or drifts | Photos not looking straight down, or too little overlap | Switch to the USGS replay; never fake progress |
+| Growing map falls behind the replay (seconds per photo above 1.0) | The whole-map re-solve grows with the map (Test 7e: 24 s at 298 frames) | Switch to the USGS replay, which kept pace in Test 7c (1.02 s); say the number on screen out loud; never speed up the clock |
+| Our own flight's map has no scale or north | `REC_0028` carries no GPS (Test 7e) | Say so; it is shown in map units. Never quote metres from it |
 | Debris model too slow or wrong on stage | GPU busy or a bad crop | Show the stored result for that road with its timestamp, and say it is stored |
 | Laptop dies or nothing runs | — | Fallback video plus deck from the USB stick; say plainly that the live build failed |
 
@@ -64,3 +66,9 @@ Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes 
 - If a fix lands too late to test, it does not ship.
 - Every demo action is run end to end before each round, not just before the jury.
 - Push only after `git pull`; never force-push.
+
+## 7. Submission (Sun, by 11:30; the portal locks at 12:00)
+1. Final `git pull`, then push `main`. The repository link is the main submission.
+2. **Only if the portal asks for a zip:** `uv run python scripts/make_submission_zip.py`. It writes `typhon_submission_<commit>.zip` next to the repo folder, and refuses if you are not on `main`, have uncommitted changes, or `main` differs from GitHub, so the zip always matches GitHub. Never upload a zip made from someone's own folder.
+3. Demo video and deck (PDF export) as in `PLAN.md` ("The pitch deck").
+4. Post in the team chat what was submitted and when.
