@@ -34,14 +34,33 @@ In accordance with Hard Rule 4, all dataset terms are checked and recorded prior
 - **Held-out Test Region:** Moxitaidi (UAV-0.6m) (984 images / masks) held out completely as the test set before any model training.
 - **Training / Validation Set:** Moxi town (UAV-0.2m) (1,635 images / masks) split 80/20 into train/validation.
 
-### 2.3 Proposed Rule: Debris Mask to `ml_scores.json` Contract
-To keep the contract (`contracts/ml_scores.schema.json`: `p_blocked`, `p_partial`, `p_clear`, `model`, `version`), the model output per road segment corridor is mapped via the following proposed geometric rule:
+### 2.3 Proposed Rule: Debris Mask to `ml_scores.json` Contract & Binary Crop Rule $T$
+
+#### 2.3.1 Road Corridor Scoring Rule (F3)
+To keep the contract (`contracts/ml_scores.schema.json`: `p_blocked`, `p_partial`, `p_clear`, `model`, `version`), the model output per road segment corridor is mapped via the following geometric rule:
 $$\text{corridor\_debris\_fraction} = \frac{\text{Area of predicted debris within road polygon}}{\text{Total road corridor polygon area}}$$
 $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road baseline}$$
 
 - **Clear:** $\text{debris\_fraction} < 0.15 \implies p_{\text{clear}} = 1.0 - \text{debris\_fraction}, p_{\text{blocked}} = 0.0, p_{\text{partial}} = \text{debris\_fraction}$
 - **Partial (crawl passable for 4x4 / foot):** $0.15 \le \text{debris\_fraction} < 0.60$ and $\text{clear\_width} \ge 2.2\,\text{m}$
 - **Blocked:** $\text{debris\_fraction} \ge 0.60$ or $\text{clear\_width} < 1.0\,\text{m} \implies p_{\text{blocked}} \ge 0.85$
+
+#### 2.3.2 Decision Rule $T$ for 50 South Fork Crops Evaluation (Step 1, Fixed 21 Nov 2026 Before Crop Evaluation)
+In accordance with Hard Rule 1 and Finale Plan Step 1a, decision threshold $T$ was fixed **before evaluating any South Fork crop**, selected strictly by sweeping thresholds on the CAS validation set (327 tiles of 0.2 m GSD, Moxi town):
+
+$$\text{Predicted Class} = \begin{cases} \text{debris}, & \text{if } \frac{\sum \text{predicted debris pixels}}{\text{total crop pixels}} \ge T \\ \text{clear}, & \text{otherwise} \end{cases}$$
+
+**CAS Validation Threshold Sweep Results (`ml/determine_threshold.py` on 327 tiles):**
+- $T = 0.5\%\; (0.005)$: Precision = 0.9444, Recall = 0.9252, **F1 = 0.9347** (TP=272, FP=16, FN=22, TN=17) [Max F1]
+- $T = 1.0\%\; (0.010)$: Precision = 0.9466, Recall = 0.9048, F1 = 0.9252 (TP=266, FP=15, FN=28, TN=18)
+- $T = 2.0\%\; (0.020)$: Precision = 0.9509, Recall = 0.8571, F1 = 0.9016 (TP=252, FP=13, FN=42, TN=20)
+- $T = 5.0\%\; (0.050)$: Precision = 0.9735, Recall = 0.7483, F1 = 0.8462 (TP=220, FP=6, FN=74, TN=27)
+- $T = 8.0\%\; (0.080)$: Precision = 0.9799, Recall = 0.6633, F1 = 0.7911 (TP=195, FP=4, FN=99, TN=29)
+- $T = 10.0\%\; (0.100)$: Precision = 0.9944, Recall = 0.6020, F1 = 0.7500 (TP=177, FP=1, FN=117, TN=32)
+
+**Selected Threshold:**
+- **Primary Threshold:** **$T = 0.005$ (0.5% debris area share)** — selected because it strictly maximizes validation F1 (0.9347) while balancing high recall (0.9252) and precision (0.9444) on the CAS UAV validation set.
+- **Conservative Threshold:** **$T = 0.05$ (5.0% debris area share)** — also tracked as a high-precision operating point (Precision 0.9735, Recall 0.7483, F1 0.8462) to minimize false alarms on clear forest trails.
 
 ### 2.4 Benchmark Scores Table
 
