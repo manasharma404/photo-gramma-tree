@@ -3,7 +3,7 @@
 **Project:** Project Typhon (Team Vortex)  
 **Hackathon:** hackFront PS T8.2 "The First Map After The Landslide" (IIIT Delhi Finale)  
 **Branch:** `teammate` (ahead of origin/teammate; merged with `origin/main`)  
-**Test status:** `108 passed, 0 skipped, 18 warnings in 41.54s` (`uv run pytest -q`)
+**Test status:** `109 passed, 0 skipped, 18 warnings in 48.65s` (`uv run pytest -q`)
 
 ---
 
@@ -80,6 +80,22 @@ $$\text{Predicted Class} = \begin{cases} \text{debris}, & \text{if } \frac{\sum 
     `SHA-256: 2ccee7c2f8762a510d12beaccf491f6feb5377f5b9235070759ca3f324d86d20`
   - ONNX weights: `models/typhon_debris_resnet18.onnx` (57.37 MB)  
     `SHA-256: 489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`
+
+### 2.6 South Fork 498-Segment Road Scoring (F3 Part 1 Run, 21 Nov 15:26)
+In accordance with Step 2 of the Finale Plan, all 498 road segments for active project `southfork_f01_4` were scored from the drone orthophoto corridor via `ml/score_segments.py`:
+- **Execution Run Time:** **1.53 s** total across all 498 segments (NVIDIA GeForce RTX 4050 Laptop GPU).
+- **Segment Coverage Breakdown:**
+  - **Total Segments in Network:** 498 (`data/projects/southfork_f01_4/roads/segments.geojson`)
+  - **Segments Inside Drone Orthophoto Footprint:** 16 segments (`seg_0189`–`seg_0196`, `seg_0199`–`seg_0206`)
+  - **Segments Outside Flight Footprint:** 482 segments
+- **Model Scoring Results:**
+  - All 16 photographed segments: **$0.0\%$ predicted debris fraction** $\implies$ evaluated as `clear` ($p_{\text{clear}} = 1.000, p_{\text{blocked}} = 0.000, p_{\text{partial}} = 0.000$).
+  - *Physical Verification:* Confirms ground truth noted in `docs/eval_southfork_crops.md`—the 16 OSM footpath pieces run entirely through forest beside the debris channel without crossing the slide path.
+  - All 482 outside segments: correctly marked `p_blocked: null, p_partial: null, p_clear: null` (Hard Rule 2: unknown stays unknown).
+- **Evidence Images Generated:**
+  - 16 visual evidence crops saved under `data/projects/southfork_f01_4/evidence/{segment_id}.jpg` showing the RGB corridor, cyan polygon boundary, model debris overlay, and status badge.
+- **Contract Schema Validation:**
+  - Output file `data/projects/southfork_f01_4/ml_scores.json` successfully validated against `contracts/ml_scores.schema.json` with zero errors. Tested via `tests/test_ml_scoring.py`.
 
 ---
 
