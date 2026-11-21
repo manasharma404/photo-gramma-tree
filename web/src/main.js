@@ -69,6 +69,10 @@ async function boot() {
 
   const map = createMap($("map"), active, openSegment);
   app.map = map;
+  if (!SNAPSHOT && health?.mounted_routers?.live) {  // the growing map needs the live server
+    const startLive = () => import("./live.js").then(({ initLive }) => { $("live").hidden = false; initLive(map, $("live")); });
+    if (map.loaded()) startLive(); else map.once("vortex:ready", startLive);
+  }
   initTools(map, { onStatus: status, onResult: (m) => m.type === "span" && renderProfile(m) });
   initLayers(active);
 

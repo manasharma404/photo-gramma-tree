@@ -273,5 +273,29 @@ Units are "map units" until a scale is applied.
 - **Without GPS the map has no scale and no north.** On the day, scale must come from the drone's GPS (if the lead recovers it) or from a known distance on the ground. **With the flight log, one fit gives both:** the map's track then follows the GPS track within the GPS's own accuracy (median 1.4 m). So for F1, feeding the drone's GPS in as it flies should give scale and north from the start. A rough tape is not a safe substitute: fitted freely, it pointed to a scale 30–40% wrong. A known distance should be taped carefully between two sheets whose labels are written on them.
 - **Not tested:** a live link from the drone (frames replayed from disk in order); any slope or built-up area; accuracy against surveyed points.
 
+### 7f. The growing map in the app, at flight speed (finale, 21 Nov): **keeps pace on both flights**
+**What changed from 7c/7e (built at the finale):**
+- **The re-solve:** still all photos together after every photo, but as one direct solve of a small table (the "normal equations": every matched point adds to a 4-numbers-per-photo square table) instead of an iterative solver. Same equations, same answer, milliseconds instead of seconds.
+- **Two workers side by side:** one reads and analyses the next photo while the other matches and solves the current one.
+- **Our flight now uses its GPS:** the flight-controller log, with the 16.05 s clock offset from 7e.
+- Code: `pipeline/live_map.py` (engine), `pipeline/live_run.py` (replay), `pipeline/live_sets.py` (photo lists), `live/routes.py` (API), `web/src/live.js` (map). Tests: `tests/test_live_map.py`, `tests/test_live_api.py`.
+
+**How it was measured:** photos replayed from disk at the pace the drone took them (one a second), through the app, with a headless Edge browser drawing every photo on the map as it landed (`web/scripts/live_replay_check.mjs`; the in-app browser pane was hidden, which pauses drawing). Delays are counted from when the drone delivered each photo, not from when the laptop picked it up.
+
+| | USGS block (public data) | Our flight `REC_0028` |
+|---|---|---|
+| Photos placed | **248 of 248** | **297 of 298** |
+| Waiting at any moment | never more than 1 | never more than 1 |
+| From arrival to on the map | **1.2 s** typical, **1.5 s** worst | **0.8 s** typical, **1.1 s** worst |
+| Laptop work per photo (the slower of the two workers) | **0.63 s** typical, 0.80 s worst | **0.60 s** typical, 0.74 s worst |
+| Full re-solve | 0.03 s on average, 0.08 s at the last photo (7c: 4.9 s; 7e: 23.9 s) | 0.04 s on average, 0.07 s at the last photo |
+| Photo pairs matched | 695 of 1,215 (identical to 7c) | 1,399 of 1,442 |
+| Against the measured map (middle tier, itself ±6.06 m), `scripts/eval_live_map.py` | 212 photos compared: a typical point a median **11.8 m** off; 90% within 19.3 m; worst 43.1 m (7c: 11.8 / 19.0 / 42.0) | the map's drone positions sit a median 1.0 m from the GPS track |
+
+**What it means:**
+- **F1 works in the product:** the map grows while the drone flies and keeps pace, on public survey photos and on our own flight, with photos landing about a second after they arrive.
+- **The accuracy claim is unchanged:** rough, about 10 to 20 m on the USGS block, for seeing, never for measuring. The screen says so.
+- **Not tested:** a live link from a drone (photos replayed from disk); a flight longer than 5 minutes; a slower laptop.
+
 ## Tool vs tape (span, pile, staged block)
 PENDING: needs our own field measurements; the survey flights were cancelled by rain (README disclosure).

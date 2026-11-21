@@ -76,10 +76,11 @@ def create_app(root_dir: Path | None = None) -> FastAPI:
         version="0.1.0",
     )
 
-    mounted: dict[str, bool] = {"advisor": True, "measure": False, "accuracy": False}
+    mounted: dict[str, bool] = {"advisor": True, "measure": False, "accuracy": False, "live": False}
     app.include_router(advisor.router, prefix="/advisor")
     mounted["measure"] = _try_mount_optional_router(app, "measure", "/measure")
     mounted["accuracy"] = _try_mount_optional_router(app, "accuracy", "/accuracy")
+    mounted["live"] = _try_mount_optional_router(app, "live", "/live")
 
     @app.get("/health")
     def get_health() -> dict[str, Any]:
