@@ -6,6 +6,12 @@
 
 Everything below this section is the round 1 record. This section is the plan for the finale.
 
+> **Organisers' brief, received 21 Nov ~14:15 ("22 Hour MVP Development and Product Validation Challenge"). It overrides the timeline below where they differ.**
+> - **Gates (miss one and we are not evaluated):** Finale Build Plan by **16:00 today** (`docs/finale_build_plan.md`); **two ArgosX scans** (baseline by 23:59 today, final by 11:00 Sun) with a remediation log; a **live build evaluators can use without us**.
+> - **Scored on how far we move** from the `finale-start` tag. Five dimensions: Build & Complete (most weight: no faked steps, real database, **authentication**, error handling, first-time usability, deployment), Partner tech in the core flow (**Neo4j**), Security (ArgosX), Market (**Market Fit Canvas + 3 Customer Test** with real people from the segment), Impact (**Persona Use Case Matrix**: 3+ segments, primary + 1 more working in the build).
+> - **Our build order now:** the seven items of `docs/finale_build_plan.md` (growing map in the app; debris on roads; Neo4j answers; field-team journey; judges' input on the iPad; access by role; ArgosX + load test). F2 ("the slide finds itself") and F6 (design pass) become stretch.
+> - Mentor questions from the briefing and our answers: `docs/mentor_prep_round1.md`.
+
 ### Core journey (one line)
 A responder flies a consumer drone over a landslide. A rough map grows on the laptop while the drone is still flying; Typhon then says where each vehicle can go, which blockage to clear first, and **where to fly next**. One laptop, no internet.
 
