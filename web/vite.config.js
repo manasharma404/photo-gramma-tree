@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 2000,
     rollupOptions: { input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html"),
-                              login: resolve(__dirname, "login/index.html") } },
+                              login: resolve(__dirname, "login/index.html"), classic: resolve(__dirname, "classic/index.html") } },
   },
   server: {
     proxy: {

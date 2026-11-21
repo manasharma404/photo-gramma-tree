@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F2F2EC" />
+  <title>Project Typhon · Rapid drone mapping for disaster relief</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+</head>
+<!-- Home page v5 (22 Nov): the hero is the lead's Project Typhon illustration (web/public/hero.webp), rebuilt as
+     particles that sweep between a wireframe and the full picture; the cursor pushes them aside. It is artwork, not
+     our map. Measured numbers come from web/src/assets/story_anchors.json (scripts/bake_story_anchors.py); nothing on
+     this page is typed in. -->
+<body class="story">
+  <nav class="snav" aria-label="Main">
+    <div class="snav__pill">
+      <a class="snav__brand" href="./" aria-label="Project Typhon"><span class="logo" data-logo></span></a>
+      <div class="snav__links">
+        <a href="#how">How it works</a>
+        <a href="#who">Who it's for</a>
+        <a href="#questions">Questions</a>
+        <a href="#security">Security</a>
+      </div>
+      <a class="btn btn--sm snav__cta" href="app/"><span class="btn__label">Open the map</span><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <img class="hero__fallback" src="./src/assets/hero_texture.webp" alt="Project Typhon illustration: a forested valley with a landslide scar" />
+    <div class="hero__copy">
+      <p class="eyebrow"><i></i>One drone · one laptop · no internet</p>
+      <h1>Rapid drone mapping for <span>disaster relief.</span></h1>
+      <p class="lede">From one flight, on one laptop: which roads each vehicle can use, who is cut off, and what to clear first.</p>
+      <div class="ctas">
+        <a class="btn" href="app/">Open the map<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a class="btn btn--glass" href="#how">How it works</a>
+      </div>
+    </div>
+    <!-- the original home page's overlays (the lead's design): map thumbnails on the left, callouts on the valley,
+         3D view, layers and compass on the right. Thumbnails are our own maps of a public USGS survey. -->
+    <aside class="hx-col hx-col--left" id="hx-left">
+      <ol class="hx-features">
+        <li><span class="hx-caps hx-num">01</span><div><p class="hx-caps">Rapid<br />2D mapping</p><img src="./src/assets/landing/ortho.jpg" alt="Our orthophoto of a public USGS survey" /></div></li>
+        <li><span class="hx-caps hx-num">02</span><div><p class="hx-caps">Accurate terrain<br />reconstruction</p><img src="./src/assets/landing/terrain.jpg" alt="Our 3D terrain model of the same survey" /></div></li>
+        <li><span class="hx-caps hx-num">03</span><div><p class="hx-caps">Actionable insights<br />for relief teams</p><img src="./src/assets/landing/dashboard.jpg" alt="The Typhon map" /></div></li>
+      </ol>
+    </aside>
+    <aside class="hx-col hx-col--right" id="hx-right">
+      <a class="hx-view3d" href="app/" aria-label="Open the 3D view"><img src="./src/assets/landing/terrain.jpg" alt="" /><span class="hx-caps">3D view</span><span class="hx-view3d__target" data-icon="act"></span></a>
+      <ul class="hx-layers hx-caps">
+        <li class="on"><a href="app/">Terrain</a></li>
+        <li><a href="app/">Roads</a></li>
+        <li><a href="app/">Landing zones</a></li>
+        <li><a href="app/">Checkpoints</a></li>
+        <li><a href="field">Field reports</a></li>
+      </ul>
+      <div class="hx-compass" aria-hidden="true">
+        <span class="hx-caps hx-compass__n">N</span>
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="0.6"/>
+          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.4" stroke-dasharray="1 2"/>
+          <path d="M50 6v10M50 84v10M6 50h10M84 50h10" stroke="currentColor" stroke-width="0.6"/>
+          <path d="M50 20 56 50 50 56 44 50z" fill="currentColor" opacity=".75"/></svg>
+      </div>
+    </aside>
+    <!-- callouts name what Typhon measures (no numbers on an illustration); placed on the picture by story.js -->
+    <div class="hx-callouts" id="hx-callouts">
+      <div class="hx-callout" data-px="674" data-py="466" data-dy="34"><span class="hx-caps">Debris flow</span><b>volume ± tolerance</b></div>
+      <div class="hx-callout" data-px="624" data-py="679" data-dy="52"><span class="hx-caps">Affected settlements</span><b>cut off, per vehicle</b></div>
+      <div class="hx-callout" data-px="1176" data-py="581" data-dy="62"><span class="hx-caps">Roads</span><b>open · partial · blocked</b></div>
+    </div>
+    <span class="hx-cross" style="left: 21%; top: 41%" aria-hidden="true"></span>
+    <span class="hx-cross" style="left: 79%; top: 38%" aria-hidden="true"></span>
+    <span class="hx-cross" style="left: 70%; top: 33%" aria-hidden="true"></span>
+    <p class="hx-credit hx-caps">Illustration</p>
+
+    <div class="hero__foot">
+      <div class="hx-corner hx-caps">From<br />data<br />to<br />impact</div>
+      <div class="mode" id="mode" role="group" aria-label="Picture view">
+        <button type="button" data-mode="wire" aria-pressed="true">Wireframe</button>
+        <button type="button" data-mode="detail" aria-pressed="false">Detail</button>
+      </div>
+      <div class="hx-corner hx-corner--right hx-caps">Safer<br />communities<br />stronger<br />tomorrows</div>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <p class="caps" data-up>The problem</p>
+    <p class="statement" id="statement">A landslide closes a valley. The satellite pass is days away and may be under cloud, and
+      online maps still show the roads as they were. Responders need to know <em>which roads still work, who is cut off
+      and what to clear first.</em> Typhon turns one consumer drone flight into those answers, on one laptop, with no
+      internet.</p>
+    <div class="built" data-up>
+      <p class="caps">Built on open tools</p>
+      <ul><li>OpenDroneMap</li><li>OpenCV</li><li>Neo4j</li><li>MapLibre</li><li>three.js</li><li>FastAPI</li></ul>
+    </div>
+  </section>
+
+  <section class="stack" id="how">
+    <div class="stack__side">
+      <p class="caps">How it works</p>
+      <h2>From one flight to the <span>relief plan.</span></h2>
+      <p>Four steps, all on the laptop in the field. Nothing is uploaded.</p>
+      <div class="stack__dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="stack__cards">
+      <article class="stack__card" style="--i: 0">
+        <header><span class="num">#01</span><p class="caps">Fly once</p></header>
+        <h3>A flight plan a stressed pilot gets right the first time.</h3>
+        <p>Straight, overlapping lines with the camera pointing down. Any consumer drone with GPS. No markers on the ground.</p>
+      </article>
+      <article class="stack__card stack__card--forest" style="--i: 1">
+        <header><span class="num">#02</span><p class="caps">See the ground</p></header>
+        <h3>A rough map grows while the photos come in.</h3>
+        <p>Each photo lands on the map about <b><span data-num="arrival">–</span> s</b> after it arrives. It is labelled
+          rough, about 10 to 20 m: for seeing, never for measuring.</p>
+        <div class="grow" aria-hidden="true"><i></i></div>
+        <p class="note">In the demo the photos are replayed from disk, not sent live from the drone.</p>
+      </article>
+      <article class="stack__card" style="--i: 2">
+        <header><span class="num">#03</span><p class="caps">Measure</p></header>
+        <h3>Then the measured map, with its error on screen.</h3>
+        <p>Heights, debris volume, the span of a washed-out crossing, places a helicopter can land. Position error:
+          <b>±<span data-num="rmse">–</span> m</b> at <span data-num="ncp">–</span> checkpoints, with no ground control.</p>
+      </article>
+      <article class="stack__card stack__card--navy" style="--i: 3">
+        <header><span class="num">#04</span><p class="caps">Decide</p></header>
+        <h3>Answers that move trucks.</h3>
+        <ul class="asks">
+          <li>Which roads each vehicle can still use, and who is cut off</li>
+          <li>Which blockage to clear first</li>
+          <li>Where to fly the drone next</li>
+          <li>Field teams confirm or correct it from their phones</li>
+        </ul>
+        <ul class="legend" aria-label="Road status lines">
+          <li><svg viewBox="0 0 32 8"><line x1="0" y1="4" x2="32" y2="4" stroke="#57B37C" stroke-width="3"/></svg>Open</li>
+          <li><svg viewBox="0 0 32 8"><line x1="0" y1="4" x2="32" y2="4" stroke="#E0A93A" stroke-width="3" stroke-dasharray="6 4"/></svg>Partial</li>
+          <li><svg viewBox="0 0 32 8"><line x1="0" y1="4" x2="32" y2="4" stroke="#E2574C" stroke-width="4"/></svg>Blocked ✕</li>
+          <li><svg viewBox="0 0 32 8"><line x1="0" y1="4" x2="32" y2="4" stroke="#B9BDB5" stroke-width="3" stroke-dasharray="1.5 3.5" stroke-linecap="round"/></svg>Unknown</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="proof" id="proof">
+    <p class="caps" data-up>Measured on this laptop, offline</p>
+    <div class="proof__nums">
+      <div data-up><b><span data-num="minutes">–</span><small>min</small></b><span>for <span data-num="area">–</span> ha
+        from <span data-num="photos">–</span> photos</span></div>
+      <div data-up><b>±<span data-num="rmse">–</span><small>m</small></b><span>position error at
+        <span data-num="ncp">–</span> checkpoints, no ground control</span></div>
+      <div data-up><b><span data-num="arrival">–</span><small>s</small></b><span>from photo to rough map (worst
+        <span data-num="worst">–</span> s)</span></div>
+    </div>
+    <p class="proof__note" data-up>Tested on a public USGS survey (public domain, doi:10.5066/P144KDGN), not our footage.
+      3 checkpoints is a small sample: the standard asks for 30.</p>
+  </section>
+
+  <section class="ssec contour-paper" id="who">
+    <header class="ssec__head">
+      <p class="caps">Who it's for</p>
+      <h2>Built for the people who decide in the <span>first hours.</span></h2>
+    </header>
+    <div class="tiles tiles--3">
+      <article class="tile tile--hot" data-up><span class="tile__ico">1</span><p class="caps">First user</p>
+        <h3>The district emergency operations centre</h3>
+        <p>The duty officer who sends vehicles: which roads hold, who is cut off, what to clear first, where to look next.</p></article>
+      <article class="tile" data-up><span class="tile__ico">2</span><p class="caps">In the field</p>
+        <h3>Rescue teams: SDRF, NDRF, fire services</h3>
+        <p>A phone page with a team PIN. Reports wait on the phone with no signal and send when it returns; the map can be saved to the phone.</p></article>
+      <article class="tile" data-up><span class="tile__ico">3</span><p class="caps">Next</p>
+        <h3>Road owners: PWD, BRO</h3>
+        <p>Debris volume on a road, the span of a washed-out crossing, working space at each bank: measured from the same flight.</p></article>
+    </div>
+    <p class="ssec__foot">Software: free and open source, with no cloud bill per map. What a district buys once: a gaming
+      laptop and a consumer drone, about ₹1.5–2.6 lakh (<b>estimate</b> from current listings, 21 Nov).</p>
+  </section>
+
+  <section class="ssec" id="questions">
+    <header class="ssec__head">
+      <p class="caps">Questions we get</p>
+      <h2>Fair questions, <span>straight answers.</span></h2>
+    </header>
+    <div class="faq">
+      <details open>
+        <summary>Why not just use Google Maps or satellite images?</summary>
+        <p>They show the valley as it was before the slide. A satellite pass can be days away, and cloud often hides the
+          ground. A drone flies under the cloud on the same day, and Typhon turns its photos into a current map in the field.</p>
+      </details>
+      <details>
+        <summary>There is no phone network after a disaster. How does the drone fly?</summary>
+        <p>It does not need one. The drone talks to its remote control over its own radio link and gets its position from
+          GPS satellites. The map is made on the laptop, and phones join the laptop's own Wi-Fi hotspot. Set the drone up
+          online once, before deployment.</p>
+      </details>
+      <details>
+        <summary>What if the photos are not clear: blur, dust, low light, cloud?</summary>
+        <p>The drone flies below the cloud, which is where satellites fail. From video, we keep the sharpest frame in each
+          stretch of the flight and drop blurred ones, with a record of why. Where the ground still cannot be seen, the
+          road stays <b>unknown</b>: never shown as open.</p>
+      </details>
+      <details>
+        <summary>Which drone do I need?</summary>
+        <p>Any consumer drone with a camera that can look straight down, and GPS for each photo: in the photo itself or in
+          the drone's flight log. Fly it in simple straight, overlapping lines. No special camera and no markers on the
+          ground. We tested survey photos (USGS, public data) and our own drone video with its flight log (20 Nov).</p>
+      </details>
+      <details>
+        <summary>How accurate is it without ground markers?</summary>
+        <p>The measured map: <b>±<span data-num="rmse">–</span> m</b> at <span data-num="ncp">–</span> surveyed checkpoints,
+          with no ground control. The rough map during the flight: about 10 to 20 m, labelled rough and used only to see,
+          never to measure. The error is on screen with its sample size: 3 checkpoints is a small sample.</p>
+      </details>
+      <details>
+        <summary>Does it need the internet or a cloud account?</summary>
+        <p>No. Processing, the map, the route answers and the field reports all run on one laptop. Nothing is uploaded.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="ssec contour-paper" id="security">
+    <header class="ssec__head">
+      <p class="caps">Security</p>
+      <h2>Eight attacks. Each defence has a <span>test that proves it.</span></h2>
+    </header>
+    <div class="tiles tiles--4">
+      <article class="tile"><span class="tile__ico">01</span><h3>Guessing the access code</h3>
+        <p>Five wrong codes lock that device out for 10 minutes.</p><code>test_wrong_codes_lock_the_device_out</code></article>
+      <article class="tile"><span class="tile__ico">02</span><h3>Faking a sign-in</h3>
+        <p>Sign-ins are signed with a secret key and expire after 12 hours; a changed one is refused.</p><code>test_a_tampered_or_expired_cookie_is_refused</code></article>
+      <article class="tile"><span class="tile__ico">03</span><h3>Another website acting as you</h3>
+        <p>The sign-in is never sent with requests that start on another site.</p><code>test_the_sign_in_cookie_cannot_be_read_…</code></article>
+      <article class="tile"><span class="tile__ico">04</span><h3>A script stealing the sign-in</h3>
+        <p>Scripts on the page cannot read the sign-in cookie.</p><code>test_the_sign_in_cookie_cannot_be_read_…</code></article>
+      <article class="tile"><span class="tile__ico">05</span><h3>Database injection</h3>
+        <p>Every query uses placeholders: injected text is stored as plain text.</p><code>test_sql_injection_is_stored_as_plain_text</code></article>
+      <article class="tile"><span class="tile__ico">06</span><h3>Reading files outside the map</h3>
+        <p>Map-tile requests cannot step outside the tiles folder.</p><code>test_tile_paths_cannot_leave_the_tiles_folder</code></article>
+      <article class="tile"><span class="tile__ico">07</span><h3>Seeing more than your role allows</h3>
+        <p>One gatekeeper checks every request; anything not allowed is refused. A field team sees only its page.</p><code>test_field_team_sees_only_its_page…</code></article>
+      <article class="tile"><span class="tile__ico">08</span><h3>Redirect tricks after sign-in</h3>
+        <p>After signing in, only links inside the app are followed.</p><code>test_after_sign_in_only_local_paths_are_followed</code></article>
+    </div>
+    <p class="ssec__foot"><b>Still open, said plainly:</b> on the field hotspot the app runs on plain HTTP (no certificates
+      on a hotspot), so the hotspot password is the barrier. The independent ArgosX scan report: <b>PENDING</b>.</p>
+  </section>
+
+  <section class="sclose">
+    <h2>See it on the <span>map.</span></h2>
+    <div class="ctas">
+      <a class="btn" href="app/">Open the map<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn--light" href="field">Field team page</a>
+    </div>
+  </section>
+
+  <footer class="sfoot">
+    <p class="wordmark" aria-hidden="true">Typhon</p>
+    <div class="sfoot__small">
+      <span>Project Typhon · team Vortex · hackFront India 2026, PS T8.2</span>
+      <span>Hero: the team's illustration, drawn as particles. Numbers: a public USGS survey processed by our pipeline.</span>
+    </div>
+  </footer>
+  <script type="module" src="/src/story.js"></script>
+</body>
+</html>
