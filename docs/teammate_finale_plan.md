@@ -19,6 +19,13 @@
 ### In the car or on arrival (before 14:00): score the model on our 50 crops (agent step 1)
 This is evaluation, not a feature: it can happen before 14:00. **Fix the rule before you look at the results** (see Part B). The labels: 30 debris, 11 no debris, 9 can't tell. **20 of the 30 debris crops are "broken trees mainly"**, which the training data (CAS: mud and rock) may not cover. Report those separately: it tells us what the model can and cannot see.
 
+### Changed in your files by the lead's side (21 Nov, ~18:00, item 6 "access by role")
+- **Sign-in is now on** (`auth/`). Every page and API call needs a session, except the landing page, `/health` and `/accuracy/spec`. Roles: operator, evaluator (judges), field team (one PIN per team). Codes live in `.env`; show them with `uv run python -m auth.codes`.
+- **`advisor/routes.py`, `post_field_report`:** a signed-in request skips the per-report PIN, and a field team's report is stored with its team name (`Team A (callsign)`). With `VORTEX_AUTH=off`, your original PIN check runs unchanged. If you edit this function, keep that `session` block at the top.
+- **Tests:** `tests/conftest.py` turns sign-in off for every test unless the test turns it on (`tests/test_auth.py`). Your tests need no change.
+- **Your phone page works as before** once a team signs in at `/login` with its PIN (checked in a browser).
+- **Item 4 (~18:15), also in your phone page:** `field.html` loads a new `/field-static/outbox.js` before `field.js`; in `field.js` the "no connection" branch of the submit handler now keeps the report in the phone's outbox (it sends itself when back in range). A "Save the map to this phone (PDF)" link is added under the scenario picker (`GET /field/map.pdf`, module `fieldkit/`). If you rework the submit handler, keep the `TyphonOutbox.keep(...)` call in its `catch`.
+
 ### Your two ideas, added as upgrades (lead's decision, 21 Nov)
 From your innovation list, the lead picked two. They are **upgrades to F3 and F4, not new features**, because the AMA said the demo and final-day code carry the most weight, and these two show up in the demo. The others stay out tonight: they need data we do not have (satellite radar, power grid), internet, or new servers, or they already exist (population, exports, the situation report, the what-if taps in F5).
 

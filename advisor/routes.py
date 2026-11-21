@@ -232,8 +232,17 @@ def post_field_report(
     x_field_pin: str | None = Header(default=None),
 ) -> dict[str, Any]:
     """Record a ground responder field report into SQLite and update /advisor/state immediately."""
-    client = request.client.host if request is not None and request.client else None
-    check_field_pin(client, x_field_pin if isinstance(x_field_pin, str) else None)
+    # Signed in (auth/core.py, finale item 6): the sign-in already proved who this is, and a field team's
+    # reports carry its team name. Not signed in (only when VORTEX_AUTH=off): the original per-report PIN.
+    session = getattr(getattr(request, "state", None), "auth", None) if request is not None else None
+    if session:
+        reporter = session.get("team") or {"operator": "Laptop operator", "evaluator": "Evaluator"}.get(session["role"])
+        if payload.reporter and session.get("team"):
+            reporter = f"{session['team']} ({payload.reporter})"
+        payload.reporter = reporter
+    else:
+        client = request.client.host if request is not None and request.client else None
+        check_field_pin(client, x_field_pin if isinstance(x_field_pin, str) else None)
     proj = resolve_project(payload.project)
     seg_fc, places_fc, _ = _load_project_inputs(proj)
 

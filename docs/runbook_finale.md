@@ -18,7 +18,7 @@ Setup detail lives in: `README.md` ("Run it"), `docs/runbook_advisor.md` (Neo4j 
 1. Laptop on charge. Wi-Fi off unless the step needs it.
 2. Start Docker Desktop; wait until `docker info` answers.
 3. Neo4j: collect the AuraDB access at the partner desk (from 14:30). Put it in the local `.env` only, never in chat or in the repo. If AuraDB is not ready, use the local container (`docs/runbook_advisor.md`) and keep going.
-4. Start the app: `uv run python -m api.main`. Note the field PIN it prints.
+4. Start the app: `uv run python -m api.main` (sign-in is on). In your own terminal, show the access codes with `uv run python -m auth.codes`: one operator code (you), one evaluator code (judges, on a card at the table), one PIN per field team. Never paste them in a chat. Sign in at `/login`.
 5. Open `http://localhost:8000`; check the map, the 3D view and one road panel.
 6. Phone: hotspot on with **mobile data off**; laptop joins it; `uv run python scripts/qr.py`; phone opens `/field` (`docs/phone_check.md` steps 1–4).
 7. Post the time and "baseline runs" in the team chat.
@@ -66,6 +66,13 @@ Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes 
 - If a fix lands too late to test, it does not ship.
 - Every demo action is run end to end before each round, not just before the jury.
 - Push only after `git pull`; never force-push.
+
+## 6b. ArgosX security scans (gate: baseline by 23:59 Sat, final by 11:00 Sun)
+1. App running with sign-in on (`uv run python -m api.main`).
+2. `powershell -ExecutionPolicy Bypass -File scripts\argosx_tunnel.ps1`: it prints a temporary `https://…trycloudflare.com` link (tested 21 Nov: the app answered, every private page asked for sign-in, wrong codes were refused, and the link went dead on closing).
+3. Paste the link into ArgosX, run the scan, **download the report** (`docs/security/argosx_baseline.pdf`, later `argosx_final.pdf`).
+4. Press Enter in the script window: the tunnel closes.
+5. Fix critical and high first; keep a remediation log: found / fixed / remaining and why.
 
 ## 7. Submission (Sun, by 11:30; the portal locks at 12:00)
 1. Final `git pull`, then push `main`. The repository link is the main submission.

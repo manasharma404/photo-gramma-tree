@@ -119,6 +119,23 @@ body.app { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-r
 .hint { position: absolute; top: var(--space-4); left: var(--space-4); font-size: var(--fs-s); background: var(--surface);
   border-radius: var(--radius-pill); padding: 6px 14px; box-shadow: var(--shadow); }
 .hint:empty { display: none; }
+/* Growing map (F1): a small card over the map, top left; the photos themselves are map layers */
+.live { position: absolute; top: var(--space-4); left: var(--space-4); width: 340px; padding: var(--space-3) var(--space-4); font-size: var(--fs-s); }
+.live header { display: flex; align-items: center; justify-content: space-between; font: 500 var(--fs-m) var(--font-display); margin-bottom: var(--space-2); }
+.live__state { font: var(--fs-xs) var(--font-ui); padding: 1px 8px; border-radius: var(--radius-pill); background: var(--stone); color: var(--text-2); }
+.live__state[data-state="running"] { background: var(--primary); color: var(--on-primary); }
+.live__row { display: flex; gap: var(--space-2); }
+.live__row select { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 4px 8px; font-size: var(--fs-s); }
+.live__btn { border: 0; border-radius: var(--radius-pill); padding: 6px 14px; background: var(--primary); color: var(--on-primary); font: 500 var(--fs-s) var(--font-display); cursor: pointer; white-space: nowrap; }
+.live__btn:disabled { opacity: .5; cursor: default; }
+.live__stats { margin-top: var(--space-2); line-height: 1.5; }
+.live__stats:empty { display: none; }
+.live__behind { color: var(--status-blocked); font-weight: 500; }
+.live__label { margin-top: var(--space-2); font-size: var(--fs-xs); color: var(--text-2); }
+.hint { z-index: 2; }
+.who { cursor: pointer; border: 1px solid var(--line); background: var(--surface); font: var(--fs-s) var(--font-ui); color: var(--text); }
+.who:hover { background: var(--stone); }
+@media (max-width: 760px) { .live { width: auto; right: var(--space-4); } }
 .maplibregl-ctrl-group { border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; }
 .maplibregl-ctrl-attrib { font-size: 10px; background: color-mix(in srgb, var(--surface) 80%, transparent) !important; }
 .maplibregl-popup-content { font: var(--fs-s) var(--font-ui); border-radius: var(--radius); }

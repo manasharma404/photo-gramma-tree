@@ -1,0 +1,19 @@
+/* Sign-in page: same tokens as the app (tokens.css); one card on the sand background. */
+* { box-sizing: border-box; }
+body.login { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg);
+  color: var(--text); font: var(--fs-m) / 1.45 var(--font-ui); }
+.login__card { width: min(420px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: var(--space-6); }
+.login__card .logo { display: block; height: 28px; margin-bottom: var(--space-5); }
+.login__card .logo svg { height: 28px; width: auto; }
+.login h1 { font: 500 var(--fs-xl) var(--font-display); margin: 0 0 var(--space-2); }
+.login__lead { color: var(--text-2); margin: 0 0 var(--space-5); font-size: var(--fs-s); }
+.login label { display: block; font-size: var(--fs-xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--text-2); margin-bottom: var(--space-1); }
+.login input { width: 100%; font: 500 var(--fs-l) var(--font-display); padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--bg); color: var(--text); letter-spacing: 0.08em; }
+.login input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.login button { width: 100%; margin-top: var(--space-4); border: 0; border-radius: var(--radius-pill); padding: 12px; cursor: pointer;
+  background: var(--primary); color: var(--on-primary); font: 500 var(--fs-m) var(--font-display); }
+.login button:disabled { opacity: .6; cursor: default; }
+.login__msg { min-height: 1.4em; margin: var(--space-3) 0 0; color: var(--status-blocked); font-size: var(--fs-s); }
+.login__note { margin: var(--space-5) 0 0; font-size: var(--fs-xs); color: var(--text-2); }

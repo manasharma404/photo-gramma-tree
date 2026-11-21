@@ -9,12 +9,13 @@ export default defineConfig({
   base: "/",
   build: {
     outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 2000,
-    rollupOptions: { input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html") } },
+    rollupOptions: { input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html"),
+                              login: resolve(__dirname, "login/index.html") } },
   },
   server: {
     proxy: {
       "/advisor": api, "/measure": api, "/accuracy": api, "/tiles": api, "/health": api, "/field": api,
-      "/field-static": api,
+      "/field-static": api, "/live": api, "/auth": api,
     },
   },
 });

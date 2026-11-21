@@ -311,7 +311,13 @@
         await loadContext(state.project);
       }
     } catch (_) {
-      showToast("Hotspot connection error — stay near field laptop and retry.", true);
+      // no signal: keep the report on this phone; it sends itself when the laptop is reachable (outbox.js)
+      const kept = window.TyphonOutbox
+        ? window.TyphonOutbox.keep(payload, { "X-Field-PIN": elPin.value.trim() })
+        : 0;
+      showToast(kept
+        ? "No signal: report kept on this phone (" + kept + " waiting). It sends by itself when you are back in range."
+        : "Hotspot connection error — stay near field laptop and retry.", !kept);
     } finally {
       elSubmit.disabled = false;
     }

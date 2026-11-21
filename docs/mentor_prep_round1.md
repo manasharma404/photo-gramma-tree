@@ -32,14 +32,13 @@ Only measured facts; anything not yet done says PENDING. Sources: `docs/validati
 ## 4. How secure is it? ("Vibe coded is accepted but must be secured")
 - **In place today:**
   - nothing leaves the laptop at runtime (offline check: 0 requests left the laptop);
-  - field reports need a PIN;
+  - field reports need a PIN, and a phone is locked out for 10 minutes after 5 wrong PINs;
   - Neo4j listens on the laptop only (fixed 21 Nov);
   - passwords live in a git-ignored `.env`, never in the repo.
 - **Known gaps (being fixed tonight):**
   - no login on the dashboard;
   - one shared PIN;
-  - plain HTTP on the local network;
-  - no limit on PIN guesses.
+  - plain HTTP on the local network.
 - **Plan:** ArgosX baseline scan, fix critical and high first, final scan, remediation log that explains what remains.
 
 ## 5. Scalability: what if 1,000 people use it at once?

@@ -12,6 +12,10 @@ const ROOT = new URL(document.querySelector('meta[name="typhon-root"]')?.content
 export async function getJSON(url) {
   try {
     const r = await fetch(url);
+    if (r.status === 401 && !SNAPSHOT && location.pathname.startsWith("/app")) {
+      location.replace(`/login/?next=${encodeURIComponent(location.pathname)}`);  // signed out or session expired
+      return null;
+    }
     if (!r.ok) {
       lastErrors[url] = `${r.status} ${(await r.text()).slice(0, 200)}`;
       return null;

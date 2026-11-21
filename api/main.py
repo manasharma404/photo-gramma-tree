@@ -15,12 +15,16 @@ import socket
 from pathlib import Path
 from typing import Any
 
+from urllib.parse import quote
+
 import uvicorn
-from fastapi import APIRouter, FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 import advisor
+import auth
+from auth import core as auth_core
 
 logger = logging.getLogger("vortex.api")
 ROOT = Path(__file__).resolve().parent.parent
@@ -76,10 +80,35 @@ def create_app(root_dir: Path | None = None) -> FastAPI:
         version="0.1.0",
     )
 
-    mounted: dict[str, bool] = {"advisor": True, "measure": False, "accuracy": False}
+    mounted: dict[str, bool] = {"advisor": True, "measure": False, "accuracy": False, "live": False}
+
+    # Access by role (auth/core.py): every request is checked against one permission table; nothing is open by
+    # default. A browser that is not signed in is sent to /login; an API call gets 401 (not signed in) or 403.
+    @app.middleware("http")
+    async def access_by_role(request: Request, call_next):
+        if not auth_core.enabled():
+            request.state.auth = None
+            return await call_next(request)
+        session = auth_core.read_session(request.cookies.get(auth_core.COOKIE))
+        request.state.auth = session
+        role = session["role"] if session else None
+        path = request.url.path
+        if auth_core.allowed(role, request.method, path):
+            return await call_next(request)
+        if request.method in ("GET", "HEAD") and "text/html" in request.headers.get("accept", ""):
+            if role is None:
+                return RedirectResponse(f"/login/?next={quote(path, safe='/')}", status_code=303)
+            return RedirectResponse(auth_core.safe_next(None, role), status_code=303)  # e.g. a field team → /field
+        if role is None:
+            return JSONResponse({"detail": "Sign in first."}, status_code=401)
+        return JSONResponse({"detail": f"Not allowed for the {role} role."}, status_code=403)
+
+    app.include_router(auth.router)
     app.include_router(advisor.router, prefix="/advisor")
     mounted["measure"] = _try_mount_optional_router(app, "measure", "/measure")
     mounted["accuracy"] = _try_mount_optional_router(app, "accuracy", "/accuracy")
+    mounted["live"] = _try_mount_optional_router(app, "live", "/live")
+    mounted["fieldkit"] = _try_mount_optional_router(app, "fieldkit", "/field")
 
     @app.get("/health")
     def get_health() -> dict[str, Any]:
@@ -155,11 +184,23 @@ app = create_app()
 def main() -> None:
     host = os.environ.get("VORTEX_HOST", "0.0.0.0")
     port = int(os.environ.get("VORTEX_PORT", "8000"))
-    # field reports from phones need a PIN; a new one each start unless set (VORTEX_FIELD_PIN=off disables)
-    if not os.environ.get("VORTEX_FIELD_PIN", "").strip():
-        os.environ["VORTEX_FIELD_PIN"] = f"{secrets.randbelow(10 ** 6):06d}"
-    pin = os.environ["VORTEX_FIELD_PIN"]
-    print(f"Field page PIN for phones: {pin}" if pin.lower() != "off" else "Field page PIN: off")
+    if auth_core.enabled():
+        # access by role: codes live in the git-ignored .env; create any that are missing, never print them here
+        from auth.codes import ensure
+        written = ensure()
+        print("Sign-in is ON." + (f" New access codes were added to .env ({', '.join(written)})." if written else "")
+              + " Show them in your own terminal with: uv run python -m auth.codes")
+    else:
+        # sign-in off (VORTEX_AUTH=off): the original single field PIN, a new one each start unless set
+        if not os.environ.get("VORTEX_FIELD_PIN", "").strip():
+            os.environ["VORTEX_FIELD_PIN"] = f"{secrets.randbelow(10 ** 6):06d}"
+        pin = os.environ["VORTEX_FIELD_PIN"]
+        print("Sign-in is OFF. " + (f"Field page PIN for phones: {pin}" if pin.lower() != "off" else "Field page PIN: off"))
+    try:  # draw the phones' saved map once now, so the first field team does not wait ~30 s
+        from fieldkit.routes import warm
+        warm()
+    except Exception:
+        logger.exception("field map warm-up could not start")
     uvicorn.run("api.main:app", host=host, port=port, reload=False)
 
 
