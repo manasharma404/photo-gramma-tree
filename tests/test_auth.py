@@ -81,6 +81,19 @@ def test_wrong_codes_lock_the_device_out(client):
     assert client.post("/auth/login", json={"code": OP}).status_code == 429  # even the right code waits
 
 
+def test_tunnel_guesses_do_not_lock_out_the_laptop(client):
+    # the test client counts as one device; tunnel visitors are counted by the address Cloudflare passes on
+    from auth.routes import _device
+
+    class R:
+        def __init__(self, host, cf=None):
+            self.client = type("C", (), {"host": host})()
+            self.headers = {"cf-connecting-ip": cf} if cf else {}
+    assert _device(R("127.0.0.1", "203.0.113.9")) == "tunnel:203.0.113.9"
+    assert _device(R("127.0.0.1")) == "127.0.0.1"
+    assert _device(R("192.168.43.20", "203.0.113.9")) == "192.168.43.20"  # a phone cannot fake it
+
+
 def test_a_tampered_or_expired_cookie_is_refused(client, monkeypatch):
     sign_in(client, EV)
     good = client.cookies.get(core.COOKIE)

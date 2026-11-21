@@ -17,7 +17,15 @@ class LoginIn(BaseModel):
 
 
 def _device(request: Request) -> str:
-    return request.client.host if request.client else "unknown"
+    """who to count wrong codes against. Through the Cloudflare tunnel every request arrives from this laptop
+    (127.0.0.1), so a scanner's wrong guesses would lock the laptop's own operator out; for those requests the
+    visitor's real address is in CF-Connecting-IP. That header is trusted ONLY on requests that really come from
+    127.0.0.1 (the tunnel): a phone on the hotspot cannot use it to dodge its own lockout."""
+    host = request.client.host if request.client else "unknown"
+    cf = request.headers.get("cf-connecting-ip", "").strip()
+    if host in ("127.0.0.1", "::1") and cf:
+        return f"tunnel:{cf}"
+    return host
 
 
 @router.post("/login")
