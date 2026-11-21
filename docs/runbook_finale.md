@@ -67,6 +67,13 @@ Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes 
 - Every demo action is run end to end before each round, not just before the jury.
 - Push only after `git pull`; never force-push.
 
+## 6b. ArgosX security scans (gate: baseline by 23:59 Sat, final by 11:00 Sun)
+1. App running with sign-in on (`uv run python -m api.main`).
+2. `powershell -ExecutionPolicy Bypass -File scripts\argosx_tunnel.ps1`: it prints a temporary `https://…trycloudflare.com` link (tested 21 Nov: the app answered, every private page asked for sign-in, wrong codes were refused, and the link went dead on closing).
+3. Paste the link into ArgosX, run the scan, **download the report** (`docs/security/argosx_baseline.pdf`, later `argosx_final.pdf`).
+4. Press Enter in the script window: the tunnel closes.
+5. Fix critical and high first; keep a remediation log: found / fixed / remaining and why.
+
 ## 7. Submission (Sun, by 11:30; the portal locks at 12:00)
 1. Final `git pull`, then push `main`. The repository link is the main submission.
 2. **Only if the portal asks for a zip:** `uv run python scripts/make_submission_zip.py`. It writes `typhon_submission_<commit>.zip` next to the repo folder, and refuses if you are not on `main`, have uncommitted changes, or `main` differs from GitHub, so the zip always matches GitHub. Never upload a zip made from someone's own folder.
