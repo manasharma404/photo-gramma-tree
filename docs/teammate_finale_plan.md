@@ -11,12 +11,13 @@
 ### Before we leave (now → 12:30)
 | # | Do | Done when |
 |---|---|---|
-| 1 | Copy `typhon_debris_resnet18.pt` and `.onnx` onto the demo laptop, into `vortex/models/` | The laptop's SHA-256 matches your report (`2ccee7c2…` and `489dcea6…`) |
+| 1 | ~~Copy the weights onto the demo laptop~~ **Done 21 Nov 12:25:** both files in `vortex/models/`, SHA-256 match your report | — |
 | 2 | Get `labels.csv` from the lead (50 crops; she and you labelled them on 21 Nov) | You have it as a file, not a photo |
-| 3 | Run `uv run python scripts/prefetch_nepal.py` on the demo laptop while it is online | `data/projects/nepal/roads/segments.geojson` exists on the laptop |
+| 3 | ~~Nepal roads fetch~~ **Done 21 Nov 12:14 on the demo laptop:** 106,667 segments, 1,591 places. **85,625 of them are `unclassified` village roads**: for the Neo4j questions keep trunk, primary, secondary and tertiary (about 21,000), and say so | — |
+| 4 | Neo4j step 1.3 in `docs/runbook_advisor.md` on the demo laptop while online (the image is pulled; `neo4j/plugins/` does not exist yet). The password stays in the local `.env` | `neo4j/plugins/` holds the GDS jar; Neo4j starts with Wi-Fi off |
 
 ### In the car or on arrival (before 14:00): score the model on our 50 crops (agent step 1)
-This is evaluation, not a feature: it can happen before 14:00. **Fix the rule before you look at the results** (see Part B). The labels: 29 debris, 13 no debris, 7 can't tell, 1 blank (c07). **20 of the 29 debris crops are "broken trees mainly"**, which the training data (CAS: mud and rock) may not cover. Report those separately: it tells us what the model can and cannot see.
+This is evaluation, not a feature: it can happen before 14:00. **Fix the rule before you look at the results** (see Part B). The labels: 30 debris, 11 no debris, 9 can't tell. **20 of the 30 debris crops are "broken trees mainly"**, which the training data (CAS: mud and rock) may not cover. Report those separately: it tells us what the model can and cannot see.
 
 ### The 22 hours
 | When | You | Done when |
