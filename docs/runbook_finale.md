@@ -30,8 +30,8 @@ Setup detail lives in: `README.md` ("Run it"), `docs/runbook_advisor.md` (Neo4j 
 | 2 | Neo4j reachable (AuraDB or local) | advisor check in `docs/runbook_advisor.md` prints a result |
 | 3 | `uv run python -m api.main` | page loads at `http://localhost:8000` |
 | 4 | Phone on the hotspot, `/field` open, PIN entered | test report reaches the dashboard in about 3 s |
-| 5 | Growing map, staged and paused at photo 0 (F1) | PENDING (finale build) |
-| 6 | Reset to the starting state | PENDING: a "reset demo" action is planned (Mentor Round 2 notes in `PLAN.md`); it does not exist yet |
+| 5 | Growing map staged (F1): signed in as operator, the map page shows the **Growing map** panel reading "idle"; pick the photo set, and press **Start flight replay** only when the story reaches it (it replays at flight pace from disk; say so) | panel reads "idle", set chosen |
+| 6 | Reset to the starting state: `uv run python scripts/reset_demo.py` (backs up, then clears field reports and model/human-check history; `--dry-run` only shows counts). Press Stop on the growing map if it is running | prints "Already at the starting state" or "Cleared. Now: field reports 0, history 0" |
 
 ## 4. Demo script
 Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes including the demo.
