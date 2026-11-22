@@ -18,8 +18,23 @@ from advisor.graph import Topology, build_topology
 from advisor.neo4j_client import open_driver, project_paths
 
 
+# Without these, each road's MATCH on its two junctions scans every Junction in the database: with the Nepal
+# graph loaded (about 106,000 junctions) one South Fork access report took 108 s, 102 s of it here; with them, 4-6 s.
+INDEXES = (
+    "CREATE INDEX junction_project_id IF NOT EXISTS FOR (j:Junction) ON (j.project, j.junction_id)",
+    "CREATE INDEX junction_project IF NOT EXISTS FOR (j:Junction) ON (j.project)",
+    "CREATE INDEX place_project_id IF NOT EXISTS FOR (p:Place) ON (p.project, p.place_id)",
+)
+def ensure_indexes(driver: Driver) -> None:
+    """Create the lookup indexes (IF NOT EXISTS: a few milliseconds when they are already there)."""
+    for stmt in INDEXES:
+        driver.execute_query(stmt)
+    driver.execute_query("CALL db.awaitIndexes(60)")
+
+
 def load_topology_to_neo4j(topology: Topology, project: str, driver: Driver) -> dict[str, int]:
     """Idempotently replace all Junction, Place, and ROAD_SEGMENT entities for `project`."""
+    ensure_indexes(driver)
     driver.execute_query(
         "MATCH (n {project: $project}) DETACH DELETE n",
         project=project,
