@@ -74,7 +74,7 @@ const VERT = /* glsl */ `
     gl_Position = vec4(screen.x / uRes.x * 2.0 - 1.0, 1.0 - screen.y / uRes.y * 2.0, 0.0, 1.0);
     // the original home page's soft edge: an oval fade, and a fade before the bottom of the picture
     vec2 q = (aDetail - vec2(836.0, 452.0)) / vec2(970.0, 565.0);
-    float edge = (1.0 - smoothstep(0.62, 1.0, length(q))) * (1.0 - smoothstep(677.0, 885.0, aDetail.y));
+    float edge = (1.0 - smoothstep(0.62, 1.0, length(q))) * (1.0 - smoothstep(880.0, 941.0, aDetail.y));
     vColor = mix(mix(INK, LIME * 0.75, push * 0.6), aColor, m);
     vAlpha = mix(aWeight * 0.85, aAlpha, m) * edge;
     vShape = m;
@@ -150,9 +150,9 @@ async function startHero() {
   // (the picture is P.head.w wide; rows above P.head.top held the baked-in wordmark and are not used)
   const VALLEY_X = 880;                       // the valley's middle in the picture, kept in view on narrow screens
 
-  // The picture fits in the space left by the headline, the side columns and the bottom bar, so nothing overlaps.
-  // Its visible part (after the soft edge) is about x 160–1580, y 262–860 in picture pixels.
-  const VIS = { x0: 160, x1: 1580, y0: P.head.top, y1: 860 };
+  // The picture runs from just over the headline to the bottom of the hero (its misty foot meets the page edge);
+  // the side columns, the line of text and the button sit over its faded edges.
+  const VIS = { x0: 160, x1: 1580, y0: P.head.top, y1: P.head.h };
   let dpr = 1, vw = 1, vh = 1, scale = 1, css = 1, offX = 0, offY = 0;
   const callouts = [...document.querySelectorAll(".hx-callout")];
   function placeCallouts() {
@@ -180,13 +180,14 @@ async function startHero() {
     const boxL = vis(left) ? left.getBoundingClientRect().right - r.left + 8 : 12;
     const boxR = vis(right) ? right.getBoundingClientRect().left - r.left - 8 : vw - 12;
     const boxT = copy.bottom - r.top - copy.height * (narrow ? 0.16 : 0.22);   // the valley covers the headline's lower part
-    const boxB = foot.top - r.top + (narrow ? 20 : 40);                        // the picture fades out under the buttons
+    const boxB = vh;                                                            // ...and its foot meets the bottom of the hero
     const visW = VIS.x1 - VIS.x0, visH = VIS.y1 - VIS.y0;
-    css = narrow ? Math.min((boxB - boxT) / visH, vw / 720) : Math.min((boxR - boxL) / visW, (boxB - boxT) / visH);
+    css = narrow ? Math.min((boxB - boxT) / visH, vw / 640) : Math.min((boxB - boxT) / visH, (vw * 0.98) / visW);
     css = Math.max(css, 0.2);
     scale = css * dpr;
     const cx = narrow ? VALLEY_X : (VIS.x0 + VIS.x1) / 2;
-    const midX = narrow ? vw / 2 : (boxL + boxR) / 2;
+    const midX = vw / 2;
+    void foot; void boxL; void boxR;
     offX = (midX - cx * css) * dpr;
     offY = (boxT - (VIS.y0 - P.head.top) * css) * dpr;                         // top of the picture at the box top
     U.uRes.value.set(vw * dpr, vh * dpr);
