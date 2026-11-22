@@ -31,6 +31,9 @@
   const elToast = document.getElementById("toast");
   const elReports = document.getElementById("recent-reports");
   const elPriorities = document.getElementById("priority-preview");
+  const elAccessBanner = document.getElementById("access-engine-banner");
+  const elReopen = document.getElementById("reopen-preview");
+  const elFlyNext = document.getElementById("flynext-preview");
 
   function escapeHtml(str) {
     return String(str == null ? "" : str)
@@ -232,6 +235,56 @@
     updatePickedSummary();
     renderReports(ctx.reports || []);
     refreshPriorities(ctx.project);
+    refreshAccess(ctx.project);
+  }
+
+  async function refreshAccess(project) {
+    if (!elAccessBanner || !elReopen || !elFlyNext) return;
+    try {
+      const resp = await fetch("/advisor/access?project=" + encodeURIComponent(project));
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const isNeo = data.computed_with && data.computed_with.startsWith("neo4j");
+      const engine = isNeo
+        ? "Neo4j Graph Database (Plain-Cypher)"
+        : "NetworkX Fallback Engine";
+      elAccessBanner.innerHTML = "Routing engine: <strong>" + escapeHtml(engine) + "</strong>";
+
+      const reopen = (data.reopen_plan || []).slice(0, 3);
+      if (!reopen.length) {
+        elReopen.innerHTML = "<li>No roads currently blocked for clearance.</li>";
+      } else {
+        elReopen.innerHTML = reopen
+          .map(function (r) {
+            return (
+              "<li><strong>#" + escapeHtml(r.rank) + " Clear " + escapeHtml(r.segment_id) + "</strong>" +
+              (r.debris_volume_m3 != null ? " (" + escapeHtml(r.debris_volume_m3) + " m³)" : "") + "<br>" +
+              "<small>Reconnects " + escapeHtml(r.reconnects_people || 0) + " people, " +
+              escapeHtml(r.reconnects_places || 0) + " places</small></li>"
+            );
+          })
+          .join("");
+      }
+
+      const fly = (data.fly_next || []).slice(0, 3);
+      if (!fly.length) {
+        elFlyNext.innerHTML = "<li>All network roads surveyed or verified.</li>";
+      } else {
+        elFlyNext.innerHTML = fly
+          .map(function (f) {
+            const unc = f.uncertainty != null ? Math.round(f.uncertainty * 100) + "%" : "—";
+            return (
+              "<li><strong>#" + escapeHtml(f.rank) + " Recon " + escapeHtml(f.segment_id) + "</strong>" +
+              " (uncertainty: " + escapeHtml(unc) + ")<br>" +
+              "<small>Dependent pop: " + escapeHtml(f.dependent_population || 0) +
+              (f.score != null ? " &middot; priority score: " + escapeHtml(f.score.toFixed(1)) : "") + "</small></li>"
+            );
+          })
+          .join("");
+      }
+    } catch (_) {
+      elAccessBanner.textContent = "Routing engine: unable to fetch access report.";
+    }
   }
 
   function showToast(msg, isErr) {

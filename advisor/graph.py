@@ -260,6 +260,7 @@ def _networkx_reachable_junctions(
     mode: str,
     allowed_statuses: set[str],
     extra_open_segment_id: str | None = None,
+    excluded_segment_id: str | None = None,
 ) -> set[str]:
     if not topology.base_junction_id or topology.base_junction_id not in topology.junctions:
         return set()
@@ -267,6 +268,8 @@ def _networkx_reachable_junctions(
     for jid in topology.junctions:
         g.add_node(jid)
     for seg in topology.segments.values():
+        if excluded_segment_id and seg.segment_id == excluded_segment_id:
+            continue
         st = "open" if seg.segment_id == extra_open_segment_id else seg.status_by_mode[mode]
         if st in allowed_statuses:
             weight = seg.length_m if st in ("open", "unknown") else seg.length_m * 2.0
@@ -279,25 +282,39 @@ def _networkx_reachable_junctions(
     return set(lengths.keys())
 
 
-def count_alternative_routes(topology: Topology, target_junc: str | None, mode: str) -> int:
+def count_alternative_routes(
+    topology: Topology,
+    target_junc: str | None,
+    mode: str,
+    flow_graph: nx.DiGraph | None = None,
+) -> int:
     """Count edge-disjoint passable routes from base to target_junc (Menger unit-capacity max flow)."""
     base_junc = topology.base_junction_id
     if not base_junc or not target_junc or base_junc not in topology.junctions or target_junc not in topology.junctions:
         return 0
     if base_junc == target_junc:
         return 1
-    dg = nx.DiGraph()
-    for jid in topology.junctions:
-        dg.add_node(jid)
-    for seg in topology.segments.values():
-        if seg.status_by_mode[mode] in ("open", "partial") and seg.u != seg.v:
-            # Add unit capacity in both directions, accumulating parallel segments.
-            for a, b in ((seg.u, seg.v), (seg.v, seg.u)):
-                if dg.has_edge(a, b):
-                    dg[a][b]["capacity"] += 1
-                else:
-                    dg.add_edge(a, b, capacity=1)
-    flow_val, _ = nx.maximum_flow(dg, base_junc, target_junc, capacity="capacity")
+
+    if flow_graph is not None:
+        dg = flow_graph
+    else:
+        dg = nx.DiGraph()
+        for jid in topology.junctions:
+            dg.add_node(jid)
+        for seg in topology.segments.values():
+            if seg.status_by_mode[mode] in ("open", "partial") and seg.u != seg.v:
+                # Add unit capacity in both directions, accumulating parallel segments.
+                for a, b in ((seg.u, seg.v), (seg.v, seg.u)):
+                    if dg.has_edge(a, b):
+                        dg[a][b]["capacity"] += 1
+                    else:
+                        dg.add_edge(a, b, capacity=1)
+
+    # Degree bound: maximum flow cannot exceed target junction in-degree
+    if dg.in_degree(target_junc) <= 1:
+        return 1 if dg.in_degree(target_junc) == 1 else 0
+
+    flow_val = nx.maximum_flow_value(dg, base_junc, target_junc, capacity="capacity", flow_func=nx.algorithms.flow.edmonds_karp)
     return int(flow_val)
 
 
@@ -319,6 +336,21 @@ def assemble_access_report(
     isolated_by_mode: dict[str, list[str]] = {m: [] for m in MODES}
     unverified_by_mode: dict[str, list[str]] = {m: [] for m in MODES}
 
+    # Pre-build flow graphs once per mode for high-throughput alternative route counting
+    flow_graphs: dict[str, nx.DiGraph] = {}
+    for mode in MODES:
+        dg = nx.DiGraph()
+        for jid in topology.junctions:
+            dg.add_node(jid)
+        for seg in topology.segments.values():
+            if seg.status_by_mode[mode] in ("open", "partial") and seg.u != seg.v:
+                for a, b in ((seg.u, seg.v), (seg.v, seg.u)):
+                    if dg.has_edge(a, b):
+                        dg[a][b]["capacity"] += 1
+                    else:
+                        dg.add_edge(a, b, capacity=1)
+        flow_graphs[mode] = dg
+
     for p in topology.places:
         reach_map: dict[str, bool | None] = {}
         alt_map: dict[str, int] = {}
@@ -330,7 +362,7 @@ def assemble_access_report(
                     unverified_by_mode[mode].append(p.place_id)
             elif p.junction_id in passable_by_mode[mode]:
                 reach_map[mode] = True
-                alt_map[mode] = count_alternative_routes(topology, p.junction_id, mode)
+                alt_map[mode] = count_alternative_routes(topology, p.junction_id, mode, flow_graph=flow_graphs[mode])
             elif p.junction_id in optimistic_by_mode[mode]:
                 # Only reachable through unknown segments -> unknown (null), never open or blocked.
                 reach_map[mode] = None
@@ -457,12 +489,142 @@ def assemble_access_report(
     }
 
 
-def compute_access_report_networkx(topology: Topology) -> dict[str, Any]:
+def compute_fly_next(
+    topology: Topology,
+    reachability_fn: Callable[..., set[str]] | None = None,
+    ml_scores: dict[str, Any] | None = None,
+    w: float = 0.50,
+    mode: str = "ambulance",
+) -> list[dict[str, Any]]:
+    """Rank unknown road segments by dependent population x (1 + w * uncertainty). Idea 2."""
+    r_fn = reachability_fn or (
+        lambda m, s, extra=None, excl=None: _networkx_reachable_junctions(
+            topology, m, s, extra_open_segment_id=extra, excluded_segment_id=excl
+        )
+    )
+
+    ml_by_id: dict[str, dict[str, Any]] = {}
+    if isinstance(ml_scores, dict):
+        for item in ml_scores.get("scores", []):
+            if "segment_id" in item:
+                ml_by_id[str(item["segment_id"])] = item
+
+    # 1. Optimistic baseline reachability (open + partial + unknown)
+    opt_reached = r_fn(mode, {"open", "partial", "unknown"}, None, None)
+    base_places = [
+        p for p in topology.places
+        if p.junction_id in opt_reached and p.place_id != topology.base_place_id
+    ]
+
+    opt_g = nx.Graph()
+    for s in topology.segments.values():
+        if s.status_by_mode.get(mode) in ("open", "partial", "unknown"):
+            opt_g.add_edge(s.u, s.v)
+
+    bridge_set: set[tuple[str, str]] = set()
+    comp: set[str] = set()
+    sub: nx.Graph | None = None
+    if topology.base_junction_id and topology.base_junction_id in opt_g:
+        comp = nx.node_connected_component(opt_g, topology.base_junction_id)
+        sub = opt_g.subgraph(comp).copy()
+        raw_bridges = set(nx.bridges(sub))
+        bridge_set = raw_bridges | {(v, u) for (u, v) in raw_bridges}
+
+    places_by_junc: dict[str, list[PlaceNode]] = {}
+    for p in base_places:
+        if p.junction_id:
+            places_by_junc.setdefault(p.junction_id, []).append(p)
+
+    candidates: list[dict[str, Any]] = []
+    unknown_segs = [
+        seg for seg in sorted(topology.segments.values(), key=lambda s: s.segment_id)
+        if seg.status_by_mode.get(mode) == "unknown"
+    ]
+
+    for seg in unknown_segs:
+        if (seg.u, seg.v) not in bridge_set or sub is None:
+            continue
+
+        # Fast bridge cut component evaluation
+        sub.remove_edge(seg.u, seg.v)
+        comp_u = nx.node_connected_component(sub, seg.u)
+        sub.add_edge(seg.u, seg.v)
+
+        cut_nodes = (comp - comp_u) if topology.base_junction_id in comp_u else comp_u
+        dependent_places = [p for jid in cut_nodes for p in places_by_junc.get(jid, ())]
+        if not dependent_places:
+            continue
+
+        known_pops = [p.population for p in dependent_places if p.population is not None]
+        dep_pop = sum(known_pops) if known_pops else 0
+
+        # Idea 2: Uncertainty calculation from p_blocked
+        ml_item = ml_by_id.get(seg.segment_id)
+        p_blocked = ml_item.get("p_blocked") if ml_item else None
+        if p_blocked is not None:
+            uncertainty = round(1.0 - abs(2.0 * float(p_blocked) - 1.0), 4)
+        else:
+            uncertainty = 0.0
+
+        # Score = dependent_population * (1 + w * uncertainty)
+        # If population is unknown, use place count as base
+        base_weight = float(dep_pop) if dep_pop > 0 else float(len(dependent_places))
+        score = round(base_weight * (1.0 + float(w) * uncertainty), 2)
+
+        place_names = [p.name or p.place_id for p in dependent_places]
+        reasons = [
+            f"Surveying {seg.segment_id} settles access for {len(dependent_places)} place(s) ({', '.join(place_names)})",
+            f"Dependent population: {dep_pop}" if dep_pop > 0 else f"Dependent places: {len(dependent_places)} (population unknown)",
+        ]
+        if p_blocked is not None:
+            reasons.append(
+                f"Model p_blocked={float(p_blocked):.2f} -> uncertainty={uncertainty:.2f} -> weighted score {score:.1f} (rule w={w:.2f})"
+            )
+        else:
+            reasons.append(f"Uncertainty: 0.00 (unscored) -> score {score:.1f}")
+        reasons.append("Limits: battery endurance, airspace altitude, and flight cost not modelled")
+
+        candidates.append({
+            "segment_id": seg.segment_id,
+            "mode": mode,
+            "score": score,
+            "dependent_population": dep_pop if dep_pop > 0 else None,
+            "dependent_places": len(dependent_places),
+            "uncertainty": uncertainty,
+            "p_blocked": float(p_blocked) if p_blocked is not None else None,
+            "reasons": reasons,
+        })
+
+    candidates.sort(
+        key=lambda c: (
+            -c["score"],
+            -(c["dependent_population"] or 0),
+            -c["dependent_places"],
+            c["segment_id"],
+        )
+    )
+    for idx, c in enumerate(candidates, start=1):
+        c["rank"] = idx
+
+    return candidates
+
+
+def compute_access_report_networkx(
+    topology: Topology,
+    ml_scores: dict[str, Any] | None = None,
+    w: float = 0.50,
+) -> dict[str, Any]:
     """Compute access_report.json using pure NetworkX fallback."""
-    return assemble_access_report(
+    rep = assemble_access_report(
         topology=topology,
-        reachability_fn=lambda mode, statuses, extra_seg: _networkx_reachable_junctions(
-            topology, mode, statuses, extra_seg
+        reachability_fn=lambda mode, statuses, extra_seg=None, excl_seg=None: _networkx_reachable_junctions(
+            topology, mode, statuses, extra_open_segment_id=extra_seg, excluded_segment_id=excl_seg
         ),
         computed_with="networkx-fallback",
     )
+    rep["fly_next"] = compute_fly_next(
+        topology=topology,
+        ml_scores=ml_scores,
+        w=w,
+    )
+    return rep

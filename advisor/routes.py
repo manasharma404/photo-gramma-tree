@@ -16,13 +16,18 @@ from advisor.assess import assess_collection, load_vehicle_config
 from advisor.neo4j_client import project_paths
 from advisor.priorities import compute_priorities
 from advisor.report import compute_access_report
-from advisor.store import add_field_report, get_freshness, list_field_reports
+from advisor.store import (
+    add_field_report,
+    get_freshness,
+    get_segment_history,
+    list_field_reports,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 router = APIRouter(tags=["advisor"])
 
 ModeLiteral = Literal["fire_truck", "ambulance", "jeep", "foot"]
-KindLiteral = Literal["dead_end", "cleared", "new_debris", "other"]
+KindLiteral = Literal["dead_end", "cleared", "new_debris", "other", "confirm", "reject", "confirmed", "rejected"]
 
 
 class FieldReportIn(BaseModel):
@@ -184,6 +189,22 @@ def get_advisor_priorities(
         backend=backend,
     )
     return compute_priorities(places_fc, state, acc, generated_at=state.get("updated_at"))
+
+
+@router.get("/history")
+def get_segment_history_route(
+    segment_id: str = Query(..., description="Road segment ID to get history for"),
+    project: str | None = Query(default=None),
+) -> dict[str, Any]:
+    """Return chronological verification history for a segment (Idea 7: model said, person said, when)."""
+    proj = resolve_project(project)
+    history = get_segment_history(proj, segment_id)
+    return {
+        "project": proj,
+        "segment_id": segment_id,
+        "count": len(history),
+        "history": history,
+    }
 
 
 @router.get("/reports")

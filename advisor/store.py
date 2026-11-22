@@ -12,7 +12,7 @@ from advisor import MODES
 from advisor.neo4j_client import project_paths
 
 ROOT = Path(__file__).resolve().parent.parent
-REPORT_KINDS = ("dead_end", "cleared", "new_debris", "other")
+REPORT_KINDS = ("dead_end", "cleared", "new_debris", "other", "confirm", "reject", "confirmed", "rejected")
 
 
 def resolve_db_path(db_path: Path | None = None) -> Path:
@@ -46,8 +46,166 @@ def init_db(db_path: Path | None = None) -> Path:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_field_reports_project ON field_reports(project, id)"
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS segment_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project TEXT NOT NULL,
+                segment_id TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                model_name TEXT,
+                model_version TEXT,
+                p_blocked REAL,
+                evidence_crop TEXT,
+                reporter TEXT,
+                note TEXT,
+                recorded_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_segment_history_proj ON segment_history(project, segment_id)"
+        )
         conn.commit()
     return path
+
+
+def record_suspicion(
+    project: str,
+    segment_id: str,
+    p_blocked: float,
+    evidence_crop: str | None = None,
+    model: str = "typhon_debris_resnet18",
+    version: str = "1.0.0",
+    recorded_at: str | None = None,
+    db_path: Path | None = None,
+) -> dict[str, Any]:
+    """Record a model-detected debris suspicion into the segment history (Idea 7)."""
+    ts = recorded_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    path = init_db(db_path)
+    with sqlite3.connect(path) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO segment_history (project, segment_id, event_type, model_name, model_version, p_blocked, evidence_crop, recorded_at)
+            VALUES (?, ?, 'model_suspicion', ?, ?, ?, ?, ?)
+            """,
+            (project, segment_id, model, version, float(p_blocked), evidence_crop, ts),
+        )
+        rec_id = int(cur.lastrowid)
+        conn.commit()
+    return {
+        "id": rec_id,
+        "project": project,
+        "segment_id": segment_id,
+        "event": "model_suspicion",
+        "model_said": f"{model} v{version}: p_blocked={float(p_blocked):.2f}" + (f" (crop: {evidence_crop})" if evidence_crop else ""),
+        "person_said": None,
+        "when": ts,
+        "p_blocked": float(p_blocked),
+        "evidence_crop": evidence_crop,
+    }
+
+
+def record_verification(
+    project: str,
+    segment_id: str,
+    action: str,
+    reporter: str | None = None,
+    note: str | None = None,
+    recorded_at: str | None = None,
+    db_path: Path | None = None,
+) -> dict[str, Any]:
+    """Record human responder confirmation or rejection of a suspicion into segment history (Idea 7)."""
+    ts = recorded_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    clean_reporter = (reporter or "").strip() or None
+    clean_note = (note or "").strip() or None
+    event_type = "field_confirm" if action in ("confirm", "confirmed") else ("field_reject" if action in ("reject", "rejected") else f"field_{action}")
+
+    path = init_db(db_path)
+    with sqlite3.connect(path) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO segment_history (project, segment_id, event_type, reporter, note, recorded_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (project, segment_id, event_type, clean_reporter, clean_note, ts),
+        )
+        rec_id = int(cur.lastrowid)
+        conn.commit()
+
+    person_summary = f"{clean_reporter or 'responder'} ({event_type}): {clean_note or 'no note'}"
+    return {
+        "id": rec_id,
+        "project": project,
+        "segment_id": segment_id,
+        "event": event_type,
+        "model_said": None,
+        "person_said": person_summary,
+        "when": ts,
+        "reporter": clean_reporter,
+        "note": clean_note,
+    }
+
+
+def get_segment_history(
+    project: str,
+    segment_id: str,
+    db_path: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Return chronological verification history for a road segment (model said, person said, when)."""
+    path = resolve_db_path(db_path)
+    if not path.exists():
+        return []
+    init_db(path)
+    with sqlite3.connect(path) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """
+            SELECT id, project, segment_id, event_type, model_name, model_version, p_blocked, evidence_crop, reporter, note, recorded_at
+            FROM segment_history
+            WHERE project = ? AND segment_id = ?
+            ORDER BY id ASC
+            """,
+            (project, segment_id),
+        ).fetchall()
+
+    history: list[dict[str, Any]] = []
+    for r in rows:
+        evt = str(r["event_type"])
+        p_blk = r["p_blocked"]
+        m_name = r["model_name"]
+        m_ver = r["model_version"]
+        crop = r["evidence_crop"]
+        rep = r["reporter"]
+        note = r["note"]
+        when = str(r["recorded_at"])
+
+        if evt == "model_suspicion":
+            model_said = f"{m_name or 'model'} {m_ver or ''} flagged p_blocked={float(p_blk or 0):.2f}".strip()
+            if crop:
+                model_said += f" [crop: {crop}]"
+            person_said = None
+        else:
+            model_said = None
+            rep_label = rep or "responder"
+            person_said = f"{rep_label} ({evt})" + (f": {note}" if note else "")
+
+        history.append(
+            {
+                "id": int(r["id"]),
+                "project": str(r["project"]),
+                "segment_id": str(r["segment_id"]),
+                "event": evt,
+                "model_said": model_said,
+                "person_said": person_said,
+                "when": when,
+                "p_blocked": float(p_blk) if p_blk is not None else None,
+                "evidence_crop": crop,
+                "reporter": rep,
+                "note": note,
+            }
+        )
+    return history
 
 
 def add_field_report(
@@ -93,6 +251,21 @@ def add_field_report(
             ),
         )
         report_id = int(cur.lastrowid)
+
+        if segment_id:
+            evt_type = (
+                "field_confirm"
+                if kind in ("confirm", "confirmed")
+                else ("field_reject" if kind in ("reject", "rejected") else f"field_{kind}")
+            )
+            conn.execute(
+                """
+                INSERT INTO segment_history (project, segment_id, event_type, reporter, note, recorded_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (project, segment_id, evt_type, clean_reporter, clean_note, ts),
+            )
+
         conn.commit()
 
     return {

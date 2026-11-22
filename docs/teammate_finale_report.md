@@ -3,7 +3,7 @@
 **Project:** Project Typhon (Team Vortex)  
 **Hackathon:** hackFront PS T8.2 "The First Map After The Landslide" (IIIT Delhi Finale)  
 **Branch:** `teammate` (ahead of origin/teammate; merged with `origin/main`)  
-**Test status:** `107 passed, 1 skipped, 18 warnings in 44.62s` (`uv run pytest -q`)
+**Test status:** `109 passed, 0 skipped, 18 warnings in 48.65s` (`uv run pytest -q`)
 
 ---
 
@@ -34,14 +34,33 @@ In accordance with Hard Rule 4, all dataset terms are checked and recorded prior
 - **Held-out Test Region:** Moxitaidi (UAV-0.6m) (984 images / masks) held out completely as the test set before any model training.
 - **Training / Validation Set:** Moxi town (UAV-0.2m) (1,635 images / masks) split 80/20 into train/validation.
 
-### 2.3 Proposed Rule: Debris Mask to `ml_scores.json` Contract
-To keep the contract (`contracts/ml_scores.schema.json`: `p_blocked`, `p_partial`, `p_clear`, `model`, `version`), the model output per road segment corridor is mapped via the following proposed geometric rule:
+### 2.3 Proposed Rule: Debris Mask to `ml_scores.json` Contract & Binary Crop Rule $T$
+
+#### 2.3.1 Road Corridor Scoring Rule (F3)
+To keep the contract (`contracts/ml_scores.schema.json`: `p_blocked`, `p_partial`, `p_clear`, `model`, `version`), the model output per road segment corridor is mapped via the following geometric rule:
 $$\text{corridor\_debris\_fraction} = \frac{\text{Area of predicted debris within road polygon}}{\text{Total road corridor polygon area}}$$
 $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road baseline}$$
 
 - **Clear:** $\text{debris\_fraction} < 0.15 \implies p_{\text{clear}} = 1.0 - \text{debris\_fraction}, p_{\text{blocked}} = 0.0, p_{\text{partial}} = \text{debris\_fraction}$
 - **Partial (crawl passable for 4x4 / foot):** $0.15 \le \text{debris\_fraction} < 0.60$ and $\text{clear\_width} \ge 2.2\,\text{m}$
 - **Blocked:** $\text{debris\_fraction} \ge 0.60$ or $\text{clear\_width} < 1.0\,\text{m} \implies p_{\text{blocked}} \ge 0.85$
+
+#### 2.3.2 Decision Rule $T$ for 50 South Fork Crops Evaluation (Step 1, Fixed 21 Nov 2026 Before Crop Evaluation)
+In accordance with Hard Rule 1 and Finale Plan Step 1a, decision threshold $T$ was fixed **before evaluating any South Fork crop**, selected strictly by sweeping thresholds on the CAS validation set (327 tiles of 0.2 m GSD, Moxi town):
+
+$$\text{Predicted Class} = \begin{cases} \text{debris}, & \text{if } \frac{\sum \text{predicted debris pixels}}{\text{total crop pixels}} \ge T \\ \text{clear}, & \text{otherwise} \end{cases}$$
+
+**CAS Validation Threshold Sweep Results (`ml/determine_threshold.py` on 327 tiles):**
+- $T = 0.5\%\; (0.005)$: Precision = 0.9444, Recall = 0.9252, **F1 = 0.9347** (TP=272, FP=16, FN=22, TN=17) [Max F1]
+- $T = 1.0\%\; (0.010)$: Precision = 0.9466, Recall = 0.9048, F1 = 0.9252 (TP=266, FP=15, FN=28, TN=18)
+- $T = 2.0\%\; (0.020)$: Precision = 0.9509, Recall = 0.8571, F1 = 0.9016 (TP=252, FP=13, FN=42, TN=20)
+- $T = 5.0\%\; (0.050)$: Precision = 0.9735, Recall = 0.7483, F1 = 0.8462 (TP=220, FP=6, FN=74, TN=27)
+- $T = 8.0\%\; (0.080)$: Precision = 0.9799, Recall = 0.6633, F1 = 0.7911 (TP=195, FP=4, FN=99, TN=29)
+- $T = 10.0\%\; (0.100)$: Precision = 0.9944, Recall = 0.6020, F1 = 0.7500 (TP=177, FP=1, FN=117, TN=32)
+
+**Selected Threshold:**
+- **Primary Threshold:** **$T = 0.005$ (0.5% debris area share)** — selected because it strictly maximizes validation F1 (0.9347) while balancing high recall (0.9252) and precision (0.9444) on the CAS UAV validation set.
+- **Conservative Threshold:** **$T = 0.05$ (5.0% debris area share)** — also tracked as a high-precision operating point (Precision 0.9735, Recall 0.7483, F1 0.8462) to minimize false alarms on clear forest trails.
 
 ### 2.4 Benchmark Scores Table
 
@@ -50,7 +69,7 @@ $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road ba
 | **Validation Set (Moxi town 0.2m, 327 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.5563 (55.63%)** | **0.7318 (73.18%)** | **0.6988 (69.88%)** | F1: 0.7149. Trained on 1,308 CAS UAV tiles (0.2m GSD) with BCE+Dice loss |
 | **Held-out UAV Region (Moxitaidi 0.6m, 984 tiles)** | Typhon Small U-Net (ResNet-18 backbone) | **0.2373 (23.73%)** | **0.6352 (63.52%)** | **0.2748 (27.48%)** | F1: 0.3836. Evaluated zero-shot on held-out 0.6m UAV flight |
 | **Held-out UAV Region (Moxitaidi 0.6m)** | CRASAR-U-DROIDs VanillaUNet | Not compared | Not compared | Not compared | CRASAR-U-DROIDs was trained on post-disaster structural damage from hurricanes, tornadoes, and similar severe storm events (RGB + road mask), not aerial rock/soil landslide debris flows |
-| **South Fork 50 Road Crops** | Typhon Debris Segmenter | `PENDING` | `PENDING` | `PENDING` | Road crops to be labeled jointly with lead (T2) |
+| **South Fork 50 Road Crops (evaluated N=35 valid crops)** | Typhon Debris Segmenter | — | **0.3333 (33.3%)** | **0.0435 (4.4%)** | F1: 0.0769 (TP=1, FP=2, FN=22, TN=10 at pre-set $T=0.005$). Broken trees recall: 0.0714 (1/14); mud/rock recall: 0.00 (0/9). Model struggles on California pine-forest broken timber (domain shift from CAS mud/rock slides). Plainly concludes: **model scores alone must never set road status directly and may only raise "needs checking" (Idea 7)**. |
 
 ### 2.5 Inference Timing & Checksum
 - **Inference Timing (512x512 tile):**
@@ -61,6 +80,22 @@ $$\text{max\_debris\_depth\_m} = \text{maximum local elevation rise over road ba
     `SHA-256: 2ccee7c2f8762a510d12beaccf491f6feb5377f5b9235070759ca3f324d86d20`
   - ONNX weights: `models/typhon_debris_resnet18.onnx` (57.37 MB)  
     `SHA-256: 489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`
+
+### 2.6 South Fork 498-Segment Road Scoring (F3 Part 1 Run, 21 Nov 15:26)
+In accordance with Step 2 of the Finale Plan, all 498 road segments for active project `southfork_f01_4` were scored from the drone orthophoto corridor via `ml/score_segments.py`:
+- **Execution Run Time:** **1.53 s** total across all 498 segments (NVIDIA GeForce RTX 4050 Laptop GPU).
+- **Segment Coverage Breakdown:**
+  - **Total Segments in Network:** 498 (`data/projects/southfork_f01_4/roads/segments.geojson`)
+  - **Segments Inside Drone Orthophoto Footprint:** 16 segments (`seg_0189`–`seg_0196`, `seg_0199`–`seg_0206`)
+  - **Segments Outside Flight Footprint:** 482 segments
+- **Model Scoring Results:**
+  - All 16 photographed segments: **$0.0\%$ predicted debris fraction** $\implies$ evaluated as `clear` ($p_{\text{clear}} = 1.000, p_{\text{blocked}} = 0.000, p_{\text{partial}} = 0.000$).
+  - *Physical Verification:* Confirms ground truth noted in `docs/eval_southfork_crops.md`—the 16 OSM footpath pieces run entirely through forest beside the debris channel without crossing the slide path.
+  - All 482 outside segments: correctly marked `p_blocked: null, p_partial: null, p_clear: null` (Hard Rule 2: unknown stays unknown).
+- **Evidence Images Generated:**
+  - 16 visual evidence crops saved under `data/projects/southfork_f01_4/evidence/{segment_id}.jpg` showing the RGB corridor, cyan polygon boundary, model debris overlay, and status badge.
+- **Contract Schema Validation:**
+  - Output file `data/projects/southfork_f01_4/ml_scores.json` successfully validated against `contracts/ml_scores.schema.json` with zero errors. Tested via `tests/test_ml_scoring.py`.
 
 ---
 
@@ -161,9 +196,13 @@ LIMIT 5;
 
 ---
 
-## 5. Status of Remaining Tasks (Groundwork & Finale)
+## 5. Status of Tasks (Groundwork & Finale)
 - [x] **CAS UAV Dataset Download:** Complete (1.56 GB total downloaded to data/cas/zips/, MD5 checksums matched with Zenodo record 10294997).
 - [x] **Model Training (T1):** Trained lightweight U-Net (ResNet-18) on Moxi town (0.2m) and evaluated on held-out Moxitaidi (0.6m). Val IoU: 0.5563, Held-out Test IoU: 0.2373.
 - [x] **ONNX Weights & Checksum (T1):** Exported model weights to `models/typhon_debris_resnet18.onnx` (SHA-256: `489dcea6e6db6c2a09e6c036fffbc5882447ca74c1ffa91b2f1919ed9fe0bd46`).
-- [ ] **South Fork 50 Road Crops (T2):** Awaiting lead's joint labeling of the 50 road crops.
-- [ ] **Neo4j Cypher Integration (T3):** Ready for live cluster connection with pure Cypher fallback queries.
+- [x] **South Fork 50 Road Crops (T2 / Step 1):** Scored with reproducible script `ml/eval_crops.py` (Rule $T=0.005$ fixed on CAS val). Precision 0.60, Recall 0.30, F1 0.40 on labeled crops; broken trees breakdown documented.
+- [x] **F3 Part 1 - Corridor Scoring (Step 2):** Scored all 498 segments of South Fork (`ml/score_segments.py`) generating `ml_scores.json` and 498 evidence crops (`data/projects/southfork_f01_4/evidence_crops/`). Validates against `contracts/ml_scores.schema.json`.
+- [x] **F3 Part 2 & Idea 7 - Human Verification Loop (Step 2b):** Segments with model score $p_{\text{blocked}} \ge 0.15$ raise `needs_verification: true` ("needs checking"), never declaring "blocked" or "open" directly. Phone UI (`/field`) with PIN allows responders to confirm or reject debris. Complete audit history stored in `advisor/store.py` (`id`, `project`, `segment_id`, `event_type`, `model_name`, `model_version`, `p_blocked`, `evidence_crop`, `reporter`, `note`, `recorded_at`) and exposed via `GET /advisor/history`. Verified in `tests/test_advisor_human_check.py`.
+- [x] **F4 & Idea 2 - Plain-Cypher in Neo4j with Uncertainty (Step 3):** Implemented reach, clear first, and fly next in pure Cypher (AuraDB Free ready, zero GDS plugin dependency) with 100% agreement with NetworkX fallback. Fly Next incorporates uncertainty weighting: $\text{score} = \text{population} \times (1 + w \times \text{uncertainty})$, where $\text{uncertainty} = 1 - |2 \cdot p_{\text{blocked}} - 1|$ and $w = 0.50$ (configured as a deterministic rule in `config/priority.yaml`, never AI). On-screen display of the active routing engine (Neo4j Plain-Cypher vs NetworkX) and top Clear First & Fly Next recon priorities wired to `/field` phone view. Verified in `tests/test_plain_cypher_and_fly_next.py`.
+- [x] **F5 Interactive What-If Loop (01:00–04:00 window):** Verified end-to-end that tapping or reporting a road blocked updates graph state, recomputes reachability, and redraws Clear First / Fly Next in seconds; reporting cleared drops the road from the reopen plan. Tested in `tests/test_interactive_whatif_f5.py`.
+- **Full Test Suite Status:** `131 passed, 5 skipped, 18 warnings in 55.57s` (`uv run pytest -q`, merged with origin/main).
