@@ -13,8 +13,11 @@
      this page is typed in. -->
 <body class="story">
   <nav class="snav" aria-label="Main">
+    <div class="snav__left">
+      <a class="snav__mark" href="./" aria-label="Project Typhon"><span class="logo" data-logo-mark></span></a>
+      <span class="snav__name"><i class="dots" aria-hidden="true"></i>Project Typhon</span>
+    </div>
     <div class="snav__pill">
-      <a class="snav__brand" href="./" aria-label="Project Typhon"><span class="logo" data-logo></span></a>
       <div class="snav__links">
         <a href="#how">How it works</a>
         <a href="#who">Who it's for</a>
@@ -25,62 +28,53 @@
     </div>
   </nav>
 
+  <!-- Hero v7 (22 Nov): a concept valley drawn like a relief-printed survey sheet, as a small game board
+       (web/src/hero3d.js). It is an illustration made in code, not map data, and says so on the board and the sheet.
+       Pins and routes show, as a concept, the questions Typhon answers. -->
   <section class="hero" id="hero">
-    <canvas id="hero-canvas" aria-hidden="true"></canvas>
-    <img class="hero__fallback" src="./src/assets/hero_texture.webp" alt="Project Typhon illustration: a forested valley with a landslide scar" />
-    <div class="hero__copy">
-      <p class="eyebrow"><i></i>One drone · one laptop · no internet</p>
-      <h1>Rapid drone mapping for <span>disaster relief.</span></h1>
-      <p class="lede">From one flight, on one laptop: which roads each vehicle can use, who is cut off, and what to clear first.</p>
-      <div class="ctas">
-        <a class="btn" href="app/">Open the map<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="btn btn--glass" href="#how">How it works</a>
+    <div class="board">
+      <canvas id="hero-canvas" aria-label="Illustration: a concept valley drawn like a relief map, with a blocked road and a village cut off"></canvas>
+      <div class="pins" id="pins" aria-hidden="true">
+        <span class="pin pin--base" data-pin="base"><b><svg viewBox="0 0 24 24"><path d="M4 20 12 5l8 15z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></b><em>Base camp</em></span>
+        <span class="pin pin--blocked" data-pin="blocked"><b><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></b><em>Blocked · debris on the road</em></span>
+        <span class="pin pin--cutoff" data-pin="village"><b><svg viewBox="0 0 24 24"><path d="M4 20V10l8-6 8 6v10h-5v-6H9v6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></b><em>Village cut off by road</em></span>
+        <span class="pin pin--landing" data-pin="landing"><b><svg viewBox="0 0 24 24"><path d="M7 5v14M17 5v14M7 12h10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></b><em>Landing zone candidate</em></span>
+        <span class="pin pin--flynext" data-pin="flynext"><b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M5 5l3 3M19 5l-3 3M5 19l3-3M19 19l-3-3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></b><em>Fly next · road not seen yet</em></span>
       </div>
-    </div>
-    <!-- the original home page's overlays (the lead's design): map thumbnails on the left, callouts on the valley,
-         3D view, layers and compass on the right. Thumbnails are our own maps of a public USGS survey. -->
-    <aside class="hx-col hx-col--left" id="hx-left">
-      <ol class="hx-features">
-        <li><span class="hx-caps hx-num">01</span><div><p class="hx-caps">Rapid<br />2D mapping</p><img src="./src/assets/landing/ortho.jpg" alt="Our orthophoto of a public USGS survey" /></div></li>
-        <li><span class="hx-caps hx-num">02</span><div><p class="hx-caps">Accurate terrain<br />reconstruction</p><img src="./src/assets/landing/terrain.jpg" alt="Our 3D terrain model of the same survey" /></div></li>
-        <li><span class="hx-caps hx-num">03</span><div><p class="hx-caps">Actionable insights<br />for relief teams</p><img src="./src/assets/landing/dashboard.jpg" alt="The Typhon map" /></div></li>
-      </ol>
-    </aside>
-    <aside class="hx-col hx-col--right" id="hx-right">
-      <a class="hx-view3d" href="app/" aria-label="Open the 3D view"><img src="./src/assets/landing/terrain.jpg" alt="" /><span class="hx-caps">3D view</span><span class="hx-view3d__target" data-icon="act"></span></a>
-      <ul class="hx-layers hx-caps">
-        <li class="on"><a href="app/">Terrain</a></li>
-        <li><a href="app/">Roads</a></li>
-        <li><a href="app/">Landing zones</a></li>
-        <li><a href="app/">Checkpoints</a></li>
-        <li><a href="field">Field reports</a></li>
-      </ul>
-      <div class="hx-compass" aria-hidden="true">
-        <span class="hx-caps hx-compass__n">N</span>
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="0.6"/>
-          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.4" stroke-dasharray="1 2"/>
-          <path d="M50 6v10M50 84v10M6 50h10M84 50h10" stroke="currentColor" stroke-width="0.6"/>
-          <path d="M50 20 56 50 50 56 44 50z" fill="currentColor" opacity=".75"/></svg>
-      </div>
-    </aside>
-    <!-- callouts name what Typhon measures (no numbers on an illustration); placed on the picture by story.js -->
-    <div class="hx-callouts" id="hx-callouts">
-      <div class="hx-callout" data-px="674" data-py="466" data-dy="34"><span class="hx-caps">Debris flow</span><b>volume ± tolerance</b></div>
-      <div class="hx-callout" data-px="624" data-py="679" data-dy="52"><span class="hx-caps">Affected settlements</span><b>cut off, per vehicle</b></div>
-      <div class="hx-callout" data-px="1176" data-py="581" data-dy="62"><span class="hx-caps">Roads</span><b>open · partial · blocked</b></div>
-    </div>
-    <span class="hx-cross" style="left: 21%; top: 41%" aria-hidden="true"></span>
-    <span class="hx-cross" style="left: 79%; top: 38%" aria-hidden="true"></span>
-    <span class="hx-cross" style="left: 70%; top: 33%" aria-hidden="true"></span>
-    <p class="hx-credit hx-caps">Illustration</p>
 
-    <div class="hero__foot">
-      <div class="hx-corner hx-caps">From<br />data<br />to<br />impact</div>
-      <div class="mode" id="mode" role="group" aria-label="Picture view">
-        <button type="button" data-mode="wire" aria-pressed="true">Wireframe</button>
-        <button type="button" data-mode="detail" aria-pressed="false">Detail</button>
+      <div class="hud">
+        <div class="hcard hcard--title">
+          <h1><span>Rapid drone mapping</span> for disaster relief.</h1>
+          <p class="hfield mono">One drone · one laptop · no internet</p>
+        </div>
+        <div class="hcard">
+          <p class="mono cap"><i class="dots"></i>What it answers</p>
+          <div class="chips" id="chips">
+            <button type="button" data-kind="blocked"><b class="sw sw--blocked"></b>Blocked roads</button>
+            <button type="button" data-kind="village"><b class="sw sw--cutoff"></b>Who is cut off</button>
+            <button type="button" data-kind="landing"><b class="sw sw--landing"></b>Landing zones</button>
+            <button type="button" data-kind="flynext"><b class="sw sw--flynext"></b>Fly next</button>
+          </div>
+          <hr />
+          <p class="mono cap veh-cap"><i class="dots"></i>Route for</p>
+          <div class="veh" id="veh">
+            <button type="button" data-mode="truck" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M2 16V7h11v9M13 10h5l3 3v3h-8M6 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Fire truck</span></button>
+            <button type="button" data-mode="ambulance" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M3 17V8h12v9M15 11h4l2 3v3h-6M8 10v4M6 12h4M7 19a2 2 0 1 0 0-.01M18 19a2 2 0 1 0 0-.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Ambulance</span></button>
+            <button type="button" data-mode="jeep" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 16v-4l3-4h9l3 4h3v4M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Jeep</span></button>
+            <button type="button" data-mode="foot" aria-pressed="false"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="2" fill="currentColor"/><path d="M10 21l2-6 3 3v3M12 15l-1-5 4 1 2 3M11 10l-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>On foot</span></button>
+          </div>
+          <p class="answer" id="answer" aria-live="polite"><b>Ambulance:</b> stops at the debris. The village is cut off: clear this road first.</p>
+        </div>
+        <a class="hcta" href="app/"><span class="mono">Open the live map</span><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></i></a>
       </div>
-      <div class="hx-corner hx-corner--right hx-caps">Safer<br />communities<br />stronger<br />tomorrows</div>
+
+      <div class="zoom" aria-label="Zoom the illustration"><button type="button" data-z="out" aria-label="Zoom out">−</button><button type="button" data-z="in" aria-label="Zoom in">+</button></div>
+      <button type="button" class="preview mono" id="preview">Preview flight <i>▶</i></button>
+      <a class="hcard hcard--trip" href="app/">
+        <div><p class="mono cap"><i class="dots"></i>The real thing</p><h3><span>See it on</span> the live map</h3></div>
+        <img src="./src/assets/landing/dashboard.jpg" alt="The Typhon map" />
+      </a>
+      <p class="board__label mono">Illustration · a concept valley made in code, not map data</p>
     </div>
   </section>
 
