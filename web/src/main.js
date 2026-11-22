@@ -1,31 +1,35 @@
 import "@fontsource/inter/latin-400.css";
 import "@fontsource/inter/latin-500.css";
+import "@fontsource/inter/latin-600.css";
 import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
-import { SNAPSHOT, api, getJSON } from "./api.js";
-import { VEHICLES, esc } from "./format.js";
-import { mountIcons } from "./icons.js";
+import { SNAPSHOT, api, getJSON, postJSON } from "./api.js";
+import { VEHICLES, chip, esc } from "./format.js";
+import { ICONS, mountIcons } from "./icons.js";
 import { LAYER_GROUPS, createMap, legendHTML, segmentsForVehicle, setData, setGroupVisible } from "./map.js";
-import { accuracyMiniHTML, initTabs, renderAccuracy, renderActNow, renderMeasureIntro, renderReports, renderRoads,
+import { accuracyMiniHTML, initTabs, renderAccuracy, renderActNow, renderMeasureIntro, renderMeasureResult, renderReports, renderRoads,
   renderSegmentDetail, showTab } from "./panel.js";
 import { initTools } from "./tools.js";
 import { initTour } from "./tour.js";
+import { PASS_LABEL, addDemoLayers, planReflight } from "./demo.js";
 
 const $ = (id) => document.getElementById(id);
-const app = { vehicle: "foot", segments: null, state: null, three: null, mapReady: false };
+const app = { vehicle: "foot", segments: null, state: null, mapReady: false, demo: null, graphLog: [] };
 window.__vortex = app; // inspection handle for the headless check (scripts/screenshot.mjs)
 
-// Data labels (hard rule 6): public data is never presented as our footage.
+// Data labels (hard rule 6): public data is never presented as our footage; the demo always says it is simulated.
 const DATA_LABEL = {
   southfork: "USGS public data · South Fork debris flow, California, 30 Apr 2024 · not our footage",
   wayanad: "Scenario reconstructed from reports · not drone-measured",
   neo2: "Our footage · DJI Neo 2",
+  demo: "SIMULATED demo · real OpenStreetMap roads · damage and people made up",
 };
 const labelFor = (project) => Object.entries(DATA_LABEL).find(([k]) => project?.startsWith(k))?.[1] || "";
 const vehicleLabel = () => VEHICLES.find(([k]) => k === app.vehicle)[1];
 const status = (msg) => ($("statusline").textContent = msg || "");
+const isDemo = () => app.project === "demo";
 
 async function boot() {
   mountIcons();
@@ -40,9 +44,10 @@ async function boot() {
     if (go) showTab(go.dataset.goto);
   });
   renderMeasureIntro();
-  $("legend").innerHTML = legendHTML();
 
-  const [active, health, me] = await Promise.all([api.active(), api.health(), SNAPSHOT ? null : getJSON("/auth/me")]);
+  const [active, health, me, demo] = await Promise.all([api.active(), api.health(), SNAPSHOT ? null : getJSON("/auth/me"),
+    SNAPSHOT ? null : getJSON("/advisor/demo/scenario")]);
+  app.me = me;
   if (me?.auth && me.role) {  // who is signed in, and a way out
     const who = $("who");
     who.textContent = `${{ operator: "Operator", evaluator: "Evaluator", field: me.team || "Field team" }[me.role]} · Sign out`;
@@ -58,16 +63,31 @@ async function boot() {
     : health.snapshot ? `Read-only snapshot · ${new Date(health.captured_at).toLocaleDateString([], { day: "numeric", month: "short" })}`
     : health.internet_reachable ? "Online (not needed)" : "Offline mode";
 
-  if (!active) {
+  if (!active && !demo) {
     $("site").innerHTML = `<option>No map processed yet</option>`;
     $("tab-act").innerHTML = `<p class="empty">No map is active. Process a survey, then run <code>python -m pipeline.activate</code>.</p>`;
     return;
   }
-  app.project = active.project;
-  $("site").innerHTML = `<option>${esc(prettySite(active.project))}</option>`;
-  $("dataset").textContent = labelFor(active.project);
-  $("dataset").title = `run ${active.run_id}`;
-  $("freshness").textContent = new Date(active.set_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  // Site: the demo scenario (default when it exists) or our real survey run.
+  let pick = null;
+  try { pick = localStorage.getItem("typhon-site"); } catch { /* private mode */ }
+  const useDemo = demo && (pick === "demo" || !pick || !active);
+  app.project = useDemo ? "demo" : active.project;
+  app.demo = useDemo ? demo : null;
+  document.body.classList.toggle("is-demo", !!useDemo);
+  $("site").innerHTML = (demo ? `<option value="demo">Demo: landslide scenario (simulated)</option>` : "")
+    + (active ? `<option value="survey">${esc(prettySite(active.project))} (real survey)</option>` : "");
+  $("site").value = useDemo ? "demo" : "survey";
+  $("site").addEventListener("change", () => {
+    try { localStorage.setItem("typhon-site", $("site").value); } catch { /* ignore */ }
+    location.reload();
+  });
+  $("dataset").textContent = labelFor(app.project);
+  if (useDemo) $("freshness-field").hidden = true;
+  else {
+    $("dataset").title = `run ${active.run_id}`;
+    $("freshness").textContent = new Date(active.set_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  }
 
   $("vehicle").innerHTML = VEHICLES.map(([k, l]) => `<button role="radio" data-v="${k}" aria-checked="${k === app.vehicle}">${l}</button>`).join("");
   $("vehicle").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
@@ -76,37 +96,50 @@ async function boot() {
     refresh();
   }));
 
-  const map = createMap($("map"), active, openSegment);
+  // the map: our orthophoto only when the site is that survey (the demo has no imagery of its own)
+  const sameBase = useDemo && active && demo.base === active.project;
+  const mapActive = useDemo ? { ...(active || {}), tiles: sameBase ? active.tiles : null, image: null } : active;
+  const map = createMap($("map"), mapActive, openSegment);
   app.map = map;
-  if (!SNAPSHOT && health?.mounted_routers?.live) {  // the growing map needs the live server
-    const startLive = () => import("./live.js").then(({ initLive }) => { $("live").hidden = false; initLive(map, $("live")); });
+  if (!useDemo && !SNAPSHOT && health?.mounted_routers?.live) {  // the growing map: real survey sites only
+    const startLive = () => import("./live.js").then(({ initLive }) => initLive(map, $("live")));
     if (map.loaded()) startLive(); else map.once("vortex:ready", startLive);
   }
-  initTools(map, { onStatus: status, onResult: (m) => m.type === "span" && renderProfile(m) });
-  initLayers(active);
+  if (!useDemo) initTools(map, { onStatus: status, onResult: (m) => renderMeasureResult(m) });
+  $("legend").innerHTML = legendHTML(useDemo);
+  initLayers(mapActive);
 
   // Panels don't wait for the map to draw (a hidden or slow map must not leave them empty).
-  const [segments, places, checkpoints, spec] = await Promise.all([
-    api.layer("segments"), api.layer("places"), api.layer("checkpoints"), api.spec()]);
-  app.segments = segments;
-  app.spec = spec;
-  renderAccuracy(spec);
-  $("accuracy-mini").innerHTML = accuracyMiniHTML(spec);
+  if (useDemo) {
+    app.segments = demo.segments;
+    app.places = demo.places;
+    app.spec = null;
+    renderReports(null);
+  } else {
+    const [segments, places, checkpoints, spec] = await Promise.all([
+      api.layer("segments"), api.layer("places"), api.layer("checkpoints"), api.spec()]);
+    Object.assign(app, { segments, places, checkpoints, spec });
+    renderAccuracy(spec);
+  }
   renderOverview(active);
-  await loadAdvisor();
+  renderStripRight();
+  await loadAdvisor(useDemo ? "Opened the demo scenario" : "Opened the map");
   if (!SNAPSHOT) setTimeout(watchReports, 3000);
   initTour(() => app.spec);
 
   const fillMap = () => {
     app.mapReady = true;
-    setData(map, "places", places);
-    setData(map, "checkpoints", checkpoints);
+    setData(map, "places", app.places);
+    if (app.checkpoints) setData(map, "checkpoints", app.checkpoints);
+    if (useDemo) {
+      app.demoLayers = addDemoLayers(map, demo, { onBlockage: (b) => openSegment(b.segment_id), onPeople: () => showTab("act") });
+      const [w, s, e, n] = demo.bounds_wsen;
+      map.fitBounds([[w, s], [e, n]], { padding: { top: 60, bottom: 60, left: 60, right: 260 }, duration: 0 });
+    }
     refresh();
   };
   if (map.getSource("segments")) fillMap();
   else map.once("vortex:ready", fillMap);
-
-  init3D(active);
 }
 
 function prettySite(p) {
@@ -115,39 +148,66 @@ function prettySite(p) {
   return p;
 }
 
-async function loadAdvisor() {
+// ---- the route graph: every answer about access comes from it; the strip card shows it working ----
+async function loadAdvisor(trigger) {
+  renderGraph({ busy: true, trigger });
+  const t0 = performance.now();
   const [state, priorities, access, reports] = await Promise.all([
-    api.state(app.project), api.priorities(app.project), api.access(app.project), api.reports(app.project)]);
+    api.state(app.project), getJSON(`/advisor/priorities?project=${encodeURIComponent(app.project)}&backend=networkx`),
+    api.access(app.project), api.reports(app.project)]);
   Object.assign(app, { state, priorities, access });
-  app.lastReportId = reports?.reports?.at(-1)?.id ?? 0;
+  app.lastReportId = reports?.reports?.at(-1)?.id ?? app.lastReportId ?? 0;
   renderReports(reports);
+  app.graphLog.unshift({ trigger, seconds: access?.timing_s ?? (performance.now() - t0) / 1000, engine: access?.computed_with, at: new Date() });
+  app.graphLog = app.graphLog.slice(0, 4);
+  renderGraph({ busy: false });
   refresh();
 }
 
-// Field reports arrive from phones on /field. Check every few seconds; when a new one lands, re-run the
-// advisor so the road recolours and the cut-off counts update, then say what changed. Live server only.
-const KIND_TEXT = { dead_end: "dead end", new_debris: "new debris", cleared: "cleared", other: "note" };
-const cutCount = (access, v) => (access?.places || []).filter((p) => p.reachable?.[v] === false).length;
+const ENGINE = (cw) => !cw ? "not available" : cw.startsWith("neo4j") ? "Neo4j graph database" : "NetworkX (Neo4j is not running)";
+const cutPlaces = (v) => (app.access?.places || []).filter((p) => p.reachable?.[v] === false);
+function peopleCut(v) {
+  const cut = new Set(cutPlaces(v).map((p) => p.place_id));
+  return (app.demo?.people || []).filter((p) => cut.has(p.place_id)).reduce((s, p) => s + p.count, 0);
+}
 
+function renderGraph({ busy = false, trigger = "" } = {}) {
+  const el = $("graph-body");
+  $("card-graph").classList.toggle("is-busy", busy);
+  if (busy) {
+    const t0 = performance.now();
+    el.innerHTML = `<div class="graph__busy"><span class="pulse"></span><div><strong>Recomputing routes for 4 vehicles…</strong>
+      <span class="muted">${esc(trigger)} · <span id="graph-tick">0.0</span> s</span></div></div>`;
+    clearInterval(app._tick);
+    app._tick = setInterval(() => { const t = $("graph-tick"); if (t) t.textContent = ((performance.now() - t0) / 1000).toFixed(1); }, 100);
+    return;
+  }
+  clearInterval(app._tick);
+  const a = app.access, last = app.graphLog[0];
+  const rows = VEHICLES.map(([k, label]) => {
+    const n = app.demo ? peopleCut(k) : cutPlaces(k).length;
+    const total = app.demo ? app.demo.people_total : (a?.places || []).length;
+    return `<div class="gbar"><span>${label}</span><i style="--w:${total ? Math.round((n / total) * 100) : 0}%"></i><b>${n}</b></div>`;
+  }).join("");
+  el.innerHTML = `<div class="graph__engine"><span class="dot dot--${a?.computed_with?.startsWith("neo4j") ? "neo" : "nx"}"></span>${esc(ENGINE(a?.computed_with))}</div>
+    <div class="muted">${a?.graph_size ? `${a.graph_size.roads} roads · ${a.graph_size.places} places · ` : ""}answered in ${last ? last.seconds.toFixed(1) : "–"} s</div>
+    <div class="graph__head">${app.demo ? "People cut off (simulated)" : "Places cut off"}</div>${rows}
+    <div class="graph__log">${app.graphLog.map((g) => `<div><span>${g.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>${esc(g.trigger)} · ${g.seconds.toFixed(1)} s</div>`).join("")}</div>`;
+}
+
+// Field reports arrive from phones on /field (or from the what-if buttons here). When a new one lands, re-run
+// the advisor so roads recolour and the cut-off counts update, then say what changed. Live server only.
+const KIND_TEXT = { dead_end: "blocked", new_debris: "new debris", cleared: "cleared", other: "note" };
 async function watchReports() {
   const r = await api.reports(app.project);
   const latest = r?.reports?.at(-1);
-  if (latest && latest.id > (app.lastReportId ?? 0)) {
-    const before = cutCount(app.access, app.vehicle);
-    await loadAdvisor();
-    const after = cutCount(app.access, app.vehicle);
-    const seg = app.fc?.features.find((f) => f.properties.segment_id === latest.segment_id);
-    const name = seg ? `road ${latest.segment_id}${seg.properties.highway ? ` (${seg.properties.highway})` : ""}` : latest.place_id || "a road";
-    const status = seg ? seg.properties.status : null;
-    showReportToast(`Field report: ${KIND_TEXT[latest.kind] || latest.kind} on ${name}`,
-      (status ? `Now ${status} for ${vehicleLabel().toLowerCase()}. ` : "")
-      + `Places cut off: ${before} → ${after}. Plan recomputed.`);
-    if (seg && app.mapReady) {
-      const cs = seg.geometry.type === "MultiLineString" ? seg.geometry.coordinates.flat() : seg.geometry.coordinates;
-      const lng = cs.map((c) => c[0]), lat = cs.map((c) => c[1]);
-      app.map.fitBounds([[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]],
-        { padding: 220, maxZoom: 18, duration: 1200 });
-    }
+  if (latest && latest.id > (app.lastReportId ?? 0) && !app.busy) {
+    const before = app.demo ? peopleCut(app.vehicle) : cutPlaces(app.vehicle).length;
+    app.lastReportId = latest.id;
+    await loadAdvisor(`Field report: ${KIND_TEXT[latest.kind] || latest.kind} on ${latest.segment_id || latest.place_id || "a road"}`);
+    const after = app.demo ? peopleCut(app.vehicle) : cutPlaces(app.vehicle).length;
+    showReportToast(`Field report: ${KIND_TEXT[latest.kind] || latest.kind} on ${latest.segment_id || "a road"}`,
+      `${app.demo ? "People" : "Places"} cut off for ${vehicleLabel().toLowerCase()}: ${before} → ${after}. Plan recomputed.`);
   }
   setTimeout(watchReports, 3000);
 }
@@ -173,9 +233,78 @@ function refresh() {
   const fc = segmentsForVehicle(app.segments, app.state, app.vehicle);
   app.fc = fc;
   if (app.mapReady) setData(app.map, "segments", fc);
-  renderRoads(fc, vehicleLabel(), openSegment);
-  renderActNow({ priorities: app.priorities, access: app.access, fc, spec: app.spec, vehicle: app.vehicle, vehicleLabel: vehicleLabel() });
-  app.three?.setRoads({ ...fc, features: fc.features.filter((f) => f.properties.measured) });
+  if (app.demo) {
+    app.demoLayers?.recolour(app.access, app.vehicle);
+    renderDemoAct();
+    renderDemoRoads();
+  } else {
+    renderRoads(fc, vehicleLabel(), openSegment);
+    renderActNow({ priorities: app.priorities, access: app.access, fc, spec: app.spec, vehicle: app.vehicle, vehicleLabel: vehicleLabel() });
+  }
+  if (app.access) renderGraph({ busy: false });
+  renderStripRight();
+}
+
+// ---- demo panels ----
+const flyTo = (lonlat, zoom = 16) => app.map?.flyTo({ center: lonlat, zoom, duration: 900 });
+function renderDemoAct() {
+  const d = app.demo, v = app.vehicle, a = app.access;
+  const byId = Object.fromEntries((a?.places || []).map((p) => [p.place_id, p]));
+  const cut = peopleCut(v), groups = d.people.filter((p) => byId[p.place_id]?.reachable?.[v] === false).length;
+  const blockTitle = Object.fromEntries(d.blockages.map((b) => [b.segment_id, b]));
+  const reopen = (a?.reopen_plan || []).filter((r) => !r.mode || r.mode === v).slice(0, 3);
+  const zone = d.blur_zones[0];
+  $("tab-act").innerHTML = `<div class="demo-note">${ICONS.alert}<span><b>Simulated demo.</b> Real roads (OpenStreetMap); the damage and the people are made up to show how Typhon decides.</span></div>`
+    + `<div class="alert ${cut ? "" : "alert--ok"}">${ICONS.alert}<div><strong>${cut} people cut off for ${esc(vehicleLabel().toLowerCase())}</strong>
+        <span>${groups} of ${d.people.length} groups have no road open to this vehicle. Pick another vehicle above to compare.</span></div></div>`
+    + `<h2>Clear first</h2>` + (reopen.length ? reopen.map((r) => {
+        const b = blockTitle[r.segment_id];
+        return `<article class="item item--click" data-seg="${esc(r.segment_id)}"><h3>${r.rank}. ${esc(b ? b.title : `Clear ${r.segment_id}`)}</h3>
+          <div class="muted">Reconnects <b>${r.reconnects_people ?? "?"}</b> people in ${r.reconnects_places ?? "?"} places${r.debris_volume_m3 != null ? ` · about ${Math.round(r.debris_volume_m3)} m³ of debris (simulated)` : ""}</div></article>`;
+      }).join("") : `<p class="empty">${cut ? "No single road reopens a route for this vehicle: the groups cut off are behind more than one blockage, so clear them in order." : "Nothing to clear for this vehicle: every group it can serve is reachable."}</p>`)
+    + `<h2>Roads that let only some through</h2>` + d.blockages.map((b) => `<article class="item item--click blk" data-seg="${esc(b.segment_id)}">
+        <h3>${esc(b.title)}</h3><div class="passes">${Object.keys(PASS_LABEL).map((m) => `<span class="${b.passes.includes(m) ? "ok" : "no"}">${PASS_LABEL[m]}</span>`).join("")}</div></article>`).join("")
+    + (zone ? `<h2>Fly next</h2><article class="item"><h3>Blurred photos: ${zone.segments.length} roads not seen</h3>
+        <div class="muted">Until a clear pass, these roads are unknown, never shown as open.</div>
+        <button class="btn-line" id="plan-refly">${ICONS.drone}Plan a re-fly of this patch</button></article>` : "")
+    + `<h2>People (simulated)</h2>` + d.people.map((p) => {
+        const r = byId[p.place_id]?.reachable?.[v];
+        return `<div class="row people-row" data-ll="${p.lonlat.join(",")}"><b class="ppl ppl--${r === false ? "cut" : r == null ? "unv" : "ok"}">${p.count}</b>
+          <span>${esc(p.name)}</span><span class="muted">${r === false ? "cut off" : r == null ? "access unverified" : "reachable"}</span></div>`;
+      }).join("");
+  $("tab-act").querySelectorAll("[data-seg]").forEach((el) => el.addEventListener("click", () => {
+    const b = d.blockages.find((x) => x.segment_id === el.dataset.seg);
+    if (b) flyTo(b.lonlat);
+    openSegment(el.dataset.seg);
+  }));
+  $("tab-act").querySelectorAll(".people-row").forEach((el) => el.addEventListener("click", () => flyTo(el.dataset.ll.split(",").map(Number))));
+  $("plan-refly")?.addEventListener("click", () => showReflight(zone));
+}
+
+function renderDemoRoads() {
+  const d = app.demo;
+  const counts = {};
+  (app.fc?.features || []).forEach((f) => (counts[f.properties.status] = (counts[f.properties.status] || 0) + 1));
+  $("tab-roads").innerHTML = `<p class="muted">${(app.fc?.features || []).length} roads for <strong>${esc(vehicleLabel())}</strong> (simulated statuses)</p>
+    <p>${Object.entries(counts).map(([s, n]) => `${chip(s)} ${n}`).join(" &nbsp; ")}</p>
+    <p class="muted">Click any road on the map to report it blocked or cleared, and watch the route graph recompute.</p>`
+    + d.blockages.map((b) => `<div class="row" data-seg="${esc(b.segment_id)}">${chip(b.passes.length ? "partial" : "blocked")}<span>${esc(b.title)}</span></div>`).join("");
+  $("tab-roads").querySelectorAll("[data-seg]").forEach((r) => r.addEventListener("click", () => openSegment(r.dataset.seg)));
+}
+
+function showReflight(zone) {
+  const plan = planReflight(zone);
+  app.demoLayers?.showFlight(plan);
+  const c = zone.polygon.coordinates[0];
+  const lng = c.map((x) => x[0]), lat = c.map((x) => x[1]);
+  app.map.fitBounds([[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]], { padding: 140, duration: 900 });
+  const el = $("refly");
+  el.hidden = false;
+  el.innerHTML = `<header><span>${ICONS.drone}Re-fly plan</span><button class="x" id="refly-close" aria-label="Close">${ICONS.close}</button></header>
+    <div class="refly__nums"><div><b>${plan.lines}</b><span>passes</span></div><div><b>${(plan.length_m / 1000).toFixed(1)}</b><span>km</span></div>
+      <div><b>${plan.minutes}</b><span>min</span></div><div><b>${plan.photos}</b><span>photos</span></div></div>
+    <p class="muted"><b>Estimate</b> from stated settings: ${esc(plan.assumptions)}. Fly it, then the new photos replace the blurred ones.</p>`;
+  $("refly-close").addEventListener("click", () => { el.hidden = true; app.demoLayers?.showFlight(null); });
 }
 
 function openSegment(id) {
@@ -183,63 +312,67 @@ function openSegment(id) {
   if (!seg) return;
   showTab("roads");
   renderSegmentDetail(seg, app.state?.segments?.find((s) => s.segment_id === id));
-  $("back-roads").addEventListener("click", () => renderRoads(app.fc, vehicleLabel(), openSegment));
+  if (app.demo) {
+    $("tab-roads").insertAdjacentHTML("afterbegin", `<div class="whatif"><p class="muted">What if a field team reports this road? The route graph recomputes for all four vehicles.</p>
+      <button class="btn-line" data-k="dead_end">Report blocked</button><button class="btn-line" data-k="cleared">Report cleared</button></div>`);
+    $("tab-roads").querySelectorAll(".whatif button").forEach((b) => b.addEventListener("click", async () => {
+      $("tab-roads").querySelectorAll(".whatif button").forEach((x) => (x.disabled = true));
+      try {
+        app.busy = true;
+        const saved = await postJSON("/advisor/reports", { project: "demo", segment_id: id, kind: b.dataset.k,
+          note: "what-if from the dashboard (demo)", reporter: "Dashboard what-if" });
+        app.lastReportId = Math.max(app.lastReportId ?? 0, saved?.report?.id ?? saved?.id ?? 0);
+        const before = peopleCut(app.vehicle);
+        await loadAdvisor(`Road ${id} reported ${KIND_TEXT[b.dataset.k]}`);
+        showReportToast(`Road ${id} reported ${KIND_TEXT[b.dataset.k]}`, `People cut off for ${vehicleLabel().toLowerCase()}: ${before} → ${peopleCut(app.vehicle)}. Recomputed in ${app.graphLog[0]?.seconds.toFixed(1)} s.`);
+      } catch (e) {
+        status(`Could not report: ${e.message}`);
+      } finally {
+        app.busy = false;
+        openSegment(id);
+      }
+    }));
+  }
+  $("back-roads")?.addEventListener("click", () => (app.demo ? renderDemoRoads() : renderRoads(app.fc, vehicleLabel(), openSegment)));
 }
 
 function initLayers(active) {
-  $("layer-list").innerHTML = Object.entries(LAYER_GROUPS).map(([k, g]) => `<label class="layer"><span>${g.label}</span>
-      <span class="switch"><input type="checkbox" data-layer="${k}" checked ${k === "ortho" && !active.tiles ? "disabled" : ""}><span></span></span></label>`).join("");
-  $("layer-list").querySelectorAll("input").forEach((i) => i.addEventListener("change", () => setGroupVisible(app.map, i.dataset.layer, i.checked)));
+  const groups = Object.entries(LAYER_GROUPS).filter(([k]) => (k !== "ortho" || active?.tiles) && (!app.demo || !["checkpoints", "results"].includes(k)));
+  $("layer-list").innerHTML = groups.map(([k, g]) => `<label class="layer"><span>${g.label}</span>
+      <span class="switch"><input type="checkbox" data-layer="${k}" checked><span></span></span></label>`).join("")
+    + (app.demo ? `<label class="layer"><span>Simulated damage &amp; people</span><span class="switch"><input type="checkbox" data-layer="demo" checked><span></span></span></label>` : "");
+  $("layer-list").querySelectorAll("input").forEach((i) => i.addEventListener("change", () => (i.dataset.layer === "demo"
+    ? app.demoLayers?.setVisible(i.checked) : setGroupVisible(app.map, i.dataset.layer, i.checked))));
 }
 
 function renderOverview(active) {
-  $("card-overview").innerHTML = `<header><span>Overview</span></header>
-    <div class="label-public">${esc(labelFor(active.project))}</div>
-    <div class="muted">${esc(prettySite(active.project))}. Mapped from drone images without ground control; every number on screen comes from a run on this laptop.</div>`;
-  if (active.terrain) $("thumb-3d").style.backgroundImage = `url(${active.terrain.url}${active.terrain.thumb || active.terrain.texture.file})`;
-  else $("thumb-3d").innerHTML = `<p class="empty">No 3D terrain for this run yet</p>`;
-  $("profile-body").innerHTML = `<p class="muted">Draw a span across a gap to see its height profile here.</p>`;
-}
-
-function renderProfile(m) {
-  const p = m.result.profile;
-  if (!p) return;
-  const W = 300, H = 100, pad = 4;
-  const zs = p.height_m.filter((v) => v != null);
-  const zmin = Math.min(...zs), zmax = Math.max(...zs), dmax = p.distance_m[p.distance_m.length - 1] || 1;
-  const x = (d) => pad + (d / dmax) * (W - 2 * pad), y = (z) => H - pad - ((z - zmin) / (zmax - zmin || 1)) * (H - 2 * pad);
-  const path = p.distance_m.map((d, i) => p.height_m[i] == null ? "" : `${i ? "L" : "M"}${x(d).toFixed(1)},${y(p.height_m[i]).toFixed(1)}`).join("");
-  const span = m.result.span_m;
-  $("profile-body").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100" role="img" aria-label="Height profile">
-      <path d="${path} L${x(dmax)},${H} L${x(0)},${H}Z" fill="var(--stone)"/><path d="${path}" fill="none" stroke="var(--forest)" stroke-width="1.5"/>
-      ${span ? `<line x1="${x(p.bank_a_m)}" x2="${x(p.bank_b_m)}" y1="${y(m.result.bank_a_height_m)}" y2="${y(m.result.bank_b_height_m)}" stroke="var(--ocean)" stroke-dasharray="4 3"/>` : ""}
-    </svg><div class="muted">${span ? `Span ${span.toFixed(1)} m · bed ${m.result.bed_elevation_m.toFixed(1)} m` : esc(m.result.note || "")}</div>`;
-}
-
-function init3D(active) {
-  const btn3d = $("btn-3d");
-  const buttons = document.querySelectorAll("[data-view]");
-  if (!active.terrain) { btn3d.disabled = true; btn3d.title = "No 3D terrain exported for this run yet"; }
-  const setView = async (v) => {
-    buttons.forEach((b) => b.setAttribute("aria-checked", String(b.dataset.view === v)));
-    const on = v === "3d";
-    $("three").hidden = !on; $("map").hidden = on; $("exaggeration").hidden = !on;
-    $("layers").hidden = on; $("tools").hidden = on;
-    if (on && !app.three) {
-      status("Loading 3D terrain…");
-      const { createThreeView } = await import("./three-view.js");
-      app.three = await createThreeView($("three"), active.terrain, active.terrain.url);
-      app.three.setRoads({ ...app.fc, features: (app.fc?.features || []).filter((f) => f.properties.measured) });
-      status("");
-    }
-    if (!on) app.map.resize();
-  };
-  buttons.forEach((b) => b.addEventListener("click", () => !b.disabled && setView(b.dataset.view)));
-  $("card-3d").addEventListener("click", () => active.terrain && setView("3d"));
-  $("exag").addEventListener("input", (e) => {
-    $("exag-value").textContent = e.target.value;
-    app.three?.setExaggeration(Number(e.target.value));
+  const canReset = app.demo && app.me?.role !== "evaluator" && app.me?.role !== "field";
+  $("card-overview").innerHTML = app.demo
+    ? `<header><span>Overview</span></header><div class="label-public">Simulated demo</div>
+       <div class="muted">Real roads from OpenStreetMap. Blockages, the blurred patch and the people are made up, to show what Typhon decides on a day like this.</div>
+       ${canReset ? `<button class="btn-line btn-line--sm" id="demo-reset">Reset demo</button>` : ""}`
+    : `<header><span>Overview</span></header><div class="label-public">${esc(labelFor(active.project))}</div>
+       <div class="muted">${esc(prettySite(active.project))}. Mapped from drone images without ground control; every number on screen comes from a run on this laptop.</div>`;
+  $("demo-reset")?.addEventListener("click", async () => {
+    try { await postJSON("/advisor/demo/reset", {}); await loadAdvisor("Demo reset to the start"); }
+    catch (e) { status(`Could not reset: ${e.message}`); }
   });
+  // the 3D terrain is kept as a picture only (it was not adding to decisions)
+  if (active?.terrain) {
+    $("thumb-3d").style.backgroundImage = `url(${active.terrain.url}${active.terrain.thumb || active.terrain.texture.file})`;
+    if (app.demo) $("card-3d").querySelector("header span").textContent = "3D terrain · from our survey run";
+  } else $("card-3d").hidden = true;
+}
+
+function renderStripRight() {
+  const card = $("card-accuracy");
+  if (app.demo) {
+    const total = app.demo.people_total, cut = peopleCut(app.vehicle);
+    card.innerHTML = `<header><span>People (simulated)</span></header><div class="big">${cut} <small>of ${total}</small></div>
+      <div class="muted">cut off for ${esc(vehicleLabel().toLowerCase())}, in ${app.demo.people.length} groups</div>`;
+  } else if (app.spec?.accuracy) {
+    card.innerHTML = `<header><span>Accuracy</span></header><div id="accuracy-mini">${accuracyMiniHTML(app.spec)}</div>`;
+  } else card.hidden = true;
 }
 
 boot();

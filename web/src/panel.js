@@ -40,15 +40,16 @@ export function renderActNow(ctx) {
   const critical = (priorities?.items || []).filter((i) => i.level === "critical");
   const acc = spec?.accuracy;
 
+  const ins = (icon, label, value, target) => (value === NOT_MEASURED ? "" : insight(icon, label, value, target));
   el.innerHTML = (critical.length ? `<div class="alert">${ICONS.alert}<div><strong>${critical.length} critical ${critical.length === 1 ? "place" : "places"}</strong>
       <span>Ranked by decision-support rules; see the list below.</span></div></div>` : "")
-    + insight("roads", `Blocked for ${esc(vehicleLabel)}`, measured.length
+    + ins("roads", `Blocked for ${esc(vehicleLabel)}`, measured.length
       ? `${blocked.length} <small>of ${measured.length} measured segments · ${lenKm(blocked).toFixed(2)} km</small>` : NOT_MEASURED, "roads")
-    + insight("act", `Places cut off for ${esc(vehicleLabel)}`,
+    + ins("act", `Places cut off for ${esc(vehicleLabel)}`,
       places.length ? `${cut.length} <small>of ${places.length} · ${unverified.length} with access unverified</small>` : NOT_MEASURED)
-    + insight("layers", "Road we couldn't see (canopy, no data)", measured.length
+    + ins("layers", "Road we couldn't see (canopy, no data)", measured.length
       ? `${Math.round((unknown.length / measured.length) * 100)}% <small>of measured segments</small>` : NOT_MEASURED, "roads")
-    + insight("accuracy", "Map accuracy", acc ? `± ${num(acc.horizontal.rmse_h_m, "m", 1)} <small>at ${acc.n_checkpoints} checkpoints</small>` : NOT_MEASURED, "accuracy")
+    + ins("accuracy", "Map accuracy", acc ? `± ${num(acc.horizontal.rmse_h_m, "m", 1)} <small>at ${acc.n_checkpoints} checkpoints</small>` : NOT_MEASURED, "accuracy")
     + `<h2>Priorities</h2><p class="muted">Decision support with hand-set weights (PLACEHOLDER), not an automated dispatch.</p>`
     + ((priorities?.items || []).map((it) => `<article class="item">
         <h3>${it.rank}. ${esc(it.recommended_action)}</h3>
@@ -84,15 +85,13 @@ export function renderRoads(fc, vehicleLabel, onPick) {
 
 export function renderSegmentDetail(seg, st) {
   const p = seg.properties;
+  const kv = (label, html) => (html.includes("not-measured") ? "" : `<dt>${label}</dt><dd>${html}</dd>`);
   $("tab-roads").innerHTML = `<button class="back" id="back-roads">← All segments</button>
     <article class="item"><h3>${esc(p.segment_id)} · ${esc(p.highway)}</h3><dl class="kv">
-      <dt>Length</dt><dd>${num(p.length_m, "m")}</dd>
-      <dt>Corridor width</dt><dd>${num(p.corridor_width_m, "m")}<div class="muted">${esc(p.corridor_width_source)}</div></dd>
-      <dt>Visible</dt><dd>${p.coverage_fraction == null ? NOT_MEASURED : Math.round(p.coverage_fraction * 100) + " %"}</dd>
-      <dt>Clear width</dt><dd>${num(p.min_clear_width_m, "m", 2)}</dd>
-      <dt>Max obstruction</dt><dd>${num(p.max_obstruction_m, "m", 2)}</dd>
-      <dt>Obstructed</dt><dd>${num(p.obstructed_length_m, "m")}</dd>
-      <dt>Debris</dt><dd>${withTol(p.debris_volume_m3, p.debris_volume_tolerance_m3, "m³")}</dd></dl></article>
+      ${kv("Length", num(p.length_m, "m"))}${p.corridor_width_m != null ? kv("Corridor width", `${num(p.corridor_width_m, "m")}<div class="muted">${esc(p.corridor_width_source)}</div>`) : ""}
+      ${p.coverage_fraction == null ? "" : kv("Visible", Math.round(p.coverage_fraction * 100) + " %")}${kv("Clear width", num(p.min_clear_width_m, "m", 2))}
+      ${kv("Max obstruction", num(p.max_obstruction_m, "m", 2))}${kv("Obstructed", num(p.obstructed_length_m, "m"))}
+      ${p.debris_volume_m3 == null ? "" : kv("Debris", p.mock ? `${num(p.debris_volume_m3, "m³", 0)} <span class="muted">(simulated)</span>` : withTol(p.debris_volume_m3, p.debris_volume_tolerance_m3, "m³"))}</dl></article>
     <h2>Status by vehicle</h2>${VEHICLES.map(([k, label]) => `<article class="item">
       <h3>${chip(st?.status_by_mode?.[k] || "unknown")} ${label}</h3>
       <ul>${(st?.reasons_by_mode?.[k] || ["no assessment yet"]).map((r) => `<li>${esc(r)}</li>`).join("")}</ul></article>`).join("")}

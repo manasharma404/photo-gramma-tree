@@ -161,7 +161,8 @@ def get_advisor_access(
     """Return multi-vehicle reachability and T5 reopen plan (validates access_report.schema.json)."""
     proj = resolve_project(project)
     seg_fc, places_fc, _, state = _compute_state_for_project(proj)
-    return compute_access_report(
+    t0 = time.perf_counter()
+    rep = compute_access_report(
         segments_geojson=seg_fc,
         places_geojson=places_fc,
         advisor_state=state,
@@ -169,6 +170,40 @@ def get_advisor_access(
         base_place_id=base,
         backend=backend,
     )
+    # extra, optional fields (the contract allows them): how long the graph answer took, and on what
+    rep["timing_s"] = round(time.perf_counter() - t0, 2)
+    rep["graph_size"] = {"roads": len(seg_fc.get("features", [])), "places": len(places_fc.get("features", []))}
+    return rep
+
+
+# ---- the map's DEMO scenario (scripts/build_demo_scenario.py): real OSM roads, SIMULATED damage and people ----
+def _demo_dir() -> Path:
+    return _data_root() / "data" / "projects" / "demo"
+
+
+@router.get("/demo/scenario")
+def get_demo_scenario() -> dict[str, Any]:
+    """Everything the map needs to draw the demo: its roads, places, blockages, blurred patch and people."""
+    d = _demo_dir()
+    if not (d / "demo.json").exists():
+        raise HTTPException(status_code=404, detail="no demo scenario on this laptop (scripts/build_demo_scenario.py)")
+    demo = json.loads((d / "demo.json").read_text(encoding="utf-8"))
+    demo["segments"] = json.loads((d / "roads" / "segments.geojson").read_text(encoding="utf-8"))
+    demo["places"] = json.loads((d / "places.geojson").read_text(encoding="utf-8"))
+    return demo
+
+
+@router.post("/demo/reset")
+def reset_demo_scenario() -> dict[str, Any]:
+    """Clear the demo's field reports and history (only project 'demo'), so the next run starts clean."""
+    import sqlite3
+
+    from advisor.store import init_db, resolve_db_path
+
+    db = init_db(resolve_db_path())
+    with sqlite3.connect(db) as conn:
+        n = {t: conn.execute(f"DELETE FROM {t} WHERE project = 'demo'").rowcount for t in ("field_reports", "segment_history")}
+    return {"project": "demo", "cleared": n}
 
 
 @router.get("/priorities")

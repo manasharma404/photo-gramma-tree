@@ -18,7 +18,8 @@ export function initLive(map, el) {
   const $ = (id) => el.querySelector(`#${id}`);
 
   Promise.all([getJSON("/live/sets"), getJSON("/live/status")]).then(([sets, s]) => {
-    if (!sets?.length) { $("live-set").innerHTML = "<option>No photo sets on this laptop</option>"; $("live-go").disabled = true; return; }
+    if (!sets?.length) { el.hidden = true; return; }  // nothing to replay on this laptop: no empty panel
+    el.hidden = false;
     $("live-set").innerHTML = sets.map((x) => `<option value="${esc(x.name)}">${esc(setLabel(x))}</option>`).join("");
     if (s && s.state !== "idle") {  // a replay already ran or is running: show it, and show which set it is
       if (sets.some((x) => x.name === s.set)) $("live-set").value = s.set;

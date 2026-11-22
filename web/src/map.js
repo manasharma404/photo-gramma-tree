@@ -133,9 +133,10 @@ export function segmentsForVehicle(segments, state, vehicle) {
   };
 }
 
-export function legendHTML() {
+export function legendHTML(demo = false) {
   const style = { open: "solid", partial: "dashed", blocked: "solid", unknown: "dotted" };
   return STATUSES.map((s) => `<div class="legend__row"><span class="legend__swatch" style="border-top:${WIDTH[s]}px ${style[s]} var(--status-${s})"></span>${
     s === "blocked" ? "Blocked ✕" : s[0].toUpperCase() + s.slice(1)}</div>`).join("")
-    + `<div class="legend__row"><span class="legend__swatch" style="border-top:2px dashed var(--ocean)"></span>Checkpoint error</div>`;
+    + (demo ? `<div class="legend__row"><span class="legend__ppl">12</span>People (simulated)</div><div class="legend__row"><span class="legend__blur"></span>Blurred photos</div>`
+      : `<div class="legend__row"><span class="legend__swatch" style="border-top:2px dashed var(--ocean)"></span>Checkpoint error</div>`);
 }

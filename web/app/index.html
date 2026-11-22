@@ -25,7 +25,7 @@
       <span class="field__label">Vehicle</span>
       <div class="segmented" id="vehicle" role="radiogroup" aria-label="Vehicle type"></div>
     </div>
-    <div class="field">
+    <div class="field" id="freshness-field">
       <span class="field__label">Last processed</span>
       <span class="field__value" id="freshness">—</span>
     </div>
@@ -61,7 +61,6 @@
 
     <main class="stage">
       <div id="map"></div>
-      <div id="three" hidden></div>
 
       <button class="fab card" id="layers-btn" aria-label="Layers" aria-expanded="false"><span data-icon="layers"></span></button>
       <section class="layers card" id="layers" aria-label="Layers">
@@ -78,17 +77,8 @@
         <button data-tool="clear" title="Clear measurements"><span data-icon="trash"></span></button>
       </div>
 
-      <div class="viewswitch card">
-        <div class="segmented" role="radiogroup" aria-label="View">
-          <button role="radio" data-view="2d" aria-checked="true">2D</button>
-          <button role="radio" data-view="3d" aria-checked="false" id="btn-3d">3D</button>
-        </div>
-        <label class="exag" id="exaggeration" hidden>Height ×<span id="exag-value">1</span>
-          <input type="range" id="exag" min="1" max="3" step="0.5" value="1" />
-        </label>
-      </div>
-
       <section class="live card" id="live" aria-label="Growing map" hidden></section>
+      <section class="refly card" id="refly" aria-label="Re-fly plan" hidden></section>
 
       <div class="legend card" id="legend"></div>
       <div class="hint" id="statusline" role="status"></div>
@@ -97,13 +87,13 @@
 
   <footer class="strip">
     <article class="card strip__card" id="card-overview"></article>
-    <article class="card strip__card strip__card--click" id="card-3d" tabindex="0">
-      <header><span>3D view</span><span data-icon="expand"></span></header>
+    <article class="card strip__card" id="card-3d">
+      <header><span>3D terrain</span></header>
       <div class="thumb" id="thumb-3d"></div>
     </article>
-    <article class="card strip__card" id="card-profile">
-      <header><span>Cross-section</span></header>
-      <div id="profile-body"></div>
+    <article class="card strip__card strip__card--graph" id="card-graph" aria-live="polite">
+      <header><span>Neo4j · route graph</span><span class="live-dot" aria-hidden="true"></span></header>
+      <div id="graph-body"></div>
     </article>
     <article class="card strip__card" id="card-accuracy">
       <header><span>Accuracy</span></header>

@@ -288,3 +288,77 @@ body.app { background: linear-gradient(180deg, #F5F1E6 0%, #E9E5DA 100%); }
 .report-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 .report-toast strong { font: 500 15px var(--font-display); }
 .report-toast span { font-size: 13px; opacity: .85; }
+
+/* ---- demo scenario (simulated): markers, panels, the route-graph card, the re-fly plan ---- */
+body.is-demo .rail [data-tab="measure"], body.is-demo .rail [data-tab="accuracy"], body.is-demo #tools { display: none; }
+.dmk { display: inline-flex; align-items: center; gap: 8px; border: 0; padding: 6px 10px 6px 6px; border-radius: 12px; cursor: pointer;
+  font: 500 12px var(--font-ui); color: #fff; box-shadow: 0 4px 14px rgba(15, 30, 61, 0.28); white-space: nowrap; }
+.dmk svg { width: 26px; height: 26px; padding: 3px; border-radius: 8px; background: rgba(255, 255, 255, 0.18); flex: none; }
+.dmk span { display: grid; line-height: 1.2; text-align: left; }
+.dmk b { font-weight: 600; } .dmk i { font-style: normal; opacity: .88; font-size: 11px; }
+.dmk--block { background: #B3261E; transform: translateY(-10px); }
+.dmk--narrowed, .dmk--bridge { background: #A86E0B; }
+.dmk--flood { background: #2A4EA8; }
+.dmk--block::after { content: ""; position: absolute; left: 50%; bottom: -8px; translate: -50% 0; border: 5px solid transparent; border-top: 8px solid; border-top-color: inherit; }
+.dmk--block { position: relative; border-top-color: #B3261E; }
+.dmk--narrowed, .dmk--bridge { border-top-color: #A86E0B; } .dmk--flood { border-top-color: #2A4EA8; }
+.dmk--people { padding: 3px 9px 3px 3px; gap: 6px; background: #fff; color: var(--text); border: 2px solid var(--status-open); }
+.dmk--people b { display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 9px; background: var(--status-open); color: #fff; font: 600 13px var(--font-display); }
+.dmk--people span { font-size: 11px; color: var(--text-2); }
+.dmk--people[data-state="cut"] { border-color: var(--status-blocked); animation: pplpulse 1.8s ease-in-out infinite; }
+.dmk--people[data-state="cut"] b { background: var(--status-blocked); }
+.dmk--people[data-state="unverified"] { border-color: var(--status-partial); }
+.dmk--people[data-state="unverified"] b { background: var(--status-partial); }
+@keyframes pplpulse { 50% { box-shadow: 0 0 0 7px rgba(179, 38, 30, 0.18), 0 4px 14px rgba(15, 30, 61, 0.28); } }
+.dmk--blur { background: rgba(42, 78, 168, 0.92); cursor: default; padding: 6px 10px; }
+.demo-note { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; padding: 10px 12px; margin-bottom: var(--space-3);
+  border-radius: var(--radius); background: #EEF2FB; color: var(--text); font-size: var(--fs-s); line-height: 1.4; }
+.demo-note svg { width: 18px; height: 18px; color: var(--ocean); }
+.alert--ok { background: #EEF6F0; }
+.item--click { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.item--click:hover { border-color: var(--forest); box-shadow: var(--shadow); }
+.passes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.passes span { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.passes .ok { color: var(--status-open); border-color: currentColor; } .passes .ok::before { content: "✓ "; }
+.passes .no { color: var(--text-2); text-decoration: line-through; opacity: .7; }
+.btn-line { display: inline-flex; align-items: center; gap: 8px; margin: 10px 8px 0 0; padding: 8px 12px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--forest); background: var(--surface); color: var(--forest); font: 500 var(--fs-s) var(--font-ui); }
+.btn-line:hover { background: var(--forest); color: var(--on-primary); }
+.btn-line:disabled { opacity: .5; cursor: wait; }
+.btn-line svg { width: 16px; height: 16px; }
+.btn-line--sm { padding: 5px 10px; font-size: var(--fs-xs); }
+.whatif { padding: 10px 12px; margin-bottom: var(--space-3); border-radius: var(--radius); background: var(--stone); }
+.people-row { cursor: pointer; }
+.ppl { display: inline-grid; place-items: center; min-width: 28px; height: 24px; padding: 0 4px; border-radius: 8px; color: #fff; font: 600 12px var(--font-display); }
+.ppl--cut { background: var(--status-blocked); } .ppl--unv { background: var(--status-partial); } .ppl--ok { background: var(--status-open); }
+.legend__ppl { display: inline-grid; place-items: center; width: 22px; height: 16px; border-radius: 5px; background: var(--status-blocked); color: #fff; font: 600 10px var(--font-display); margin-right: 8px; }
+.legend__blur { display: inline-block; width: 22px; height: 12px; margin-right: 8px; border: 1.5px dashed var(--ocean);
+  background: repeating-linear-gradient(135deg, rgba(42, 78, 168, 0.45) 0 2px, transparent 2px 6px); }
+
+/* the route-graph card (replaces the cross-section box) */
+.strip__card--graph { min-width: 0; }
+.strip__card--graph header { display: flex; justify-content: space-between; align-items: center; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-open); box-shadow: 0 0 0 3px rgba(46, 125, 79, 0.18); }
+.strip__card--graph.is-busy .live-dot { background: #B5D334; animation: pplpulse 1s ease-in-out infinite; }
+.graph__engine { display: flex; align-items: center; gap: 8px; font: 500 var(--fs-m) var(--font-display); }
+.graph__engine .dot { width: 9px; height: 9px; border-radius: 50%; }
+.dot--neo { background: #018BFF; } .dot--nx { background: var(--status-partial); }
+.graph__head { margin: 8px 0 4px; font-size: var(--fs-xs); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--text-2); }
+.gbar { display: grid; grid-template-columns: 74px 1fr 34px; align-items: center; gap: 8px; font-size: var(--fs-xs); margin: 3px 0; }
+.gbar i { height: 7px; border-radius: 4px; background: linear-gradient(90deg, var(--status-blocked) var(--w), var(--stone) var(--w)); }
+.gbar b { text-align: right; font: 600 var(--fs-s) var(--font-display); }
+.graph__log { margin-top: 8px; display: grid; gap: 2px; font-size: 11px; color: var(--text-2); max-height: 54px; overflow: hidden; }
+.graph__log span { font-family: ui-monospace, Menlo, Consolas, monospace; margin-right: 6px; color: var(--text); }
+.graph__busy { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: center; padding: 10px 0; }
+.graph__busy strong { display: block; font: 500 var(--fs-m) var(--font-display); }
+.pulse { width: 14px; height: 14px; border-radius: 50%; background: #018BFF; animation: pplpulse 1s ease-in-out infinite; box-shadow: 0 0 0 0 rgba(1, 139, 255, 0.4); }
+
+/* the re-fly plan card, over the map */
+.refly { position: absolute; z-index: 5; right: 16px; bottom: 16px; width: 300px; padding: 14px 16px; }
+.refly header { display: flex; justify-content: space-between; align-items: center; font: 500 var(--fs-m) var(--font-display); }
+.refly header span { display: inline-flex; gap: 8px; align-items: center; } .refly header svg { width: 18px; height: 18px; }
+.refly .x { border: 0; background: none; cursor: pointer; color: var(--text-2); }
+.refly__nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0 6px; }
+.refly__nums div { background: var(--stone); border-radius: 8px; padding: 6px; text-align: center; }
+.refly__nums b { display: block; font: 600 18px var(--font-display); } .refly__nums span { font-size: 11px; color: var(--text-2); }
+.big small { font-size: 0.5em; color: var(--text-2); }

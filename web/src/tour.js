@@ -13,7 +13,9 @@ function steps(spec) {
     : "The error hasn't been measured for this map yet, and the dashboard says so.";
   return [
     { title: "Welcome to Typhon", text: "The first map after a landslide: made from drone photos, on one laptop, with no internet. This tour shows the important parts, one at a time. It takes about a minute." },
-    { target: "#site", title: "Which map you're looking at", text: "The survey on screen. Right now that's USGS public photos of a real debris flow in South Fork, California, processed by us. It's not our own footage, and the page says so." },
+    { target: "#site", title: "Which map you're looking at", text: document.body.classList.contains("is-demo")
+      ? "The demo: real roads from OpenStreetMap with simulated damage and people, so you can see every decision Typhon makes. Switch here to our real survey (USGS public photos of a debris flow, processed by us)."
+      : "The survey on screen: USGS public photos of a real debris flow in South Fork, California, processed by us. It's not our own footage, and the page says so." },
     { target: "#vehicle", title: "Pick who is going", text: "Fire truck, ambulance, jeep or a team on foot. Every road colour, count and warning updates for the vehicle you pick." },
     { target: "#legend", title: "How to read the roads", text: "Solid green: open. Dashed amber: partly blocked. Red with ✕: blocked. Grey dotted: unknown, meaning we couldn't see it. Unknown is never shown as open." },
     { target: "#map", title: "The map", text: "The drone map with roads, places and checkpoints on top. Click a road to see why it has its status. Scroll to zoom." },
@@ -22,7 +24,7 @@ function steps(spec) {
       text: "Draw across a gap to get its span and height profile, outline a debris pile for its volume, or check a landing zone. Every result comes with its error."
         + (SNAPSHOT ? " (Measuring runs on the Typhon laptop; this public copy is read-only.)" : "") },
     { target: '[data-tab="accuracy"]', tab: "accuracy", title: "How far off is the map?", text: `${err} We show this next to every measurement instead of hiding it.` },
-    { target: "#card-3d", title: "3D view", text: "The terrain model built from the same photos. Open it to look along a slope or a gap." },
+    { target: "#card-graph", title: "The route graph, working", text: "Every answer about who is cut off and what to clear first is computed in Neo4j, a graph database, on this laptop. Report a road blocked or cleared and watch it recompute for all four vehicles." },
     { target: '[data-tab="reports"]', tab: "reports", title: "Field reports", text: "Teams on the ground send what they see from a phone (\"road blocked\", \"cleared\"), and it overrides what the map guessed."
         + (SNAPSHOT ? " (Phones connect to the Typhon laptop; this public copy is read-only.)" : "") },
     { target: "#offline", title: "No internet needed", text: "Everything runs on this laptop. This badge shows whether the machine is online, but nothing depends on it." },
@@ -52,7 +54,7 @@ export function initTour(getSpec) {
 
 function start(spec) {
   document.querySelector(".tour")?.remove();
-  const list = steps(spec);
+  const list = steps(spec).filter((st) => !st.target || (document.querySelector(st.target) && !document.querySelector(st.target).closest("[hidden]") && getComputedStyle(document.querySelector(st.target)).display !== "none"));
   const root = document.createElement("div");
   root.className = "tour";
   root.innerHTML = `<div class="tour__shade"></div><div class="tour__spot"></div>
