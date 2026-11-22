@@ -81,6 +81,11 @@ tr.hi td:first-child { box-shadow: inset 8px 0 0 var(--lime); padding-left: 22px
 .list strong { font-weight: 800; }
 .diagram { flex: 1; min-height: 0; margin-top: 30px; }
 .diagram svg { width: 100%; height: 100%; }
+.slide--dark th, .slide--navy th { color: rgba(242,242,236,.7); border-bottom-color: rgba(242,242,236,.25); }
+.slide--dark td, .slide--navy td { border-bottom-color: rgba(242,242,236,.14); }
+table.tt th, table.tt td { padding-right: 34px; vertical-align: top; }
+.hyp { display: inline-flex; align-items: center; gap: 12px; padding: 8px 18px; border-radius: 999px; background: var(--sand); color: var(--ink); font: 600 28px "Space Grotesk"; }
+.hyp::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--partial); }
 .notes { display: none; }
 @media screen { body.present { overflow: hidden; } body.present .slide { position: fixed; left: 50%; top: 50%; margin: 0; transform-origin: center; display: none; }
   body.present .slide.on { display: flex; } }
@@ -234,7 +239,7 @@ tr.hi td:first-child { box-shadow: inset 8px 0 0 var(--lime); padding-left: 22px
       <p class="lead" style="font-size:32px;margin-top:22px">People cut off, of 205 in 11 groups:</p>
       <div class="bars" style="margin-top:34px">
         <div class="bar" style="grid-template-columns:200px 1fr 100px"><span>Ambulance</span><i style="--w:72%"></i><b>148</b></div>
-        <div class="bar" style="grid-template-columns:200px 1fr 100px"><span>Fire truck</span><i style="--w:55%"></i><b>112</b></div>
+        <div class="bar" style="grid-template-columns:200px 1fr 100px"><span>Fire truck</span><i style="--w:71%"></i><b>146</b></div>
         <div class="bar" style="grid-template-columns:200px 1fr 100px"><span>Jeep</span><i style="--w:46%"></i><b>94</b></div>
         <div class="bar" style="grid-template-columns:200px 1fr 100px"><span>On foot</span><i style="--w:27%"></i><b>55</b></div>
       </div>
@@ -353,6 +358,95 @@ tr.hi td:first-child { box-shadow: inset 8px 0 0 var(--lime); padding-left: 22px
   </div>
   <div class="foot"><span>github.com/manasharma404/photo-gramma-tree</span><span>14</span></div>
   <aside class="notes">Software is open source with no per-map cloud bill. The cost line is an estimate from listings checked on 21 Nov.</aside>
+</section>
+
+<!-- 15: business plan starts here (from docs/PROJECT_GUIDE.md section 10) -->
+<section class="slide" data-n="15">
+  <div class="dots"></div>
+  <p class="kicker"><b>14</b>Business plan · who it is for</p>
+  <h2 style="font-size:84px; max-width:none">The district decides. <em>The state pays.</em></h2>
+  <table class="tt" style="margin-top:60px; font-size:35px">
+    <tr><th style="width:230px"></th><th>First</th><th>Then</th><th>Later</th></tr>
+    <tr><td><b>Institution</b></td><td>District emergency operations centre</td><td>SDRF, NDRF, fire services</td><td>Public Works Department, Border Roads</td></tr>
+    <tr><td><b>User</b></td><td>Duty officer sending the vehicles</td><td>Field team leader with a phone</td><td>Engineer planning clearance and bridging</td></tr>
+    <tr><td><b>Who pays</b></td><td>State Disaster Management Authority</td><td>The same budget</td><td>The road owner's budget</td></tr>
+  </table>
+  <p class="lead" style="font-size:34px; margin-top:44px; max-width:1500px">First customer to test: <strong style="color:var(--ink)">Rudraprayag district, Uttarakhand</strong>, ranked highest in India for landslide exposure.</p>
+  <div class="foot"><span>ISRO Landslide Atlas of India, 2023 · who pays is a hypothesis until a buyer confirms it</span><span>15</span></div>
+  <aside class="notes">Rudraprayag: ranked first for landslide exposure in ISRO's Landslide Atlas (2023). The state authority as payer is our hypothesis: confirm it with a real person in the Uttarakhand chain before saying it as fact.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide slide--dark" data-n="16">
+  <div class="dots"></div>
+  <p class="kicker"><b>15</b>Business plan · competition</p>
+  <h2 style="font-size:84px; max-width:none">The closest tool <em>stops at the map.</em></h2>
+  <table class="tt" style="margin-top:50px; font-size:31px">
+    <tr><th style="width:290px">Who</th><th style="width:470px">What it gives</th><th style="width:390px">Price (public listing)</th><th>Where it stops</th></tr>
+    <tr><td><b>PIX4Dreact</b></td><td>Offline 2D map on a laptop, no ground control</td><td>US$990 a year</td><td>No road status per vehicle, no route graph, no field reports; tuned for mostly flat ground</td></tr>
+    <tr><td><b>DroneDeploy</b></td><td>Cloud drone mapping</td><td>US$329–599 per user a year</td><td>Needs internet to process</td></tr>
+    <tr><td><b>Satellite maps</b></td><td>ISRO/NRSC, Copernicus damage maps</td><td>Free to agencies</td><td>Days away, under cloud, too coarse for one road</td></tr>
+    <tr class="hi"><td>Typhon</td><td>Offline map plus decisions: cut off, clear first, fly next</td><td>₹1.5 lakh a year (proposed)</td><td>A prototype: error checked at 3 checkpoints so far</td></tr>
+  </table>
+  <p class="lead" style="font-size:32px; margin-top:34px">Indian drone firms such as ideaForge and Garuda Aerospace fly drones for responders: possible partners, not rivals.</p>
+  <div class="foot"><span>Prices: pix4d.com, Capterra, checked 21 Nov · in India PIX4Dreact lists at ₹89,674 a year excl. GST</span><span>16</span></div>
+  <aside class="notes">Don't say PIX4Dreact needs the cloud or experts: it doesn't (Pix4D FAQ). It stops at the map, and Pix4D says it is optimised for mostly flat terrain. Indian firms: in public sources none was found selling an offline flight-to-road-decision workflow; that is a claim about what we found, so say it that way.</aside>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-n="17">
+  <p class="kicker"><b>16</b>Business plan · model and market</p>
+  <div class="grid2" style="grid-template-columns: .85fr 1.15fr; gap:80px">
+    <div>
+      <div class="big">₹1.5<small>lakh</small></div>
+      <p class="lead" style="font-size:36px">a year per district: the software, updates, training for the centre and its field teams, and one mock drill a year.</p>
+      <p class="hyp" style="margin-top:34px">Proposed price, to test with a buyer</p>
+    </div>
+    <div class="rows" style="margin-top:0">
+      <div class="row" style="grid-template-columns:150px 1fr; font-size:36px"><b>FUND</b><span>10% of the states' disaster funds is set aside for preparedness: about <strong>₹3,200 crore a year</strong> (estimate).</span></div>
+      <div class="row" style="grid-template-columns:150px 1fr; font-size:36px"><b>FIRST</b><span><strong>147 districts</strong> ranked for landslide exposure × ₹1.5 lakh = <strong>₹2.2 crore a year</strong>, 0.07% of that fund.</span></div>
+      <div class="row" style="grid-template-columns:150px 1fr; font-size:36px"><b>ONCE</b><span>A laptop and a consumer drone, bought at cost: about <strong>₹1.5–2.6 lakh</strong> (estimate).</span></div>
+      <div class="row" style="grid-template-columns:150px 1fr; font-size:36px"><b>LATER</b><span>On-call mapping per event, road owners, insurers and mining (planned, not tested).</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>15th Finance Commission 2021–26 (PRS summary) · ISRO Landslide Atlas 2023 · arithmetic, not a forecast</span><span>17</span></div>
+  <aside class="notes">15th Finance Commission: state disaster corpus ₹1,60,153 crore for 2021–26, 10% earmarked for preparedness and capacity building (PRS summary); ₹3,200 crore a year is our arithmetic from that split. ₹1.5 lakh is a proposed price, untested. 147 × ₹1.5 lakh = ₹2.2 crore: arithmetic, not a forecast. Hardware range from listings checked 21 Nov.</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide slide--navy" data-n="18">
+  <div class="dots"></div>
+  <p class="kicker"><b>17</b>Business plan · first 100 users</p>
+  <h2 style="font-size:84px; max-width:none">One district, one drill, <em>then ten.</em></h2>
+  <div class="diagram" style="flex:none; height:350px; margin-top:80px">
+    <svg viewBox="0 0 1680 350" role="img" aria-label="Four steps to the first 100 users: a pilot district, a state mock drill, training channels, then ten districts">
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 10 5 0 10z" fill="#B5D334"/></marker></defs>
+      <g font-family="Inter" text-anchor="middle">
+        <rect x="0" y="10" width="360" height="330" rx="26" fill="rgba(242,242,236,.08)" stroke="rgba(242,242,236,.3)" stroke-width="2"/>
+        <circle cx="180" cy="80" r="34" fill="#B5D334"/><text x="180" y="93" font-size="36" font-weight="800" fill="#17210F">1</text>
+        <text x="180" y="170" font-size="36" font-weight="800" fill="#F2F2EC">Pilot district</text>
+        <g font-size="28" fill="rgba(242,242,236,.8)"><text x="180" y="222">A top-ranked district</text><text x="180" y="262">such as Rudraprayag,</text><text x="180" y="302">through its state</text></g>
+        <path d="M364 175H434" stroke="#B5D334" stroke-width="4" marker-end="url(#a3)"/>
+        <rect x="440" y="10" width="360" height="330" rx="26" fill="rgba(242,242,236,.08)" stroke="rgba(242,242,236,.3)" stroke-width="2"/>
+        <circle cx="620" cy="80" r="34" fill="#B5D334"/><text x="620" y="93" font-size="36" font-weight="800" fill="#17210F">2</text>
+        <text x="620" y="170" font-size="36" font-weight="800" fill="#F2F2EC">Mock drill</text>
+        <g font-size="28" fill="rgba(242,242,236,.8)"><text x="620" y="222">Run Typhon alongside</text><text x="620" y="262">a state mock drill:</text><text x="620" y="302">real feedback, safely</text></g>
+        <path d="M804 175H874" stroke="#B5D334" stroke-width="4" marker-end="url(#a3)"/>
+        <rect x="880" y="10" width="360" height="330" rx="26" fill="rgba(242,242,236,.08)" stroke="rgba(242,242,236,.3)" stroke-width="2"/>
+        <circle cx="1060" cy="80" r="34" fill="#B5D334"/><text x="1060" y="93" font-size="36" font-weight="800" fill="#17210F">3</text>
+        <text x="1060" y="170" font-size="36" font-weight="800" fill="#F2F2EC">Training</text>
+        <g font-size="28" fill="rgba(242,242,236,.8)"><text x="1060" y="222">NIDM courses and</text><text x="1060" y="262">state training</text><text x="1060" y="302">institutes, to approach</text></g>
+        <path d="M1244 175H1314" stroke="#B5D334" stroke-width="4" marker-end="url(#a3)"/>
+        <rect x="1320" y="10" width="360" height="330" rx="26" fill="#B5D334"/>
+        <circle cx="1500" cy="80" r="34" fill="#17210F"/><text x="1500" y="93" font-size="36" font-weight="800" fill="#B5D334">4</text>
+        <text x="1500" y="170" font-size="36" font-weight="800" fill="#17210F">First 100 users</text>
+        <g font-size="28" fill="#24321F"><text x="1500" y="222">Ten districts: centre</text><text x="1500" y="262">staff and field teams;</text><text x="1500" y="302">phones install nothing</text></g>
+      </g>
+    </svg>
+  </div>
+  <p class="lead" style="font-size:32px; margin-top:64px; max-width:1600px">Said plainly: the problem is in the reports. <strong style="color:#F2F2EC">The buyer and the price are still hypotheses</strong>; calls with three people in the segment come first.</p>
+  <div class="foot"><span>Service first, then a product, as the problem statement suggests</span><span>18</span></div>
+  <aside class="notes">This is a plan, not results: no district has used Typhon yet. If the three customer calls have happened, replace the last line with what they said (what we assumed, what we found, what we changed).</aside>
 </section>
 
 <script>

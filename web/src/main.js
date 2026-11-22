@@ -13,7 +13,7 @@ import { accuracyMiniHTML, initTabs, renderAccuracy, renderActNow, renderMeasure
   renderSegmentDetail, showTab } from "./panel.js";
 import { initTools } from "./tools.js";
 import { initTour } from "./tour.js";
-import { PASS_LABEL, addDemoLayers, planReflight } from "./demo.js";
+import { PASS_LABEL, addDemoLayers, planReflight, planRoute } from "./demo.js";
 
 const $ = (id) => document.getElementById(id);
 const app = { vehicle: "foot", segments: null, state: null, mapReady: false, demo: null, graphLog: [] };
@@ -132,7 +132,7 @@ async function boot() {
     setData(map, "places", app.places);
     if (app.checkpoints) setData(map, "checkpoints", app.checkpoints);
     if (useDemo) {
-      app.demoLayers = addDemoLayers(map, demo, { onBlockage: (b) => openSegment(b.segment_id), onPeople: () => showTab("act") });
+      app.demoLayers = addDemoLayers(map, demo, { onBlockage: (b) => openSegment(b.segment_id), onPeople: (p) => showRouteTo(p) });
       const [w, s, e, n] = demo.bounds_wsen;
       map.fitBounds([[w, s], [e, n]], { padding: { top: 60, bottom: 60, left: 60, right: 260 }, duration: 0 });
     }
@@ -264,6 +264,7 @@ function refresh() {
   if (app.mapReady) setData(app.map, "segments", fc);
   if (app.demo) {
     app.demoLayers?.recolour(app.access, app.vehicle);
+    if (app.routeTarget) renderRoute(false);
     renderDemoAct();
     renderDemoRoads();
   } else {
@@ -298,7 +299,7 @@ function renderDemoAct() {
         <button class="btn-line" id="plan-refly">${ICONS.drone}Plan a re-fly of this patch</button></article>` : "")
     + `<h2>People (simulated)</h2>` + d.people.map((p) => {
         const r = byId[p.place_id]?.reachable?.[v];
-        return `<div class="row people-row" data-ll="${p.lonlat.join(",")}"><b class="ppl ppl--${r === false ? "cut" : r == null ? "unv" : "ok"}">${p.count}</b>
+        return `<div class="row people-row" data-pid="${esc(p.place_id)}" title="Show the route for this vehicle"><b class="ppl ppl--${r === false ? "cut" : r == null ? "unv" : "ok"}">${p.count}</b>
           <span>${esc(p.name)}</span><span class="muted">${r === false ? "cut off" : r == null ? "access unverified" : "reachable"}</span></div>`;
       }).join("");
   $("tab-act").querySelectorAll("[data-seg]").forEach((el) => el.addEventListener("click", () => {
@@ -306,7 +307,7 @@ function renderDemoAct() {
     if (b) flyTo(b.lonlat);
     openSegment(el.dataset.seg);
   }));
-  $("tab-act").querySelectorAll(".people-row").forEach((el) => el.addEventListener("click", () => flyTo(el.dataset.ll.split(",").map(Number))));
+  $("tab-act").querySelectorAll(".people-row").forEach((el) => el.addEventListener("click", () => showRouteTo(d.people.find((x) => x.place_id === el.dataset.pid))));
   $("plan-refly")?.addEventListener("click", () => showReflight(zone));
 }
 
@@ -334,6 +335,48 @@ function showReflight(zone) {
       <div><b>${plan.minutes}</b><span>min</span></div><div><b>${plan.photos}</b><span>photos</span></div></div>
     <p class="muted"><b>Estimate</b> from stated settings: ${esc(plan.assumptions)}. Fly it, then the new photos replace the blurred ones.</p>`;
   $("refly-close").addEventListener("click", () => { el.hidden = true; app.demoLayers?.showFlight(null); });
+}
+
+// ---- the route for the chosen vehicle, from the base to a group of people (recomputed when the vehicle changes) ----
+function showRouteTo(p) {
+  if (!p) return;
+  app.routeTarget = p;
+  renderRoute(true);
+}
+function renderRoute(fit) {
+  const d = app.demo, p = app.routeTarget, el = $("route");
+  if (!d || !p || !app.fc) return;
+  const baseF = (d.places?.features || []).find((f) => f.properties.place_id === d.base_place_id);
+  const from = baseF?.geometry?.coordinates;
+  const r = from ? planRoute(app.fc, from, p.lonlat) : null;
+  const byId = Object.fromEntries((app.fc.features || []).map((f) => [f.properties.segment_id, f.geometry]));
+  app.demoLayers?.showRoute(r, byId);
+  const v = vehicleLabel().toLowerCase();
+  const stById = Object.fromEntries((app.state?.segments || []).map((s) => [s.segment_id, s]));
+  const why = (id) => {
+    const b = d.blockages.find((x) => x.segment_id === id);
+    if (b) return b.title;
+    const reason = stById[id]?.reasons_by_mode?.[app.vehicle]?.[0] || "a blocked road";
+    return reason.replace(/^.*?simulated( rule)?: /, "").replace(/^rule=[^:]*: /, "");
+  };
+  const needs = r ? [...new Set(r.blocked.map(why))] : [];
+  const km = r ? (r.length_m / 1000).toFixed(1) : "-";
+  let line;
+  if (!r) line = "No road links the base to this group.";
+  else if (r.kind === "ok") line = "<b>Open route, " + km + " km</b>" + (r.partial ? " · " + r.partial + (r.partial > 1 ? " stretches" : " stretch") + " passable with care" : "") + ".";
+  else if (r.kind === "unverified") line = "<b>Only through roads not seen</b> (" + r.unknown + "), " + km + " km. Fly there first to confirm.";
+  else line = "<b>Cut off for " + esc(v) + ".</b> Clear " + needs.slice(0, 2).map((x) => "<b>" + esc(x) + "</b>").join(" and ")
+    + (needs.length > 2 ? " and " + (needs.length - 2) + " more" : "") + " to open a " + km + " km route.";
+  el.hidden = false;
+  el.innerHTML = '<header><span>' + ICONS.roads + 'Route for ' + esc(v) + '</span><button class="x" id="route-close" aria-label="Close">' + ICONS.close + '</button></header>'
+    + '<p class="route__to">To <b>' + esc(p.name) + '</b> · ' + p.count + ' people (simulated)</p>'
+    + '<p class="route__line route__line--' + (r ? r.kind : "none") + '">' + line + '</p>'
+    + '<p class="muted">Switch the vehicle at the top to see how the route changes.</p>';
+  $("route-close").addEventListener("click", () => { app.routeTarget = null; el.hidden = true; app.demoLayers?.showRoute(null); });
+  if (fit && r) {
+    const lng = r.coords.map((c) => c[0]), lat = r.coords.map((c) => c[1]);
+    app.map.fitBounds([[Math.min(...lng), Math.min(...lat)], [Math.max(...lng), Math.max(...lat)]], { padding: { top: 150, bottom: 80, left: 80, right: 80 }, maxZoom: 16, duration: 900 });
+  }
 }
 
 function openSegment(id) {

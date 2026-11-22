@@ -32,6 +32,18 @@ export function addDemoLayers(map, demo, { onBlockage, onPeople } = {}) {
   map.addLayer({ id: "demo-blur-line", type: "line", source: "demo-blur", paint: { "line-color": "#2A4EA8", "line-width": 1.8, "line-dasharray": [2, 2] } });
   map.addLayer({ id: "demo-flight-line", type: "line", source: "demo-flight", layout: { "line-cap": "round", "line-join": "round" },
     paint: { "line-color": "#7A9A1C", "line-width": 2.6 } });
+  // the route for the chosen vehicle: solid when open, dashed through roads not seen, red where it is blocked
+  map.addSource("demo-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  map.addLayer({ id: "demo-route-casing", type: "line", source: "demo-route", filter: ["==", ["get", "part"], "path"],
+    layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#FFFFFF", "line-width": 11, "line-opacity": 0.95 } });
+  map.addLayer({ id: "demo-route-solid", type: "line", source: "demo-route", filter: ["all", ["==", ["get", "part"], "path"], ["!=", ["get", "kind"], "unverified"]],
+    layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#24321F", "line-width": 5.5 } });
+  map.addLayer({ id: "demo-route-dash", type: "line", source: "demo-route", filter: ["all", ["==", ["get", "part"], "path"], ["==", ["get", "kind"], "unverified"]],
+    paint: { "line-color": "#24321F", "line-width": 5, "line-dasharray": [1.2, 1.2] } });
+  map.addLayer({ id: "demo-route-need", type: "line", source: "demo-route", filter: ["==", ["get", "part"], "need"],
+    layout: { "line-cap": "round" }, paint: { "line-color": "#B3261E", "line-width": 9, "line-opacity": 0.85 } });
+  map.addLayer({ id: "demo-route-ends", type: "circle", source: "demo-route", filter: ["==", ["get", "part"], "end"],
+    paint: { "circle-radius": 7, "circle-color": "#B5D334", "circle-stroke-color": "#24321F", "circle-stroke-width": 3 } });
   map.addLayer({ id: "demo-flight-pt", type: "circle", source: "demo-flight", filter: ["==", ["geometry-type"], "Point"],
     paint: { "circle-radius": 5, "circle-color": "#B5D334", "circle-stroke-color": "#24321F", "circle-stroke-width": 2 } });
 
@@ -70,9 +82,19 @@ export function addDemoLayers(map, demo, { onBlockage, onPeople } = {}) {
         mk.el.dataset.state = r === false ? "cut" : r == null ? "unverified" : "ok";
       }
     },
+    showRoute(route, segsById) {
+      const fs = [];
+      if (route) {
+        fs.push({ type: "Feature", geometry: { type: "LineString", coordinates: route.coords }, properties: { part: "path", kind: route.kind } });
+        for (const id of route.blocked) { const g = segsById?.[id]; if (g) fs.push({ type: "Feature", geometry: g, properties: { part: "need" } }); }
+        fs.push({ type: "Feature", geometry: { type: "Point", coordinates: route.coords[0] }, properties: { part: "end" } });
+        fs.push({ type: "Feature", geometry: { type: "Point", coordinates: route.coords[route.coords.length - 1] }, properties: { part: "end" } });
+      }
+      map.getSource("demo-route")?.setData({ type: "FeatureCollection", features: fs });
+    },
     showFlight(plan) { map.getSource("demo-flight")?.setData(plan ? plan.geojson : { type: "FeatureCollection", features: [] }); },
     setVisible(on) {
-      for (const id of ["demo-blur-fill", "demo-blur-line", "demo-flight-line", "demo-flight-pt"]) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+      for (const id of ["demo-blur-fill", "demo-blur-line", "demo-flight-line", "demo-flight-pt", "demo-route-casing", "demo-route-solid", "demo-route-dash", "demo-route-need", "demo-route-ends"]) map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
       markers.forEach((x) => (x.m.getElement().style.display = on ? "" : "none"));
       if (zoneEl) zoneEl.style.display = on ? "" : "none";
     },
@@ -123,4 +145,72 @@ export function planReflight(zone, opts = {}) {
   const seconds = length / speed;
   return { geojson, lines: lines.length, length_m: Math.round(length), minutes: Math.max(1, Math.round(seconds / 60)),
     photos: Math.round(seconds / 2), assumptions: `${height} m above ground · lines ${Math.round(spacing)} m apart (70 % overlap) · ${speed} m/s · a photo every 2 s` };
+}
+
+/**
+ * The best way from the base to a point for the chosen vehicle, over the road network on the map (each road's
+ * `status` is already the chosen vehicle's). Three tries, in order: open or partly open roads only; then also roads
+ * not seen; then also blocked roads, at a high cost, so the result names what has to be cleared.
+ * Returns { kind: "ok" | "unverified" | "cut", coords, length_m, blocked: [segment ids], unknown: n } or null.
+ */
+export function planRoute(fc, from, to) {
+  const key = (c) => `${c[0].toFixed(5)},${c[1].toFixed(5)}`;
+  const nodes = new Map(), adj = new Map();
+  const node = (c) => { const k = key(c); if (!nodes.has(k)) { nodes.set(k, c); adj.set(k, []); } return k; };
+  const len = (cs) => { let s = 0; for (let i = 1; i < cs.length; i++) s += hav(cs[i - 1], cs[i]); return s; };
+  for (const f of fc?.features || []) {
+    const parts = f.geometry.type === "MultiLineString" ? f.geometry.coordinates : [f.geometry.coordinates];
+    for (const cs of parts) {
+      if (cs.length < 2) continue;
+      const a = node(cs[0]), b = node(cs[cs.length - 1]);
+      const e = { id: f.properties.segment_id, st: f.properties.status, len: f.properties.length_m || len(cs), cs };
+      adj.get(a).push({ to: b, e, fwd: true });
+      adj.get(b).push({ to: a, e, fwd: false });
+    }
+  }
+  if (!nodes.size) return null;
+  const nearest = (p) => { let best = null, d = Infinity; for (const [k, c] of nodes) { const x = hav(p, c); if (x < d) { d = x; best = k; } } return best; };
+  const s = nearest(from), t = nearest(to);
+  const COST = [{ open: 1, partial: 1.6 }, { open: 1, partial: 1.6, unknown: 4 }, { open: 1, partial: 1.6, unknown: 4, blocked: 60 }];
+  const KIND = ["ok", "unverified", "cut"];
+  for (let pass = 0; pass < 3; pass++) {
+    const w = COST[pass];
+    const dist = new Map([[s, 0]]), prev = new Map(), done = new Set();
+    const heap = [[0, s]];
+    while (heap.length) {
+      heap.sort((x, y) => x[0] - y[0]);
+      const [d, u] = heap.shift();
+      if (done.has(u)) continue;
+      done.add(u);
+      if (u === t) break;
+      for (const { to, e, fwd } of adj.get(u)) {
+        const c = w[e.st];
+        if (c === undefined || done.has(to)) continue;
+        const nd = d + e.len * c;
+        if (nd < (dist.get(to) ?? Infinity)) { dist.set(to, nd); prev.set(to, { from: u, e, fwd }); heap.push([nd, to]); }
+      }
+    }
+    if (!dist.has(t)) continue;
+    const coords = [], blocked = [];
+    let unknown = 0, partial = 0, length_m = 0, v = t;
+    const steps = [];
+    while (v !== s) { const p = prev.get(v); steps.push(p); v = p.from; }
+    steps.reverse().forEach(({ e, fwd }) => {
+      const cs = fwd ? e.cs : [...e.cs].reverse();
+      coords.push(...(coords.length ? cs.slice(1) : cs));
+      length_m += e.len;
+      if (e.st === "blocked") blocked.push(e.id);
+      if (e.st === "unknown") unknown += 1;
+      if (e.st === "partial") partial += 1;
+    });
+    return { kind: KIND[pass], coords, length_m, blocked, unknown, partial };
+  }
+  return null;
+}
+
+function hav(a, b) {
+  const R = 6371000, toR = Math.PI / 180;
+  const dLat = (b[1] - a[1]) * toR, dLon = (b[0] - a[0]) * toR;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * toR) * Math.cos(b[1] * toR) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
 }

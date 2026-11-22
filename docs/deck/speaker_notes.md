@@ -57,3 +57,21 @@ Debris model: recall 0.27, precision 0.64 on the held-out CAS region; on 35 Sout
 ## 14. A service first, then a product.
 
 Software is open source with no per-map cloud bill. The cost line is an estimate from listings checked on 21 Nov.
+
+## Business plan (slides 15 to 18, from docs/PROJECT_GUIDE.md section 10)
+
+## 15. The district decides. The state pays.
+
+Rudraprayag: ranked first for landslide exposure in ISRO's Landslide Atlas (2023). The state authority as payer is our hypothesis: confirm it with a real person in the Uttarakhand chain before saying it as fact.
+
+## 16. The closest tool stops at the map.
+
+Don't say PIX4Dreact needs the cloud or experts: it doesn't (Pix4D FAQ). It stops at the map, and Pix4D says it is optimised for mostly flat terrain. Prices: PIX4Dreact US$990 a year on pix4d.com (₹89,674.20 a year excl. GST from an Indian reseller); DroneDeploy US$329–599 per user a year on Capterra; checked 21 Nov. Indian firms: in public sources none was found selling an offline flight-to-road-decision workflow; that is a claim about what we found, so say it that way.
+
+## 17. Business model and market.
+
+15th Finance Commission: state disaster corpus ₹1,60,153 crore for 2021–26, 10% earmarked for preparedness and capacity building (PRS summary); ₹3,200 crore a year is our arithmetic from that split. ₹1.5 lakh per district a year is a proposed price, untested. 147 × ₹1.5 lakh = ₹2.2 crore a year: arithmetic, not a forecast. Hardware range from listings checked 21 Nov.
+
+## 18. One district, one drill, then ten.
+
+This is a plan, not results: no district has used Typhon yet. If the three customer calls have happened, replace the last line with what they said (what we assumed, what we found, what we changed).

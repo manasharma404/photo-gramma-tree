@@ -112,11 +112,21 @@ def main() -> None:
 
     by_sid = {f["properties"]["segment_id"]: f for f in feats}
     blockages, people, blur = [], [], []
-    # default: every road open (the demo shows the designed trouble clearly); then the trouble
+    # default: what each vehicle can use on an undamaged road, by road class (a simulated rule, stated on screen;
+    # vehicle sizes from config/vehicles.yaml): unpaved tracks are too narrow for a fire truck and rough for an
+    # ambulance; narrow village roads are slow for a fire truck. Then the designed trouble on top.
+    class_rule = {
+        "track": ({"fire_truck": "blocked", "ambulance": "partial", "jeep": "open", "foot": "open"},
+                  {"fire_truck": "simulated rule: a narrow unpaved track; a fire truck does not fit",
+                   "ambulance": "simulated rule: a rough unpaved track; passable slowly, with care"}),
+        "unclassified": ({"fire_truck": "partial", "ambulance": "open", "jeep": "open", "foot": "open"},
+                         {"fire_truck": "simulated rule: a narrow village road; slow for a fire truck"}),
+    }
     for f in feats:
         p = f["properties"]
-        p.update({"source": "scenario", "status_by_mode": {m: "open" for m in MODES}, "scenario_label": LABEL,
-                  "scenario_reasons_by_mode": {m: ["simulated: no damage reported on this road"] for m in MODES},
+        st, why = class_rule.get(p.get("highway"), ({m: "open" for m in MODES}, {}))
+        p.update({"source": "scenario", "status_by_mode": dict(st), "scenario_label": LABEL,
+                  "scenario_reasons_by_mode": {m: [why.get(m, "simulated: no damage reported on this road")] for m in MODES},
                   "measured": False, "mock": True})
     # On a network that is one long chain the cut points are nested (each far side holds the next). Then order
     # them from the base outwards and put people between them: each vehicle gets as far as its roads allow.

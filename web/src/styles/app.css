@@ -366,3 +366,14 @@ body.is-demo .rail [data-tab="measure"], body.is-demo .rail [data-tab="accuracy"
 .graph__neo .ok { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #018BFF; color: #fff; font-size: 10px; }
 .graph__neo .warn { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--status-partial); color: #fff; font-size: 11px; }
 .pulse--sm { width: 10px; height: 10px; flex: none; }
+
+/* the route card, top centre of the map */
+.route { position: absolute; z-index: 6; left: 50%; top: 16px; translate: -50% 0; width: min(520px, calc(100% - 32px)); padding: 12px 16px 12px; }
+.route header { display: flex; justify-content: space-between; align-items: center; font: 500 var(--fs-m) var(--font-display); }
+.route header span { display: inline-flex; gap: 8px; align-items: center; } .route header svg { width: 18px; height: 18px; }
+.route .x { border: 0; background: none; cursor: pointer; color: var(--text-2); }
+.route__to { margin: 6px 0 2px; font-size: var(--fs-s); color: var(--text-2); }
+.route__line { margin: 0 0 4px; font-size: var(--fs-m); line-height: 1.4; padding-left: 10px; border-left: 4px solid var(--status-open); }
+.route__line--unverified { border-left-color: var(--status-partial); }
+.route__line--cut, .route__line--none { border-left-color: var(--status-blocked); }
+.people-row:hover { background: var(--stone); }
