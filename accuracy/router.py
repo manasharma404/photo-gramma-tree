@@ -82,12 +82,23 @@ def layer(name: str):
     a = load_active()
     if not a:
         raise HTTPException(404, "no run is active yet")
-    files = {"segments": _project_dir(a) / "roads/segments.geojson",
-             "places": _project_dir(a) / "roads/places.geojson",
-             "checkpoints": (ROOT / a["accuracy"]).with_name("checkpoints.geojson") if a.get("accuracy") else None}
+    p_dir = _project_dir(a)
+    cp_file = (ROOT / a["accuracy"]).with_name("checkpoints.geojson") if a.get("accuracy") else None
+    if not cp_file or not cp_file.exists():
+        for cand in (p_dir / "exports/checkpoints.geojson", p_dir / "checkpoints.geojson"):
+            if cand.exists():
+                cp_file = cand
+                break
+    files = {
+        "segments": p_dir / "roads/segments.geojson" if (p_dir / "roads/segments.geojson").exists() else p_dir / "segments.geojson",
+        "places": p_dir / "roads/places.geojson" if (p_dir / "roads/places.geojson").exists() else p_dir / "places.geojson",
+        "checkpoints": cp_file,
+    }
     if name not in files:
         raise HTTPException(404, f"unknown layer; choose from {sorted(files)}")
     f = files[name]
     if not f or not f.exists():
+        if name == "checkpoints":
+            return {"type": "FeatureCollection", "features": []}
         raise HTTPException(404, f"{name} not produced yet for {a['project']}")
     return json.loads(f.read_text(encoding="utf-8"))

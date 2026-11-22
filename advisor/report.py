@@ -7,11 +7,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import uuid
 from pathlib import Path
 from typing import Any
 
 from neo4j import Driver
+
+logger = logging.getLogger(__name__)
 
 from advisor.assess import assess_collection, load_vehicle_config
 from advisor.graph import (
@@ -343,6 +346,10 @@ def compute_access_report(
                     ml_scores=ml_scores,
                     w=w,
                 )
+            except Exception as e:
+                if backend in ("neo4j", "cypher"):
+                    raise
+                logger.warning("Neo4j computation failed (%s); falling back to NetworkX", e)
             finally:
                 driver.close()
         if backend in ("neo4j", "cypher"):
