@@ -4,11 +4,29 @@
 
 hackFront IIITD, team Vortex (repo: photo-gramma-tree). hackFront India 2026, **PS T8.2 "The First Map After The Landslide"**: turn consumer drone footage into a georeferenced map, measurements and road status per vehicle, **offline on a laptop**, and state the positional error honestly.
 
+## Finale build (22 Nov 2026): for reviewers
+
+**Project Typhon (T8.2):** one consumer-drone flight becomes a map on one laptop, offline, then tells responders which roads each vehicle can use, who is cut off, what to clear first and where to fly next.
+
+**Evidence in this repo:**
+- Positional error **±6.06 m at 3 RTK checkpoints, with no ground control** ([docs/validation.md](docs/validation.md))
+- **13.14 ha mapped in 80.2 min** on one laptop: i5-13420H, 16 GB RAM, RTX 4050 ([docs/validation.md](docs/validation.md))
+- Height differences within **±1.1 m at 326 surveyed ground points** ([docs/validation.md](docs/validation.md))
+- Offline: **0 of 128** page requests left the laptop (check run on 22 Nov)
+- Route graph: NetworkX answers first, **Neo4j confirms the same answer** ([advisor/](advisor/))
+- **8 attacks** (brute force, CSRF, SQL injection and more), each with a passing test ([tests/](tests/))
+
+**Said plainly:** 3 checkpoints (the standard asks for 30); the map demo is a **simulated scenario on real Wayanad OpenStreetMap roads**; vehicle limits are placeholders until sourced.
+
+AI use: [docs/AI_DISCLOSURE.md](docs/AI_DISCLOSURE.md) · data licences: [data/LICENSES.md](data/LICENSES.md) · running it on the day: [docs/runbook_finale.md](docs/runbook_finale.md)
+
+## Round 1 notes (31 Oct 2026)
+
 **Status (round 1, 31 Oct 2026):** working prototype; results below come from runs on this laptop. Plan, owners and decisions: [PLAN.md](PLAN.md). Validation write-up: [docs/validation.md](docs/validation.md).
 
 **Try it:** [manasharma404.github.io/photo-gramma-tree](https://manasharma404.github.io/photo-gramma-tree/) is a read-only copy of the app (South Fork block): map, 3D view, panels, the guided tour, About and Drone data. Measuring and field reports run on the Typhon laptop (`uv run python -m api.main`).
 
-**Watch it:** [docs/demo/typhon_demo.mp4](docs/demo/typhon_demo.mp4) (1 min 41 s): the real laptop app, recorded headlessly by `web/scripts/demo_video.mjs`: home, the guided tour, vehicles, measuring a span across the debris channel (59.40 ± 8.62 m), accuracy, 3D view, the field page. Captions describe what is on screen; frames are captured about 1.5 per second, so scrolling looks stepped.
+**Watch it:** the demo videos are submitted with the entry (video files are kept out of git). Round 1 video (1 min 41 s): the real laptop app, recorded headlessly by `web/scripts/demo_video.mjs`: home, the guided tour, vehicles, measuring a span across the debris channel (59.40 ± 8.62 m), accuracy, 3D view, the field page. Captions describe what is on screen; frames are captured about 1.5 per second, so scrolling looks stepped.
 
 ## What it does
 ```
