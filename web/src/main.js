@@ -149,19 +149,36 @@ function prettySite(p) {
 }
 
 // ---- the route graph: every answer about access comes from it; the strip card shows it working ----
+// Two engines answer the same question: NetworkX right away (under a second), so the map updates at once, and
+// Neo4j in the background (several seconds on a big network). When Neo4j lands, its answer replaces the quick one
+// and the panel says whether the two agree. A newer change supersedes an older Neo4j check.
+const sameAnswer = (a, b) => JSON.stringify((a?.places || []).map((p) => [p.place_id, p.reachable]))
+  === JSON.stringify((b?.places || []).map((p) => [p.place_id, p.reachable]));
 async function loadAdvisor(trigger) {
+  const seq = (app.seq = (app.seq || 0) + 1);
   renderGraph({ busy: true, trigger });
   const t0 = performance.now();
+  const q = encodeURIComponent(app.project);
   const [state, priorities, access, reports] = await Promise.all([
-    api.state(app.project), getJSON(`/advisor/priorities?project=${encodeURIComponent(app.project)}&backend=networkx`),
-    api.access(app.project), api.reports(app.project)]);
+    api.state(app.project), getJSON(`/advisor/priorities?project=${q}&backend=networkx`),
+    getJSON(`/advisor/access?project=${q}&backend=networkx`), api.reports(app.project)]);
   Object.assign(app, { state, priorities, access });
   app.lastReportId = reports?.reports?.at(-1)?.id ?? app.lastReportId ?? 0;
   renderReports(reports);
-  app.graphLog.unshift({ trigger, seconds: access?.timing_s ?? (performance.now() - t0) / 1000, engine: access?.computed_with, at: new Date() });
+  const entry = { trigger, seconds: access?.timing_s ?? (performance.now() - t0) / 1000, at: new Date(), neo: "checking", neoStart: performance.now() };
+  app.graphLog.unshift(entry);
   app.graphLog = app.graphLog.slice(0, 4);
-  renderGraph({ busy: false });
+  renderGraph({});
   refresh();
+  if (SNAPSHOT) { entry.neo = "unavailable"; renderGraph({}); return; }
+  getJSON(`/advisor/access?project=${q}&backend=neo4j`).then((neo) => {
+    if (seq !== app.seq) { entry.neo = "superseded"; return; }
+    if (!neo) { entry.neo = "unavailable"; renderGraph({}); return; }
+    entry.neo = sameAnswer(access, neo) ? "agrees" : "differs";
+    entry.neoSeconds = neo.timing_s ?? (performance.now() - entry.neoStart) / 1000;
+    app.access = neo;
+    refresh();
+  });
 }
 
 const ENGINE = (cw) => !cw ? "not available" : cw.startsWith("neo4j") ? "Neo4j graph database" : "NetworkX (Neo4j is not running)";
@@ -184,15 +201,27 @@ function renderGraph({ busy = false, trigger = "" } = {}) {
   }
   clearInterval(app._tick);
   const a = app.access, last = app.graphLog[0];
+  const checking = last?.neo === "checking";
+  $("card-graph").classList.toggle("is-busy", checking);
   const rows = VEHICLES.map(([k, label]) => {
     const n = app.demo ? peopleCut(k) : cutPlaces(k).length;
     const total = app.demo ? app.demo.people_total : (a?.places || []).length;
     return `<div class="gbar"><span>${label}</span><i style="--w:${total ? Math.round((n / total) * 100) : 0}%"></i><b>${n}</b></div>`;
   }).join("");
-  el.innerHTML = `<div class="graph__engine"><span class="dot dot--${a?.computed_with?.startsWith("neo4j") ? "neo" : "nx"}"></span>${esc(ENGINE(a?.computed_with))}</div>
-    <div class="muted">${a?.graph_size ? `${a.graph_size.roads} roads · ${a.graph_size.places} places · ` : ""}answered in ${last ? last.seconds.toFixed(1) : "–"} s</div>
+  const neoLine = !last ? "" : last.neo === "checking"
+      ? `<span class="pulse pulse--sm"></span>Neo4j is checking the same answer… <span id="graph-tick">0.0</span> s`
+    : last.neo === "agrees" ? `<span class="ok">✓</span>Neo4j graph database: same answer, ${last.neoSeconds.toFixed(1)} s`
+    : last.neo === "differs" ? `<span class="warn">!</span>Neo4j answered differently (${last.neoSeconds.toFixed(1)} s): showing Neo4j's answer`
+    : "Neo4j is not running: the answer is from NetworkX";
+  el.innerHTML = `<div class="graph__engine"><span class="dot dot--nx"></span>NetworkX answered in ${last ? last.seconds.toFixed(1) : "–"} s</div>
+    <div class="graph__neo">${neoLine}</div>
+    <div class="muted">${a?.graph_size ? `${a.graph_size.roads} roads · ${a.graph_size.places} places` : ""}</div>
     <div class="graph__head">${app.demo ? "People cut off (simulated)" : "Places cut off"}</div>${rows}
-    <div class="graph__log">${app.graphLog.map((g) => `<div><span>${g.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>${esc(g.trigger)} · ${g.seconds.toFixed(1)} s</div>`).join("")}</div>`;
+    <div class="graph__log">${app.graphLog.map((g) => `<div><span>${g.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>${esc(g.trigger)}${
+      g.neo === "agrees" ? ` · Neo4j ✓ ${g.neoSeconds.toFixed(1)} s` : g.neo === "checking" ? " · Neo4j checking" : ""}</div>`).join("")}</div>`;
+  if (checking) {
+    app._tick = setInterval(() => { const t = $("graph-tick"); if (t) t.textContent = ((performance.now() - last.neoStart) / 1000).toFixed(1); }, 100);
+  }
 }
 
 // Field reports arrive from phones on /field (or from the what-if buttons here). When a new one lands, re-run

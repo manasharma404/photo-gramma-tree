@@ -362,3 +362,7 @@ body.is-demo .rail [data-tab="measure"], body.is-demo .rail [data-tab="accuracy"
 .refly__nums div { background: var(--stone); border-radius: 8px; padding: 6px; text-align: center; }
 .refly__nums b { display: block; font: 600 18px var(--font-display); } .refly__nums span { font-size: 11px; color: var(--text-2); }
 .big small { font-size: 0.5em; color: var(--text-2); }
+.graph__neo { display: flex; align-items: center; gap: 8px; font-size: var(--fs-s); color: var(--text); }
+.graph__neo .ok { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #018BFF; color: #fff; font-size: 10px; }
+.graph__neo .warn { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--status-partial); color: #fff; font-size: 11px; }
+.pulse--sm { width: 10px; height: 10px; flex: none; }

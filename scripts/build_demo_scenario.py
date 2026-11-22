@@ -178,15 +178,8 @@ def main() -> None:
         leaves = sorted([j for j in region if H.degree(j) == 1], key=lambda j: -math.dist(xy[j], c["mid"]))
         if not leaves:  # a stretch of the chain with no road ends: use its point farthest from the blockage
             leaves = sorted(region, key=lambda j: -math.dist(xy[j], c["mid"]))[:1]
-        real = [pn for j in region for pn in place_by_j.get(j, [])]
-        n_groups = 0
-        for pn in real[:2]:
-            f = next(f for f in places["features"] if f["properties"].get("place_id") == pn.place_id)
-            cnt = rnd.choice([12, 18, 26, 34, 47, 60])
-            f["properties"].update({"population": cnt, "population_source": "SIMULATED (demo)", "mock": True})
-            people.append({"place_id": pn.place_id, "name": pn.name or "Village", "count": cnt, "lonlat": [J[pn.junction_id].lon, J[pn.junction_id].lat]})
-            n_groups += 1
-        for j in leaves[: max(0, (1 if nested else 2) - n_groups)]:
+        # never put made-up counts on a real named village: simulated groups sit on unnamed road points
+        for j in leaves[: (1 if nested else 2)]:
             add_group(j, rnd.choice([5, 8, 11, 15, 23, 31]), next(names, "Stranded group"))
     # two groups on the near side, still reachable, for contrast
     near = [j for j in H.nodes if all(j not in c["far"] for c in chosen) and H.degree(j) == 1 and j != topo.base_junction_id]
@@ -194,6 +187,10 @@ def main() -> None:
     for j in near[:2]:
         add_group(j, rnd.choice([9, 14, 20]), next(names, "Stranded group"))
 
+    # real settlements stay out of the demo (no simulated people on real communities; and a village with no
+    # population would make the graph report "unknown" people); real facilities and the base stay in
+    places["features"] = [f for f in places["features"] if f["properties"].get("mock") or f["properties"].get("kind") != "settlement"
+                          or f["properties"].get("place_id") == topo.base_place_id]
     out = ROOT / "data" / "projects" / "demo"
     (out / "roads").mkdir(parents=True, exist_ok=True)
     segs.update({"mock": True, "scenario_label": LABEL})

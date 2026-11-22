@@ -79,3 +79,12 @@ Timings come from `PLAN.md` ("How we are scored"). The jury slot is six minutes 
 2. **Only if the portal asks for a zip:** `uv run python scripts/make_submission_zip.py`. It writes `typhon_submission_<commit>.zip` next to the repo folder, and refuses if you are not on `main`, have uncommitted changes, or `main` differs from GitHub, so the zip always matches GitHub. Never upload a zip made from someone's own folder.
 3. Demo video and deck (PDF export) as in `PLAN.md` ("The pitch deck").
 4. Post in the team chat what was submitted and when.
+
+## 7. The map's demo scenario (22 Nov)
+- **What it is:** real OpenStreetMap roads of the Wayanad (Chooralmala–Mundakkai) area with SIMULATED blockages (four kinds, each letting different vehicles through), a blurred patch, and simulated trapped people. It is the map's default site; the real survey is one click away in the Site menu. Everything simulated says so on screen.
+- **Build it (once; the first command needs the internet):**
+  - `uv run python scripts/prefetch_wayanad.py`
+  - `uv run python scripts/build_demo_scenario.py --base wayanad`
+- **Restart the app after pulling new code:** Ctrl+C in its window, then `uv run python -m api.main`.
+- **Between rounds:** "Reset demo" in the Overview card (operator), or `uv run python scripts/reset_demo.py --project demo`.
+- **What to expect (measured on this laptop, 22 Nov):** the map answers in about 1–3 s (NetworkX); Neo4j checks the same answer in about 18 s on this network and the panel says "same answer". Start Neo4j first (`docker start t82-neo4j`).
