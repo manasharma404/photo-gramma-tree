@@ -35,7 +35,7 @@ export function createMap(container, active, onSegmentClick) {
   const tiles = active?.tiles;
   const image = active?.image; // snapshot builds use one orthophoto image instead of a tile pyramid
   const attribution = "Imagery: USGS (public domain), processed by Project Typhon · Roads © OpenStreetMap contributors";
-  const bwsen = image ? image.bounds_wsen : tiles?.bounds_wsen;
+  const bwsen = image ? image.bounds_wsen : (tiles?.bounds_wsen || active?.bounds_wsen);
   const ortho = image
     ? { type: "image", url: image.url, coordinates: [[bwsen[0], bwsen[3]], [bwsen[2], bwsen[3]], [bwsen[2], bwsen[1]], [bwsen[0], bwsen[1]]] }
     : tiles ? { type: "raster", tiles: [tiles.url], tileSize: 256, minzoom: tiles.min_zoom, maxzoom: tiles.max_zoom,

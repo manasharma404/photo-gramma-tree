@@ -148,7 +148,7 @@ def test_f5_cypher_whatif_matches_networkx(tmp_path: Path):
     assert [r["segment_id"] for r in cypher_base["reopen_plan"]] == [r["segment_id"] for r in nx_base["reopen_plan"]]
 
     # 2. Block a road (simulating field report or tap)
-    test_seg = "seg_NORTH_LONG"
+    test_seg = "seg_FOG_UNKNOWN"
     field_reports = [
         {
             "id": 1,
