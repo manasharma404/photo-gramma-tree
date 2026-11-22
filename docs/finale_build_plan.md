@@ -14,6 +14,13 @@
 | Neo4j: route graph and access report run locally | "Clear first" and "fly next" exist only as tested queries, not in the product |
 
 ## 2. Where we will be by 12 PM, 22 Nov, and where we are at 20:15
+
+**Update 06:30, 22 Nov (local commits on `main`, not pushed yet):**
+- **Teammate branch merged** (`f688c46`): human confirm/reject of model suspicions with road history; Neo4j answers in plain Cypher; Clear First and Fly Next on the field page (items 2, 3; item 5 shifted to the teammate's iPad flow on `/field`). Full suite after the merge: **142 passed, 3 skipped** (Wayanad scenario and `ml_scores.json` not on this laptop).
+- **Neo4j speed fix** (`fee4974`): an index on junctions. South Fork access report **108 s → 4–6 s**, still computed in Neo4j. **Nepal stays slow: about 90 s with Neo4j, 23 s with NetworkX** (106,000 junctions): not for live use.
+- **Reset demo** (`03753bd`): `uv run python scripts/reset_demo.py`.
+- **Offline check** on the merged code: 128 requests, **0 left the laptop**, 0 failed, 0 page errors.
+- **Still open:** app restart (runs the old server code until restarted); push; the model scores and the iPad demo's scenario data onto this laptop; ArgosX baseline scan (PENDING) and the open tunnel; load test (not started); which timing to quote (145.6 vs 80.2 min).
 | # | Promised for 12 PM | Status at 20:15 | Evidence |
 |---|---|---|---|
 | 1 | **The map grows while the drone flies, in the app:** each photo placed within about a second; drone GPS gives scale and north; "rough, not for measuring" on screen | **Done, in `main`** | Test 7f, commits `66b7858`, `3532189`. USGS block: 248 of 248 photos, on the map **1.2 s** after arriving (1.5 s worst), a median **11.8 m** off the measured map. Our flight: 297 of 298, **0.8 s** (1.1 s worst), drone positions a median **1.0 m** from the GPS track. Replayed from disk, not a live drone link |
