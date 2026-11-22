@@ -480,6 +480,12 @@
     if (place) h += '<div class="muted">Near ' + esc(place.name) + "</div>";
     h += statusChips(r);
 
+    if (S.busy) {
+      h += '<div class="sending-overlay"><span class="spinner"></span> <b>Updating road and recomputing plan\u2026</b></div>';
+      panel.innerHTML = h;
+      return;
+    }
+
     if (S.result) return renderResult(h);
 
     if (r.p_blocked != null && (r.verify || r.p_blocked >= 0.5)) {
@@ -488,28 +494,34 @@
         (r.crop ? '<img alt="Drone crop of this road" src="/advisor/evidence?path=' + encodeURIComponent(r.crop) + '">' : "") + "</div>";
     }
 
-    h += steps(S.step);
-    if (S.step === 1) {
-      h += "<h3>1 \u00B7 What do you see?</h3><div class=\"grid\">";
-      const opts = (r.verify || r.p_blocked != null) ? CHECKS.concat(PROBLEMS) : PROBLEMS;
-      h += opts.map((o) => card(o, S.problem && S.problem.id === o.id, "problem")).join("") + "</div>";
-    } else if (S.step === 2) {
-      h += '<button class="back" type="button" data-act="back">\u2190 ' + esc(S.problem.label) + "</button>";
-      h += "<h3>2 \u00B7 How bad is it?</h3><div class=\"grid\">";
+    // 1-Tap Quick Action Row
+    h += '<div class="quick-row">' +
+      '<button type="button" class="quick-btn block" data-act="quick-block"><span class="q-ic">\u{1F6D1}</span><div><b>Block Road</b><small>1-Tap Report</small></div></button>' +
+      '<button type="button" class="quick-btn clear" data-act="quick-clear"><span class="q-ic">\u2705</span><div><b>Mark Open</b><small>1-Tap Report</small></div></button>' +
+      '</div>';
+
+    // Interactive Problem Grid
+    const opts = (r.verify || r.p_blocked != null) ? CHECKS.concat(PROBLEMS) : PROBLEMS;
+    h += '<div class="section-title">Or choose problem:</div><div class="grid">';
+    h += opts.map((o) => card(o, S.problem && S.problem.id === o.id, "problem")).join("") + "</div>";
+
+    // If problem requires severity, show severity options directly below
+    if (S.problem && S.problem.sev) {
+      h += '<div class="sev-section">';
+      h += '<div class="section-title">How bad is it? (Tap to submit immediately)</div><div class="grid">';
       h += SEVERITY.map((s) => '<button type="button" class="card wide' + (S.sev && S.sev.id === s.id ? " sel" : "") + '" data-sev="' + s.id + '">' +
         "<div><b>" + esc(s.label) + "</b><small>" + esc(s.sub) + "</small>" + vehStrip(s.modes) + "</div></button>").join("");
-      h += "</div>";
-    } else if (S.step === 3) {
-      const modes = reportModes();
-      h += '<button class="back" type="button" data-act="back">\u2190 Change</button>';
-      h += "<h3>3 \u00B7 Send it</h3>";
-      h += '<div class="summary">' + S.problem.icon + " <b>" + esc(S.problem.label) + "</b>" + (S.sev ? " \u2014 " + esc(S.sev.label.toLowerCase()) : "") +
-        "<br><span class=\"muted\">" + esc(effectText(modes)) + "</span>" + (S.problem.kind !== "other" && S.problem.kind !== "reject" ? vehStrip(S.problem.kind === "cleared" ? [] : modes) : "") + "</div>";
-      h += '<label class="f" for="fm-note">Anything else? (optional)</label><textarea id="fm-note" placeholder="e.g. Boulder the size of a car, 20 m past the school"></textarea>';
-      h += '<label class="f" for="fm-team">Team / callsign</label><input type="text" id="fm-team" placeholder="e.g. NDRF Team-2" value="' + esc(sessionGet("typhon_team")) + '">';
-      h += '<details><summary>Field PIN (if the laptop asks for one)</summary><input type="text" id="fm-pin" inputmode="numeric" maxlength="6" placeholder="6 digits" value="' + esc(sessionGet("vortex_field_pin")) + '"></details>';
-      h += '<button class="send" type="button" data-act="send" id="fm-send">Send report</button>';
+      h += "</div></div>";
     }
+
+    // Collapsible note / custom team info
+    h += '<details style="margin-top:14px"><summary class="muted">Add note or callsign</summary>' +
+      '<label class="f" for="fm-note">Note</label><textarea id="fm-note" placeholder="e.g. Boulder on road"></textarea>' +
+      '<label class="f" for="fm-team">Team / callsign</label><input type="text" id="fm-team" placeholder="e.g. NDRF Team-2" value="' + esc(sessionGet("typhon_team")) + '">' +
+      '<label class="f" for="fm-pin">Field PIN (optional)</label><input type="text" id="fm-pin" inputmode="numeric" maxlength="6" placeholder="6 digits" value="' + esc(sessionGet("vortex_field_pin")) + '">' +
+      '<button class="send" type="button" data-act="send" id="fm-send">Send custom report</button>' +
+      '</details>';
+
     panel.innerHTML = h;
   }
 
@@ -537,7 +549,7 @@
     const R = S.result;
     const worse = R.after > R.before, better = R.after < R.before;
     h += '<div class="result"><div class="big">' + (better ? "\u{1F7E2}" : worse ? "\u{1F534}" : "\u2705") + "</div>";
-    h += "<b>Report #" + esc(R.id) + " saved</b><div class=\"muted\">" + esc(R.text) + "</div>";
+    h += "<b>Report #" + esc(R.id) + " saved & live on laptop</b><div class=\"muted\">" + esc(R.text) + "</div>";
     h += '<div class="delta">' + R.before + " \u2192 <em class=\"" + (better ? "good" : "") + '">' + R.after + "</em></div>";
     h += '<div class="muted">places cut off for ' + esc(VEH_NAME[S.vehicle].toLowerCase()) + " \u00B7 plan recomputed in " + R.secs + " s</div></div>";
     if (R.reopenTop) h += '<h3>Clear first now</h3><ul class="list"><li class="tap" data-road="' + esc(R.reopenTop.segment_id) + '"><span class="badge c">#1</span>Clear <b>' + esc(R.reopenTop.segment_id) + "</b> \u2014 reconnects " + esc(R.reopenTop.reconnects_people || 0) + " people, " + esc(R.reopenTop.reconnects_places || 0) + " places</li></ul>";
@@ -564,16 +576,27 @@
 
   panel.addEventListener("click", (e) => {
     const t = e.target.closest("[data-act],[data-problem],[data-sev],[data-road],[data-place]");
-    if (!t) return;
-    if (t.dataset.problem) {
+    if (!t || S.busy) return;
+    if (t.dataset.act === "quick-block") {
+      S.problem = PROBLEMS.find((p) => p.id === "landslide") || { id: "landslide", label: "Landslide", kind: "dead_end", sev: true };
+      S.sev = SEVERITY.find((s) => s.id === "total") || { id: "total", label: "Completely blocked", modes: ALL };
+      send();
+    } else if (t.dataset.act === "quick-clear") {
+      S.problem = PROBLEMS.find((p) => p.id === "clear") || { id: "clear", label: "Road is clear", kind: "cleared", sev: false };
+      S.sev = null;
+      send();
+    } else if (t.dataset.problem) {
       S.problem = CHECKS.concat(PROBLEMS).find((o) => o.id === t.dataset.problem);
       S.sev = null;
-      S.step = S.problem.sev ? 2 : 3;
-      renderPanel();
+      if (!S.problem.sev) {
+        // Clear, Confirm, Reject don't need severity -> send immediately!
+        send();
+      } else {
+        renderPanel();
+      }
     } else if (t.dataset.sev) {
       S.sev = SEVERITY.find((s) => s.id === t.dataset.sev);
-      S.step = 3;
-      renderPanel();
+      send();
     } else if (t.dataset.road) {
       focusRoad(t.dataset.road);
     } else if (t.dataset.place) {
@@ -581,9 +604,6 @@
       if (p) { S.selPlace = p.id; focusRoad(p.seg); S.selPlace = p.id; renderPanel(); }
     } else if (t.dataset.act === "close") {
       deselect();
-    } else if (t.dataset.act === "back") {
-      S.step = S.step === 3 && S.problem && S.problem.sev ? 2 : 1;
-      renderPanel();
     } else if (t.dataset.act === "again") {
       deselect();
     } else if (t.dataset.act === "send") {
@@ -601,24 +621,24 @@
   // ---------- send ----------
   async function send() {
     if (S.busy) return;
-    const btn = $("fm-send");
-    const note = ($("fm-note").value || "").trim();
-    const team = ($("fm-team").value || "").trim();
-    const pin = ($("fm-pin").value || "").trim();
+    const note = ($("fm-note")?.value || "").trim();
+    const team = ($("fm-team")?.value || sessionGet("typhon_team") || "").trim();
+    const pin = ($("fm-pin")?.value || sessionGet("vortex_field_pin") || "").trim();
     sessionSet("typhon_team", team); sessionSet("vortex_field_pin", pin);
     const modes = reportModes();
-    const tag = "[" + S.problem.label + (S.sev ? " \u00B7 " + S.sev.label : "") + "]";
+    const probLabel = S.problem ? S.problem.label : "Obstruction";
+    const tag = "[" + probLabel + (S.sev ? " \u00B7 " + S.sev.label : "") + "]";
     const payload = {
       project: S.project,
       segment_id: S.sel,
       place_id: S.selPlace || null,
-      kind: S.problem.kind,
+      kind: S.problem ? S.problem.kind : "dead_end",
       modes: modes,
       note: (tag + (note ? " " + note : "")).slice(0, 500),
       reporter: team || null,
     };
     S.busy = true;
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Sending and recomputing\u2026';
+    renderPanel();
     const before = cutCount();
     const t0 = performance.now();
     try {
@@ -630,7 +650,8 @@
       const out = await r.json().catch(() => ({}));
       if (!r.ok) {
         toast(typeof out.detail === "string" ? out.detail : "The laptop refused the report (" + r.status + ").", true);
-        btn.disabled = false; btn.textContent = "Send report";
+        S.busy = false;
+        renderPanel();
         return;
       }
       S.lastId = out.report.id;
@@ -647,8 +668,8 @@
       toast("Report #" + out.report.id + " saved \u2014 places cut off " + before + " \u2192 " + after, false);
     } catch (_) {
       const kept = window.TyphonOutbox ? window.TyphonOutbox.keep(payload, { "X-Field-PIN": pin }) : 0;
-      toast(kept ? "No signal: report kept on this device (" + kept + " waiting). It sends by itself when you are back in range." : "Cannot reach the laptop. Move closer to the hotspot and try again.", !kept);
-      btn.disabled = false; btn.textContent = "Send report";
+      toast(kept ? "No signal: report kept on this device (" + kept + " waiting)." : "Cannot reach the laptop.", !kept);
+      renderPanel();
     } finally {
       S.busy = false;
     }
@@ -679,9 +700,9 @@
       .map((p) => '<option value="' + esc(p) + '"' + (p === S.project ? " selected" : "") + ">" + esc(prettyProject(p)) + "</option>").join("");
   }
   function prettyProject(p) {
-    if (p.startsWith("wayanad")) return "Wayanad (scenario)";
+    if (p.startsWith("wayanad")) return "Wayanad (Recommended Demo)";
     if (p.startsWith("southfork")) return "South Fork (USGS)";
-    if (p.startsWith("nepal")) return "Nepal (slow)";
+    if (p.startsWith("nepal")) return "Nepal (Slow / large dataset)";
     return p;
   }
 
@@ -711,9 +732,14 @@
     renderVehicles(); renderStats(); baseDirty = true;
     renderPanel();
   });
-  $("fm-project").addEventListener("change", (e) => {
+  $("fm-project").addEventListener("change", async (e) => {
     S.project = e.target.value; S.sel = null; S.step = 0; S.result = null;
-    setLive("Loading\u2026", "");
+    setLive("Syncing\u2026", "");
+    await fetch("/advisor/active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ project: S.project }),
+    }).catch(() => {});
     reload(true).then(() => setLive("Live \u00B7 " + prettyProject(S.project), "ok")).catch(() => setLive("Server unreachable", "bad"));
   });
 

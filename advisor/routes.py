@@ -77,12 +77,14 @@ def available_projects(data_root: Path | None = None) -> list[str]:
     projs: list[str] = []
     projects_dir = root / "data" / "projects"
     if projects_dir.exists():
-        for child in sorted(projects_dir.iterdir()):
+        for child in projects_dir.iterdir():
             if child.is_dir() and (
                 (child / "roads" / "segments.geojson").exists()
                 or (child / "segments.geojson").exists()
             ):
                 projs.append(child.name)
+    order = {"wayanad": 0, "southfork_f01_4": 1, "southfork": 2, "nepal": 3}
+    projs.sort(key=lambda x: (order.get(x, 10), x))
     projs.append("mock")
     return projs
 
@@ -102,10 +104,34 @@ def resolve_project(project: str | None = None, data_root: Path | None = None) -
         active_proj = None
     if active_proj in projs:
         return active_proj
-    for preferred in ("southfork", "wayanad"):
+    for preferred in ("wayanad", "southfork"):
         if preferred in projs:
             return preferred
     return "mock"
+
+
+@router.post("/active")
+def set_active_scenario(payload: dict[str, Any]) -> dict[str, Any]:
+    """Synchronize the active scenario so iPad and laptop view the exact same map."""
+    proj = str(payload.get("project", "")).strip()
+    root = _data_root()
+    projs = available_projects(data_root=root)
+    if proj not in projs and proj != "mock":
+        raise HTTPException(status_code=400, detail=f"Unknown project: {proj}")
+    active_file = Path(os.environ.get("VORTEX_ACTIVE", "") or root / "data" / "active.json")
+    cur = {}
+    if active_file.exists():
+        try:
+            cur = json.loads(active_file.read_text(encoding="utf-8"))
+        except Exception:
+            cur = {}
+    cur["project"] = proj
+    cur["run_id"] = proj
+    cur["full_run_id"] = proj
+    cur["set_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    active_file.parent.mkdir(parents=True, exist_ok=True)
+    active_file.write_text(json.dumps(cur, indent=2), encoding="utf-8")
+    return {"status": "ok", "project": proj}
 
 
 def _load_project_inputs(project: str) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any] | None]:

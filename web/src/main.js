@@ -130,6 +130,13 @@ const KIND_TEXT = { dead_end: "dead end", new_debris: "new debris", cleared: "cl
 const cutCount = (access, v) => (access?.places || []).filter((p) => p.reachable?.[v] === false).length;
 
 async function watchReports() {
+  try {
+    const act = await api.active();
+    if (act?.project && act.project !== app.project) {
+      location.reload();
+      return;
+    }
+  } catch (_) {}
   const r = await api.reports(app.project);
   const latest = r?.reports?.at(-1);
   if (latest && latest.id > (app.lastReportId ?? 0)) {
@@ -149,7 +156,7 @@ async function watchReports() {
         { padding: 220, maxZoom: 18, duration: 1200 });
     }
   }
-  setTimeout(watchReports, 3000);
+  setTimeout(watchReports, 2000);
 }
 
 function showReportToast(title, body) {

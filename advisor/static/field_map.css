@@ -95,6 +95,21 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
 .suspect { margin-top: 12px; padding: 10px; border-radius: 12px; background: #FFF8E1; border: 1px solid #F1D98A; font-size: .84rem; }
 .suspect img { width: 100%; border-radius: 8px; margin-top: 8px; display: block; }
 
+.quick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 12px; }
+.quick-btn { border: 0; border-radius: 14px; padding: 14px 12px; color: #fff; display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.quick-btn:active { transform: scale(.96); }
+.quick-btn.block { background: linear-gradient(135deg, #D32F2F, #B71C1C); box-shadow: 0 4px 14px rgba(183,28,28,.35); }
+.quick-btn.clear { background: linear-gradient(135deg, #2E7D4F, #1B5E20); box-shadow: 0 4px 14px rgba(46,125,79,.35); }
+.quick-btn .q-ic { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+.quick-btn b { display: block; font-size: .95rem; font-family: var(--font-display); }
+.quick-btn small { opacity: .88; font-size: .75rem; }
+
+.section-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--terrain); margin: 16px 0 8px; font-weight: 700; }
+.sev-section { margin-top: 14px; padding: 12px; background: rgba(15,30,61,.04); border-radius: 14px; border: 1.5px dashed var(--line); animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.sending-overlay { margin: 16px 0; padding: 18px; border-radius: 14px; background: var(--forest); color: var(--sand); text-align: center; font-size: .95rem; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 16px rgba(15,30,61,.2); }
+
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .card { border: 2px solid var(--line); background: var(--sand); border-radius: 14px; padding: 12px 10px; text-align: left; min-height: 86px; transition: transform .12s, border-color .12s; }
 .card:active { transform: scale(.97); }
