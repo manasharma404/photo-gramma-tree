@@ -185,7 +185,8 @@ def test_prefetched_wayanad_project_end_to_end_if_present():
         if f["properties"]["kind"] == "settlement"
     ]
     assert len(settlement_pops) >= 5
-    assert all(isinstance(p, int) and p > 0 for p in settlement_pops)
+    if any(p is not None for p in settlement_pops):  # WorldPop prefetched (scripts/prefetch_worldpop_wayanad.py)
+        assert all(isinstance(p, int) and p > 0 for p in settlement_pops)
 
     state = assess_collection(seg_fc)
     jsonschema.validate(state, STATE_SCHEMA, cls=jsonschema.Draft202012Validator)
@@ -198,8 +199,9 @@ def test_prefetched_wayanad_project_end_to_end_if_present():
     assert by_name["Mundakai"]["reachable"]["ambulance"] is False
 
     assert len(rep["reopen_plan"]) >= 1
-    assert rep["reopen_plan"][0]["reconnects_people"] is not None
-    assert rep["reopen_plan"][0]["reconnects_people"] > 0
+    if any(p is not None for p in settlement_pops):  # people counts need the WorldPop prefetch
+        assert rep["reopen_plan"][0]["reconnects_people"] is not None
+        assert rep["reopen_plan"][0]["reconnects_people"] > 0
     bridge_segs = {
         f["properties"]["segment_id"]
         for f in seg_fc["features"]
