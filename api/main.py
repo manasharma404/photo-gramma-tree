@@ -136,6 +136,14 @@ def create_app(root_dir: Path | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="field.html not found")
         return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 
+    @app.get("/field/map", response_class=HTMLResponse)
+    def serve_field_map_page() -> HTMLResponse:
+        """Tap-on-the-map field view: tap a road, pick what you see and how bad, send."""
+        html_path = FIELD_STATIC_DIR / "field_map.html"
+        if not html_path.exists():
+            raise HTTPException(status_code=404, detail="field_map.html not found")
+        return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
     def _serve_project_tile(project: str, tile_path: str) -> FileResponse:
         tiles_root = (base_root / "data" / "projects" / project / "tiles").resolve()
         if not tiles_root.is_dir():

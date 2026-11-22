@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0F1E3D">
+  <title>Typhon Field Map</title>
+  <link rel="stylesheet" href="/field-static/field_map.css">
+</head>
+<body>
+  <header class="fm-top">
+    <div class="fm-brand"><span class="fm-logo">T</span><span>Typhon <small>Field Map</small></span></div>
+    <select id="fm-project" aria-label="Scenario"></select>
+    <div class="fm-vehicles" id="fm-vehicles" role="radiogroup" aria-label="Show status for vehicle"></div>
+    <span id="fm-live" class="fm-live">Connecting...</span>
+    <a class="fm-link" href="/field">Form view</a>
+  </header>
+
+  <div class="fm-stage">
+    <canvas id="fm-canvas" aria-label="Road map. Tap a road to report what you see."></canvas>
+
+    <div class="fm-stats" id="fm-stats"></div>
+
+    <div class="fm-hint" id="fm-hint">Tap a road on the map to report it</div>
+
+    <div class="fm-zoom">
+      <button type="button" id="fm-zin" aria-label="Zoom in">+</button>
+      <button type="button" id="fm-zout" aria-label="Zoom out">&minus;</button>
+      <button type="button" id="fm-fit" aria-label="Show whole area">&#x2922;</button>
+    </div>
+
+    <div class="fm-legend">
+      <div><i class="lg open"></i>Open</div>
+      <div><i class="lg partial"></i>Partial</div>
+      <div><i class="lg blocked"></i>Blocked</div>
+      <div><i class="lg unknown"></i>Not seen</div>
+      <div><i class="lg clear1"></i>Clear first</div>
+      <div><i class="lg fly"></i>Fly drone next</div>
+      <div><i class="dot cut"></i>Cut off</div>
+    </div>
+
+    <aside class="fm-panel" id="fm-panel" aria-live="polite"></aside>
+    <div class="fm-toast hidden" id="fm-toast" role="status"></div>
+  </div>
+
+  <script src="/field-static/outbox.js"></script>
+  <script src="/field-static/field_map.js"></script>
+</body>
+</html>

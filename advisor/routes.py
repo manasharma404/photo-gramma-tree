@@ -359,3 +359,96 @@ def get_field_context(project: str | None = Query(default=None)) -> dict[str, An
         "total_segments": len(raw_segs),
         "reports": list(reversed(reports[-20:])),
     }
+
+
+def _compact_coords(geom: dict[str, Any]) -> list[list[list[float]]]:
+    """LineString / MultiLineString -> list of lines, coordinates rounded to ~1 m (5 decimals)."""
+    if not geom:
+        return []
+    gtype = geom.get("type")
+    lines = [geom.get("coordinates", [])] if gtype == "LineString" else geom.get("coordinates", []) if gtype == "MultiLineString" else []
+    return [[[round(float(c[0]), 5), round(float(c[1]), 5)] for c in line] for line in lines if line]
+
+
+@router.get("/fieldmap")
+def get_field_map(project: str | None = Query(default=None)) -> dict[str, Any]:
+    """Compact road + place geometry with per-vehicle status for the tap-on-the-map field view (/field/map).
+
+    Same rules and data as /advisor/state; this only trims the payload so a phone or iPad on the hotspot
+    can draw every road of the project offline (no tile server, no internet).
+    """
+    root = _data_root()
+    projs = available_projects(data_root=root)
+    proj = resolve_project(project, data_root=root)
+    seg_fc, places_fc, reports, state = _compute_state_for_project(proj)
+    state_by_id = {s["segment_id"]: s for s in state["segments"]}
+    ml_by_id: dict[str, dict[str, Any]] = {}
+    _, _, ml_data = _load_project_inputs(proj)
+    for sc in (ml_data or {}).get("scores", []) or []:
+        ml_by_id[str(sc.get("segment_id"))] = sc
+
+    roads: list[dict[str, Any]] = []
+    for f in seg_fc.get("features", []):
+        pr = f.get("properties", {})
+        sid = str(pr.get("segment_id"))
+        st = state_by_id.get(sid, {})
+        ml = ml_by_id.get(sid)
+        roads.append(
+            {
+                "id": sid,
+                "hw": pr.get("highway") or "road",
+                "name": pr.get("name"),
+                "len": pr.get("length_m"),
+                "c": _compact_coords(f.get("geometry") or {}),
+                "st": st.get("status_by_mode", {}),
+                "src": st.get("source", "geometry"),
+                "verify": bool(st.get("needs_verification")),
+                "reasons": (st.get("reasons_by_mode", {}) or {}).get("ambulance", [])[:3],
+                "p_blocked": ml.get("p_blocked") if ml else None,
+                "crop": ml.get("evidence_crop") if ml else None,
+            }
+        )
+
+    places: list[dict[str, Any]] = []
+    for f in places_fc.get("features", []):
+        pr = f.get("properties", {})
+        geom = f.get("geometry") or {}
+        if geom.get("type") != "Point":
+            continue
+        c = geom.get("coordinates", [None, None])
+        places.append(
+            {
+                "id": pr.get("place_id"),
+                "name": pr.get("name") or pr.get("place_id"),
+                "kind": pr.get("kind", "settlement"),
+                "pop": pr.get("population"),
+                "seg": pr.get("nearest_segment_id"),
+                "c": [round(float(c[0]), 5), round(float(c[1]), 5)],
+            }
+        )
+
+    return {
+        "project": proj,
+        "available_projects": projs,
+        "mock": bool(state.get("mock", False)),
+        "scenario_label": seg_fc.get("scenario_label"),
+        "updated_at": state.get("updated_at"),
+        "report_count": len(reports),
+        "last_report_id": reports[-1]["id"] if reports else 0,
+        "roads": roads,
+        "places": places,
+    }
+
+
+@router.get("/evidence")
+def get_evidence_crop(path: str = Query(..., description="evidence_crop path from ml_scores.json")):
+    """Serve one model evidence crop (read-only, only image files under data/projects/)."""
+    from fastapi.responses import FileResponse
+
+    base = (_data_root() / "data" / "projects").resolve()
+    target = (_data_root() / path).resolve()
+    if not target.is_relative_to(base) or target.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp"):
+        raise HTTPException(status_code=404, detail="Evidence crop not found")
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="Evidence crop not found")
+    return FileResponse(target)
